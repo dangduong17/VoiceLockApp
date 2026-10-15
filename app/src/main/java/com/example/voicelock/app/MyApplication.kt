@@ -1,6 +1,7 @@
-package com.example.voicelock
+package com.example.voicelock.app
 
 import android.app.Application
+import com.example.voicelock.BuildConfig
 import com.example.voicelock.di.appModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger

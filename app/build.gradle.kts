@@ -30,6 +30,10 @@ android {
             }
         }
     }
+    androidResources {
+        // Keep the model uncompressed so it can be memory-mapped from the APK.
+        noCompress += "tflite"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -54,6 +58,9 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.gson)
+
+    // Offline speaker-embedding inference (TensorFlow Lite / LiteRT)
+    implementation(libs.litert)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

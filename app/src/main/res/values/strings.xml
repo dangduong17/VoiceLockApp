@@ -1,3 +1,143 @@
 <resources>
     <string name="app_name">VoiceLock</string>
+    <string name="font_family_medium" translatable="false">sans-serif-medium</string>
+
+    <!-- Welcome -->
+    <string name="welcome_eyebrow">GIỌNG NÓI CỦA BẠN. CHÌA KHÓA CỦA BẠN.</string>
+    <string name="welcome_title">An tâm hơn,\nchỉ bằng một câu nói.</string>
+    <string name="welcome_subtitle">Khóa và mở lớp bảo vệ VoiceLock bằng giọng nói quen thuộc của chính bạn.</string>
+    <string name="welcome_feature_voice">Nhận giọng bạn</string>
+    <string name="welcome_feature_backup">Luôn có dự phòng</string>
+    <string name="welcome_start">Bắt đầu thiết lập</string>
+    <string name="welcome_footer">Bạn kiểm soát quyền micro và lắng nghe nền. Có thể thay đổi bất cứ lúc nào.</string>
+
+    <!-- Setup: permissions -->
+    <string name="setup_toolbar_title">Thiết lập bảo vệ</string>
+    <string name="setup_step">BƯỚC %1$d / %2$d</string>
+    <string name="setup_title">Bạn luôn nắm quyền.</string>
+    <string name="setup_subtitle">Chỉ cấp quyền khi bạn sẵn sàng. VoiceLock sẽ giải thích trước mỗi yêu cầu.</string>
+    <string name="setup_status_granted">ĐÃ CHO PHÉP</string>
+    <string name="setup_status_optional">TÙY CHỌN</string>
+    <string name="setup_status_required">BẮT BUỘC</string>
+    <string name="setup_mic_title">Micro</string>
+    <string name="setup_mic_desc">Dùng để ghi mẫu và nhận diện giọng nói khi bạn mở hoặc khóa.</string>
+    <string name="setup_mic_action">Quản lý quyền micro</string>
+    <string name="setup_overlay_title">Lớp khóa VoiceLock</string>
+    <string name="setup_overlay_desc">Hiển thị lớp bảo vệ riêng trên ứng dụng khác; không thay thế khóa màn hình Android.</string>
+    <string name="setup_overlay_action">Cho phép hiển thị trên ứng dụng khác</string>
+    <string name="setup_background_title">Lắng nghe nền</string>
+    <string name="setup_background_desc">Chỉ bật khi bạn muốn khóa bằng giọng nói. Luôn có thông báo khi dịch vụ đang chạy.</string>
+    <string name="setup_background_action">Thiết lập sau trong Lệnh giọng nói</string>
+    <string name="setup_background_action_notification">Cho phép hiển thị thông báo</string>
+    <string name="setup_info">Vẫn giữ mã khóa Android. Hãy tạo PIN dự phòng trước khi bật bảo vệ.</string>
+    <string name="setup_continue">Tiếp tục với quyền đã cấp</string>
+    <string name="setup_mic_required">Cần quyền micro để tiếp tục.</string>
+    <string name="setup_open_app_settings">Mở cài đặt ứng dụng</string>
+
+    <!-- Setup: voice enrollment -->
+    <string name="setup_voice_title">Dạy VoiceLock giọng của bạn.</string>
+    <string name="setup_voice_subtitle">Đọc cùng một câu mật khẩu %1$d lần ở nơi yên tĩnh. Chờ chữ \"Nói ngay!\" rồi mới nói.</string>
+    <string name="setup_voice_phrase_label">GỢI Ý CÂU MẬT KHẨU</string>
+    <string name="setup_voice_phrase">\"Mở khóa VoiceLock của tôi\"</string>
+    <string name="setup_voice_sample">Mẫu %1$d</string>
+    <string name="setup_voice_tap_to_record">Chạm micro để ghi mẫu %1$d</string>
+    <string name="setup_voice_get_ready">Chuẩn bị…</string>
+    <string name="setup_voice_sample_ok">Tốt lắm! Chạm micro để ghi mẫu %1$d</string>
+    <string name="setup_voice_done">Đã học xong giọng của bạn ✓</string>
+    <string name="setup_voice_retry">%1$s. Chạm micro để thử lại.</string>
+    <string name="setup_voice_restart">Ghi lại từ đầu</string>
+    <string name="setup_voice_continue">Tiếp tục</string>
+    <string name="setup_voice_record">Ghi âm</string>
+
+    <!-- Setup: backup PIN -->
+    <string name="setup_pin_title_enter">Tạo PIN dự phòng.</string>
+    <string name="setup_pin_title_confirm">Nhập lại PIN.</string>
+    <string name="setup_pin_subtitle">PIN %1$d số giúp bạn mở khóa khi không tiện nói hoặc giọng không được nhận ra. Chỉ lưu dạng băm trên máy.</string>
+    <string name="setup_pin_mismatch">PIN không khớp. Hãy tạo lại.</string>
+    <string name="setup_pin_weak">PIN quá dễ đoán. Hãy chọn PIN khác.</string>
+    <string name="setup_pin_saved">Đã lưu PIN dự phòng</string>
+    <string name="pin_backspace">Xóa</string>
+    <string name="pin_key_0" translatable="false">0</string>
+    <string name="pin_key_1" translatable="false">1</string>
+    <string name="pin_key_2" translatable="false">2</string>
+    <string name="pin_key_3" translatable="false">3</string>
+    <string name="pin_key_4" translatable="false">4</string>
+    <string name="pin_key_5" translatable="false">5</string>
+    <string name="pin_key_6" translatable="false">6</string>
+    <string name="pin_key_7" translatable="false">7</string>
+    <string name="pin_key_8" translatable="false">8</string>
+    <string name="pin_key_9" translatable="false">9</string>
+
+    <!-- Settings mode titles -->
+    <string name="settings_permissions_title">Quyền truy cập</string>
+    <string name="settings_voice_title">Mẫu giọng nói</string>
+    <string name="settings_pin_title">PIN dự phòng</string>
+    <string name="settings_done">Xong</string>
+
+    <!-- Home -->
+    <string name="home_protection_on">Đang bảo vệ</string>
+    <string name="home_protection_off">Chưa bật bảo vệ</string>
+    <string name="home_protection_on_desc">Tự khóa mỗi khi tắt màn hình.</string>
+    <string name="home_protection_off_desc">Bật để khóa thiết bị bằng giọng nói của bạn.</string>
+    <string name="home_section_test">KIỂM TRA GIỌNG NÓI</string>
+    <string name="home_test_desc">Thử nói câu mật khẩu để xem VoiceLock có nhận ra bạn không.</string>
+    <string name="home_section_settings">CÀI ĐẶT</string>
+    <string name="home_row_voice_enrolled">%1$d mẫu · ngưỡng %2$.2f</string>
+    <string name="home_row_pin_set">Đã đặt PIN %1$d số</string>
+    <string name="home_row_pin_unset">Chưa đặt — cần trước khi bật bảo vệ</string>
+    <string name="home_row_permissions_ok">Đã cấp đủ quyền</string>
+    <string name="home_row_permissions_missing">Còn thiếu quyền</string>
+    <string name="home_row_clear">Xóa dữ liệu giọng nói</string>
+    <string name="home_row_clear_desc">Xóa mẫu giọng và tắt bảo vệ</string>
+    <string name="home_clear_confirm_title">Xóa dữ liệu giọng nói?</string>
+    <string name="home_clear_confirm_message">Mẫu giọng sẽ bị xóa và bảo vệ sẽ tắt. Bạn cần ghi lại mẫu để dùng tiếp.</string>
+    <string name="home_clear_confirm_ok">Xóa</string>
+    <string name="cancel">Hủy</string>
+    <string name="need_pin">Hãy đặt PIN dự phòng trước khi bật bảo vệ.</string>
+
+    <!-- Shared -->
+    <string name="model_neural">Model: TensorFlow Lite (offline)</string>
+    <string name="model_fallback">Model: chế độ dự phòng MFCC — chưa có file assets/speaker_embedding.tflite, độ an toàn thấp</string>
+    <string name="enroll_status_none">Chưa đăng ký giọng nói</string>
+    <string name="action_test">Thử xác thực</string>
+    <string name="lock_enable">Bật khóa (tự khóa khi tắt màn hình)</string>
+    <string name="action_lock_now">Khóa ngay</string>
+    <string name="speak_now">Nói ngay!</string>
+    <string name="processing">Đang phân tích…</string>
+    <string name="verify_success">Khớp giọng ✓  điểm %1$.2f ≥ %2$.2f</string>
+    <string name="verify_failed">Từ chối: %1$s (điểm %2$.2f / ngưỡng %3$.2f)</string>
+    <string name="error_generic">Lỗi: %1$s</string>
+    <string name="need_permissions">Cần cấp quyền Micro, Hiển thị trên ứng dụng khác và Thông báo trước.</string>
+    <string name="need_enroll">Hãy đăng ký giọng nói trước.</string>
+
+    <!-- Failure reasons -->
+    <string name="fail_not_enrolled">chưa đăng ký giọng nói</string>
+    <string name="fail_profile_outdated">model đã thay đổi, cần đăng ký lại</string>
+    <string name="fail_too_quiet">âm thanh quá nhỏ</string>
+    <string name="fail_too_short">giọng nói quá ngắn (cần ≥ 1 giây)</string>
+    <string name="fail_spoke_before_cue">phát hiện âm thanh trước tín hiệu \"Nói ngay\" (nghi phát lại)</string>
+    <string name="fail_no_speech_after_cue">không nghe thấy giọng nói sau tín hiệu</string>
+    <string name="fail_clipped">âm thanh bị méo/quá to</string>
+    <string name="fail_replay_duplicate">trùng khớp bản ghi trước đó (nghi phát lại file ghi âm)</string>
+    <string name="fail_loudspeaker">đặc trưng giống âm thanh phát từ loa (nghi phát lại)</string>
+    <string name="fail_voice_mismatch">giọng nói không khớp</string>
+    <string name="fail_inconsistent_enrollment">các mẫu không đồng nhất, hãy ghi lại ở nơi yên tĩnh</string>
+
+    <!-- Overlay -->
+    <string name="overlay_title">Thiết bị đã khóa</string>
+    <string name="overlay_subtitle">Nhấn micro và nói câu mật khẩu khi thấy \"Nói ngay!\"</string>
+    <string name="overlay_get_ready">Chuẩn bị…</string>
+    <string name="overlay_unlocked">Đã mở khóa</string>
+    <string name="overlay_locked_out">Sai quá nhiều lần. Thử lại sau %1$d giây</string>
+    <string name="overlay_mic">Nói để mở khóa</string>
+    <string name="overlay_subtitle_pin">Nhập PIN dự phòng %1$d số</string>
+    <string name="overlay_use_pin">Dùng PIN dự phòng</string>
+    <string name="overlay_use_voice">Dùng giọng nói</string>
+    <string name="overlay_wrong_pin">PIN không đúng</string>
+    <string name="overlay_tap_to_speak">Chạm micro để nói</string>
+
+    <!-- Service notification -->
+    <string name="notification_channel">Khóa giọng nói</string>
+    <string name="notification_title">VoiceLock đang bảo vệ</string>
+    <string name="notification_text">Thiết bị sẽ khóa khi tắt màn hình</string>
 </resources>

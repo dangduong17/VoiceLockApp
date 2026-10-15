@@ -2,4 +2,38 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- VoiceLock brand -->
+    <color name="vl_primary">#FF6B46FF</color>
+    <color name="vl_accent_blue">#FF8DB2FF</color>
+    <color name="vl_success">#FF1BA36B</color>
+    <color name="vl_error">#FFD93A4A</color>
+    <color name="vl_scrim">#80000000</color>
+    <color name="vl_white_alpha_15">#26FFFFFF</color>
+
+    <!-- Orb / glow gradients -->
+    <color name="vl_orb_start">#FF7C8CFF</color>
+    <color name="vl_orb_end">#FF6A2CF5</color>
+    <color name="vl_glow_start">#806B46FF</color>
+    <color name="vl_glow_center">#336B46FF</color>
+    <color name="vl_glow_end">#006B46FF</color>
+    <color name="vl_mic_pulse">#296B46FF</color>
+    <color name="vl_status_card_end">#FF2A1F6E</color>
+
+    <!-- Dark (welcome) surface -->
+    <color name="vl_night_bg">#FF13142E</color>
+    <color name="vl_night_card">#FF20224A</color>
+    <color name="vl_night_ring">#FF2D3060</color>
+    <color name="vl_night_ring_fill">#FF1B1D42</color>
+    <color name="vl_night_text">#FFFFFFFF</color>
+    <color name="vl_night_text_secondary">#FFA7AAC9</color>
+
+    <!-- Light (setup) surface -->
+    <color name="vl_light_bg">#FFF7F7FB</color>
+    <color name="vl_card">#FFFFFFFF</color>
+    <color name="vl_card_stroke">#FFE6E7F0</color>
+    <color name="vl_ink">#FF15163A</color>
+    <color name="vl_ink_secondary">#FF6B6E85</color>
+    <color name="vl_ink_muted">#FF8A8DA3</color>
+    <color name="vl_info_bg">#FFEEEDFB</color>
 </resources>

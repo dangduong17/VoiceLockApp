@@ -1,5 +1,6 @@
 package com.example.voicelock.di
 
+import com.example.voicelock.util.Constant
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Cache
@@ -20,8 +21,8 @@ val networkModule = module {
     }
 
     single<OkHttpClient> {
-        val cacheDir = File(androidContext().cacheDir, "http_cache")
-        val cache = Cache(cacheDir, 10L * 1024L * 1024L)
+        val cacheDir = File(androidContext().cacheDir, Constant.HTTP_CACHE_DIR)
+        val cache = Cache(cacheDir, Constant.HTTP_CACHE_SIZE_BYTES)
 
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -29,16 +30,16 @@ val networkModule = module {
 
         OkHttpClient.Builder()
             .cache(cache)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(Constant.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(Constant.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(Constant.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(loggingInterceptor)
             .build()
     }
 
     single<Retrofit> {
         Retrofit.Builder()
-            .baseUrl("https://api.example.com/")
+            .baseUrl(Constant.API_BASE_URL)
             .client(get())
             .addConverterFactory(GsonConverterFactory.create(get()))
             .build()
