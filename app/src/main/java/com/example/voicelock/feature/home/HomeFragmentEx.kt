@@ -45,6 +45,10 @@ fun HomeFragment.settingEvent() {
     binding.btnQuestions.setPreventDoubleClick {
         viewModel.onQuestionsClicked()
     }
+
+    binding.btnAppLock.setPreventDoubleClick {
+        viewModel.onAppLockClicked()
+    }
 }
 
 fun HomeFragment.updateUiState(state: HomeUiState) {
@@ -98,6 +102,10 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
 
         is HomeUiEvent.NavigateToSecurityQuestions -> {
             displayToast("Mở cài đặt Câu hỏi bảo mật")
+        }
+
+        is HomeUiEvent.NavigateToAppLock -> {
+            navigator.navigateTo(R.id.action_homeFragment_to_appLockFragment)
         }
     }
 }

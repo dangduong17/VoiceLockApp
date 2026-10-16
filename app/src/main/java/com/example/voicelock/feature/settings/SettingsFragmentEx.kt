@@ -60,6 +60,10 @@ fun SettingsFragment.settingEvent() {
     binding.btnAbout.setPreventDoubleClick {
         viewModel.onAboutClicked()
     }
+
+    binding.btnAppLock.setPreventDoubleClick {
+        viewModel.onAppLockClicked()
+    }
 }
 
 fun SettingsFragment.updateUiState(state: SettingsUiState) {
@@ -90,7 +94,7 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
         }
 
         is SettingsUiEvent.NavigateToPermissions -> {
-            displayToast("Mở Quyền ứng dụng")
+            navigator.navigateTo(R.id.action_settingsFragment_to_permissionsFragment)
         }
 
         is SettingsUiEvent.NavigateToPinLock -> {
@@ -125,6 +129,10 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.NavigateToAbout -> {
             displayToast("Mở Về VoiceLock")
+        }
+
+        is SettingsUiEvent.NavigateToAppLock -> {
+            navigator.navigateTo(R.id.action_settingsFragment_to_appLockFragment)
         }
     }
 }

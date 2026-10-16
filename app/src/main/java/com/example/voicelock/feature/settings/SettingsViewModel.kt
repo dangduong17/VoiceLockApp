@@ -76,4 +76,8 @@ class SettingsViewModel(
     fun onAboutClicked() {
         launchIO { setEvent(SettingsUiEvent.NavigateToAbout) }
     }
+
+    fun onAppLockClicked() {
+        launchIO { setEvent(SettingsUiEvent.NavigateToAppLock) }
+    }
 }

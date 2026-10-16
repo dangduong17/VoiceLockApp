@@ -15,4 +15,5 @@ sealed class SettingsUiEvent {
     data object NavigateToThemeLanguage : SettingsUiEvent()
     data object NavigateToHelpFeedback : SettingsUiEvent()
     data object NavigateToAbout : SettingsUiEvent()
+    data object NavigateToAppLock : SettingsUiEvent()
 }

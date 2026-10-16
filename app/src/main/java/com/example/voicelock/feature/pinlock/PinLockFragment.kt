@@ -22,7 +22,8 @@ class PinLockFragment : BaseFragment<FragmentPinLockBinding, PinLockViewModel>(
                 runCatching { PinLockMode.valueOf(it) }.getOrDefault(PinLockMode.SETUP)
             } ?: PinLockMode.SETUP
         val pinLength = arguments?.getInt(BundleKey.KEY_PIN_LENGTH) ?: 6
-        viewModel.initData(mode = mode, knownPinLength = pinLength)
+        val targetPackageName = arguments?.getString(BundleKey.KEY_LOCK_TARGET_PACKAGE)
+        viewModel.initData(mode = mode, knownPinLength = pinLength, targetPackageName = targetPackageName)
     }
 
     override fun subscribeObserver(view: View) {

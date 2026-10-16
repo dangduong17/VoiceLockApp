@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_lock_overlay"
+    app:startDestination="@id/pinLockFragment"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <fragment
+        android:id="@+id/pinLockFragment"
+        android:name="com.example.voicelock.feature.pinlock.PinLockFragment"
+        android:label="PinLockFragment"
+        tools:layout="@layout/fragment_pin_lock" />
+
+    <fragment
+        android:id="@+id/patternLockFragment"
+        android:name="com.example.voicelock.feature.patternlock.PatternLockFragment"
+        android:label="PatternLockFragment"
+        tools:layout="@layout/fragment_pattern_lock" />
+
+</navigation>

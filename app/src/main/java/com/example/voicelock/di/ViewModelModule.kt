@@ -1,7 +1,10 @@
 package com.example.voicelock.di
 
+import com.example.voicelock.feature.applock.AppLockViewModel
+import com.example.voicelock.feature.applock.LockOverlayViewModel
 import com.example.voicelock.feature.home.HomeViewModel
 import com.example.voicelock.feature.patternlock.PatternLockViewModel
+import com.example.voicelock.feature.permissions.PermissionsViewModel
 import com.example.voicelock.feature.pinlock.PinLockViewModel
 import com.example.voicelock.feature.settings.SettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -12,4 +15,7 @@ val viewModelModule = module {
     viewModelOf(::SettingsViewModel)
     viewModelOf(::PinLockViewModel)
     viewModelOf(::PatternLockViewModel)
+    viewModelOf(::AppLockViewModel)
+    viewModelOf(::LockOverlayViewModel)
+    viewModelOf(::PermissionsViewModel)
 }

@@ -90,4 +90,31 @@
     <string name="pattern_set_success">Đã lưu hình vẽ mới</string>
 
     <string name="lockout_message">Quá nhiều lần thử sai. Vui lòng thử lại sau %1$d giây</string>
+
+    <string name="pin_title_unlock">Nhập mã PIN để mở khóa</string>
+    <string name="pin_subtitle_unlock">Xác minh để tiếp tục</string>
+    <string name="pin_unlock_success">Mở khóa thành công</string>
+
+    <string name="pattern_title_unlock">Vẽ hình để mở khóa</string>
+    <string name="pattern_subtitle_unlock">Xác minh để tiếp tục</string>
+    <string name="pattern_unlock_success">Mở khóa thành công</string>
+
+    <string name="app_lock_title">Khóa ứng dụng</string>
+    <string name="app_lock_subtitle">Chọn ứng dụng cần bảo vệ bằng mã PIN hoặc hình vẽ.</string>
+    <string name="app_lock_usage_access_title">Quyền truy cập sử dụng</string>
+    <string name="app_lock_usage_access_sub">Cần thiết để phát hiện ứng dụng đang mở</string>
+    <string name="app_lock_overlay_title">Hiển thị trên ứng dụng khác</string>
+    <string name="app_lock_overlay_sub">Cần thiết để hiện màn hình khóa</string>
+    <string name="app_lock_open_settings">Mở cài đặt</string>
+    <string name="app_lock_granted">Đã cấp quyền</string>
+    <string name="app_lock_notification_channel_name">Giám sát khóa ứng dụng</string>
+    <string name="app_lock_notification_title">VoiceLock đang bảo vệ ứng dụng</string>
+    <string name="app_lock_notification_text">Đang giám sát ứng dụng đã khóa</string>
+    <string name="app_lock_permission_warning">Cần cấp quyền để khóa ứng dụng hoạt động. Nhấn để mở Quyền ứng dụng.</string>
+
+    <string name="permissions_subtitle">Cấp các quyền cần thiết để VoiceLock hoạt động đầy đủ.</string>
+    <string name="permissions_mic_title">Micro</string>
+    <string name="permissions_mic_sub">Dùng để xác minh giọng nói và lệnh thoại</string>
+
+    <string name="lock_try_another_method">Thử phương thức khác</string>
 </resources>

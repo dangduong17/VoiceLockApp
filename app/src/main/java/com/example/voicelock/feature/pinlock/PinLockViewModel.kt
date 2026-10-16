@@ -10,6 +10,7 @@ import com.example.voicelock.data.model.pinlock.PinLockUiState
 import com.example.voicelock.data.model.pinlock.PinVerifyResult
 import com.example.voicelock.data.model.pinlock.canToggleLength
 import com.example.voicelock.data.model.pinlock.isKeypadEnabled
+import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
 import com.example.voicelock.domain.usecase.pinlock.SetPinUseCase
 import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
@@ -21,18 +22,23 @@ class PinLockViewModel(
     private val setPinUseCase: SetPinUseCase,
     private val verifyPinUseCase: VerifyPinUseCase,
     private val getLockoutStateUseCase: GetLockoutStateUseCase,
+    private val markAppUnlockedUseCase: MarkAppUnlockedUseCase,
 ) : BaseViewModel<PinLockUiState, PinLockUiEvent>(PinLockUiState()) {
 
     private val currentInput = StringBuilder()
     private var firstPin: String = ""
+    private var targetPackageName: String? = null
     private var lockoutJob: Job? = null
 
     fun initData(
         mode: PinLockMode,
         knownPinLength: Int,
+        targetPackageName: String? = null,
     ) {
-        val initialStage = if (mode == PinLockMode.CHANGE) PinLockStage.VERIFY else PinLockStage.ENTER
-        val length = if (mode == PinLockMode.CHANGE) knownPinLength else DEFAULT_LENGTH
+        val startsAtVerify = mode == PinLockMode.CHANGE || mode == PinLockMode.UNLOCK
+        val initialStage = if (startsAtVerify) PinLockStage.VERIFY else PinLockStage.ENTER
+        val length = if (startsAtVerify) knownPinLength else DEFAULT_LENGTH
+        this.targetPackageName = targetPackageName
         currentInput.clear()
         firstPin = ""
         setState {
@@ -100,9 +106,7 @@ class PinLockViewModel(
             apiCall = { verifyPinUseCase(pin) },
             onSuccess = { result ->
                 when (result) {
-                    is PinVerifyResult.Success -> {
-                        setState { copy(stage = PinLockStage.ENTER, enteredDigits = 0, isError = false) }
-                    }
+                    is PinVerifyResult.Success -> onVerifySuccess()
 
                     is PinVerifyResult.Failed -> {
                         setState { copy(enteredDigits = 0, isError = true) }
@@ -115,11 +119,24 @@ class PinLockViewModel(
         )
     }
 
+    private fun onVerifySuccess() {
+        val mode = getCurrentState().mode
+        if (mode == PinLockMode.UNLOCK) {
+            val packageName = targetPackageName
+            handleApiCall(
+                apiCall = { markAppUnlockedUseCase(packageName.orEmpty()) },
+                onSuccess = { launchIO { setEvent(PinLockUiEvent.Success(mode)) } },
+            )
+        } else {
+            setState { copy(stage = PinLockStage.ENTER, enteredDigits = 0, isError = false) }
+        }
+    }
+
     private fun savePin(pin: String) {
         handleApiCall(
             apiCall = { setPinUseCase(pin = pin, length = getCurrentState().pinLength) },
             onSuccess = {
-                launchIO { setEvent(PinLockUiEvent.Success) }
+                launchIO { setEvent(PinLockUiEvent.Success(getCurrentState().mode)) }
             },
         )
     }

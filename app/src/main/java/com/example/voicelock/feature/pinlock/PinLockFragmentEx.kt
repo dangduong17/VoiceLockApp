@@ -2,6 +2,7 @@ package com.example.voicelock.feature.pinlock
 
 import android.view.View
 import com.example.voicelock.R
+import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.pinlock.PinLockStage
 import com.example.voicelock.data.model.pinlock.PinLockUiEvent
 import com.example.voicelock.data.model.pinlock.PinLockUiState
@@ -49,7 +50,12 @@ fun PinLockFragment.settingEvent() {
 fun PinLockFragment.updateUiState(state: PinLockUiState) {
     val (titleRes, subtitleText) =
         when (state.stage) {
-            PinLockStage.VERIFY -> getString(R.string.pin_title_verify) to getString(R.string.pin_subtitle_verify)
+            PinLockStage.VERIFY ->
+                if (state.mode == PinLockMode.UNLOCK) {
+                    getString(R.string.pin_title_unlock) to getString(R.string.pin_subtitle_unlock)
+                } else {
+                    getString(R.string.pin_title_verify) to getString(R.string.pin_subtitle_verify)
+                }
             PinLockStage.ENTER -> getString(R.string.pin_title_enter) to getString(R.string.pin_subtitle_enter, state.pinLength)
             PinLockStage.CONFIRM -> getString(R.string.pin_title_confirm) to getString(R.string.pin_subtitle_confirm)
         }
@@ -108,8 +114,13 @@ fun PinLockFragment.handleUiEvent(event: PinLockUiEvent) {
         }
 
         is PinLockUiEvent.Success -> {
-            displayToast(getString(R.string.pin_set_success))
-            navigator.navigateUp()
+            if (event.mode == PinLockMode.UNLOCK) {
+                displayToast(getString(R.string.pin_unlock_success))
+                requireActivity().finish()
+            } else {
+                displayToast(getString(R.string.pin_set_success))
+                navigator.navigateUp()
+            }
         }
     }
 }

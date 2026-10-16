@@ -9,6 +9,7 @@ import com.example.voicelock.data.model.patternlock.PatternLockUiEvent
 import com.example.voicelock.data.model.patternlock.PatternLockUiState
 import com.example.voicelock.data.model.patternlock.PatternVerifyResult
 import com.example.voicelock.data.model.patternlock.isInputEnabled
+import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
 import com.example.voicelock.domain.usecase.patternlock.SetPatternUseCase
 import com.example.voicelock.domain.usecase.patternlock.VerifyPatternUseCase
@@ -20,13 +21,23 @@ class PatternLockViewModel(
     private val setPatternUseCase: SetPatternUseCase,
     private val verifyPatternUseCase: VerifyPatternUseCase,
     private val getLockoutStateUseCase: GetLockoutStateUseCase,
+    private val markAppUnlockedUseCase: MarkAppUnlockedUseCase,
 ) : BaseViewModel<PatternLockUiState, PatternLockUiEvent>(PatternLockUiState()) {
 
     private var firstPattern: List<Int> = emptyList()
+    private var targetPackageName: String? = null
     private var lockoutJob: Job? = null
 
-    fun initData(mode: PatternLockMode) {
-        val initialStage = if (mode == PatternLockMode.CHANGE) PatternLockStage.VERIFY else PatternLockStage.ENTER
+    fun initData(
+        mode: PatternLockMode,
+        targetPackageName: String? = null,
+    ) {
+        val initialStage = if (mode == PatternLockMode.CHANGE || mode == PatternLockMode.UNLOCK) {
+            PatternLockStage.VERIFY
+        } else {
+            PatternLockStage.ENTER
+        }
+        this.targetPackageName = targetPackageName
         firstPattern = emptyList()
         setState { copy(mode = mode, stage = initialStage) }
         if (initialStage == PatternLockStage.VERIFY) {
@@ -64,9 +75,7 @@ class PatternLockViewModel(
             apiCall = { verifyPatternUseCase(cells) },
             onSuccess = { result ->
                 when (result) {
-                    is PatternVerifyResult.Success -> {
-                        setState { copy(stage = PatternLockStage.ENTER) }
-                    }
+                    is PatternVerifyResult.Success -> onVerifySuccess()
 
                     is PatternVerifyResult.Failed -> {
                         launchIO { setEvent(PatternLockUiEvent.VerifyFailed(remainingAttempts = result.remainingAttempts)) }
@@ -78,11 +87,24 @@ class PatternLockViewModel(
         )
     }
 
+    private fun onVerifySuccess() {
+        val mode = getCurrentState().mode
+        if (mode == PatternLockMode.UNLOCK) {
+            val packageName = targetPackageName
+            handleApiCall(
+                apiCall = { markAppUnlockedUseCase(packageName.orEmpty()) },
+                onSuccess = { launchIO { setEvent(PatternLockUiEvent.Success(mode)) } },
+            )
+        } else {
+            setState { copy(stage = PatternLockStage.ENTER) }
+        }
+    }
+
     private fun savePattern(cells: List<Int>) {
         handleApiCall(
             apiCall = { setPatternUseCase(cells) },
             onSuccess = {
-                launchIO { setEvent(PatternLockUiEvent.Success) }
+                launchIO { setEvent(PatternLockUiEvent.Success(getCurrentState().mode)) }
             },
         )
     }

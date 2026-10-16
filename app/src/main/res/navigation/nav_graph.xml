@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_homeFragment_to_patternLockFragment"
             app:destination="@id/patternLockFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_appLockFragment"
+            app:destination="@id/appLockFragment" />
     </fragment>
 
     <fragment
@@ -32,6 +35,12 @@
         <action
             android:id="@+id/action_settingsFragment_to_patternLockFragment"
             app:destination="@id/patternLockFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_appLockFragment"
+            app:destination="@id/appLockFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_permissionsFragment"
+            app:destination="@id/permissionsFragment" />
     </fragment>
 
     <fragment
@@ -45,5 +54,21 @@
         android:name="com.example.voicelock.feature.patternlock.PatternLockFragment"
         android:label="PatternLockFragment"
         tools:layout="@layout/fragment_pattern_lock" />
+
+    <fragment
+        android:id="@+id/appLockFragment"
+        android:name="com.example.voicelock.feature.applock.AppLockFragment"
+        android:label="AppLockFragment"
+        tools:layout="@layout/fragment_app_lock">
+        <action
+            android:id="@+id/action_appLockFragment_to_permissionsFragment"
+            app:destination="@id/permissionsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/permissionsFragment"
+        android:name="com.example.voicelock.feature.permissions.PermissionsFragment"
+        android:label="PermissionsFragment"
+        tools:layout="@layout/fragment_permissions" />
 
 </navigation>

@@ -7,5 +7,7 @@ sealed class PinLockUiEvent {
 
     data object ConfirmMismatch : PinLockUiEvent()
 
-    data object Success : PinLockUiEvent()
+    data class Success(
+        val mode: PinLockMode,
+    ) : PinLockUiEvent()
 }
