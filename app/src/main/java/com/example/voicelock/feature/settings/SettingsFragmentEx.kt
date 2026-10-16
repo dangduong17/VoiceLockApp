@@ -1,7 +1,10 @@
 package com.example.voicelock.feature.settings
 
+import android.os.Bundle
+import com.example.voicelock.R
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
+import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.setPreventDoubleClick
 
@@ -67,6 +70,9 @@ fun SettingsFragment.updateUiState(state: SettingsUiState) {
     if (binding.switchVoiceLock.isChecked != state.isVoiceLockEnabled) {
         binding.switchVoiceLock.isChecked = state.isVoiceLockEnabled
     }
+
+    binding.tvPinSub.text = state.pinStatusText
+    binding.tvPatternSub.text = state.patternStatusText
 }
 
 fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
@@ -87,12 +93,18 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
             displayToast("Mở Quyền ứng dụng")
         }
 
-        is SettingsUiEvent.NavigateToPinSetup -> {
-            displayToast("Mở Mã PIN")
+        is SettingsUiEvent.NavigateToPinLock -> {
+            val bundle =
+                Bundle().apply {
+                    putString(BundleKey.KEY_LOCK_MODE, event.mode.name)
+                    putInt(BundleKey.KEY_PIN_LENGTH, event.pinLength)
+                }
+            navigator.navigateTo(R.id.action_settingsFragment_to_pinLockFragment, bundle)
         }
 
-        is SettingsUiEvent.NavigateToPatternSetup -> {
-            displayToast("Mở Hình vẽ")
+        is SettingsUiEvent.NavigateToPatternLock -> {
+            val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, event.mode.name) }
+            navigator.navigateTo(R.id.action_settingsFragment_to_patternLockFragment, bundle)
         }
 
         is SettingsUiEvent.NavigateToFingerprintSetup -> {

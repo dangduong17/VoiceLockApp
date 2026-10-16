@@ -1,8 +1,10 @@
 package com.example.voicelock.feature.home
 
+import android.os.Bundle
 import com.example.voicelock.R
 import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
+import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
@@ -76,12 +78,18 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
             displayToast(event.message)
         }
 
-        is HomeUiEvent.NavigateToPinSetup -> {
-            displayToast("Mở cài đặt Mã PIN")
+        is HomeUiEvent.NavigateToPinLock -> {
+            val bundle =
+                Bundle().apply {
+                    putString(BundleKey.KEY_LOCK_MODE, event.mode.name)
+                    putInt(BundleKey.KEY_PIN_LENGTH, event.pinLength)
+                }
+            navigator.navigateTo(R.id.action_homeFragment_to_pinLockFragment, bundle)
         }
 
-        is HomeUiEvent.NavigateToPatternSetup -> {
-            displayToast("Mở cài đặt Hình vẽ")
+        is HomeUiEvent.NavigateToPatternLock -> {
+            val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, event.mode.name) }
+            navigator.navigateTo(R.id.action_homeFragment_to_patternLockFragment, bundle)
         }
 
         is HomeUiEvent.NavigateToFingerprintSetup -> {

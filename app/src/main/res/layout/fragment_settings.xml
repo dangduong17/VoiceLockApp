@@ -408,6 +408,7 @@
                         app:layout_constraintTop_toTopOf="@id/ivKeyCircle" />
 
                     <TextView
+                        android:id="@+id/tvPinSub"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
@@ -467,6 +468,7 @@
                         app:layout_constraintTop_toTopOf="@id/ivPatternCircle" />
 
                     <TextView
+                        android:id="@+id/tvPatternSub"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"

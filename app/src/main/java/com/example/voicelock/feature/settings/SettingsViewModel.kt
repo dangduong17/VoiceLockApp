@@ -2,6 +2,8 @@ package com.example.voicelock.feature.settings
 
 import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
+import com.example.voicelock.data.model.patternlock.PatternLockMode
+import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
@@ -44,11 +46,15 @@ class SettingsViewModel(
     }
 
     fun onPinClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToPinSetup) }
+        val state = getCurrentState()
+        val mode = if (state.isPinSet) PinLockMode.CHANGE else PinLockMode.SETUP
+        launchIO { setEvent(SettingsUiEvent.NavigateToPinLock(mode = mode, pinLength = state.pinLength)) }
     }
 
     fun onPatternClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToPatternSetup) }
+        val state = getCurrentState()
+        val mode = if (state.isPatternSet) PatternLockMode.CHANGE else PatternLockMode.SETUP
+        launchIO { setEvent(SettingsUiEvent.NavigateToPatternLock(mode)) }
     }
 
     fun onFingerprintClicked() {
