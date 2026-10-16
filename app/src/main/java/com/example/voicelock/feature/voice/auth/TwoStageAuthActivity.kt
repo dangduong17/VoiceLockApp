@@ -108,9 +108,9 @@ class TwoStageAuthActivity : AppCompatActivity() {
             }
 
         viewModel.uiState
-            .map { it.recognizedText }
+            .map { it.heardText }
             .distinctUntilChanged()
-            .collectFlowOnView(this) { text -> updateRecognizedText(text) }
+            .collectFlowOnView(this) { text -> updateHeardText(text) }
 
         viewModel.uiState
             .map { it.scores }
@@ -215,15 +215,16 @@ class TwoStageAuthActivity : AppCompatActivity() {
         btnModeUnlock.isEnabled = !isBusy
     }
 
-    private fun updateRecognizedText(text: String) {
-        binding.tvRecognizedText.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
-        binding.tvRecognizedText.text = getString(R.string.voice_auth_recognized, text)
+    private fun updateHeardText(text: String?) {
+        binding.tvRecognizedText.visibility = if (text == null) View.GONE else View.VISIBLE
+        binding.tvRecognizedText.text =
+            if (text.isNullOrEmpty()) getString(R.string.voice_auth_recognized_nothing) else getString(R.string.voice_auth_recognized, text)
     }
 
     private fun updateScores(scores: VoiceScores?) {
         binding.tvScores.visibility = if (scores == null) View.GONE else View.VISIBLE
         scores?.let {
-            binding.tvScores.text = getString(R.string.voice_auth_scores, it.speakerSimilarity, it.phraseSimilarity)
+            binding.tvScores.text = getString(R.string.voice_auth_scores, it.speakerSimilarity, it.phraseSimilarity, it.phraseThreshold)
         }
     }
 

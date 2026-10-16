@@ -73,9 +73,30 @@ class AcousticPhraseMatcherTest {
     fun keyword_matchesIgnoringCaseAndDiacritics() =
         runBlocking {
             val useCase = MatchVoiceKeywordUseCase()
-            assertEquals(Result.Success(true), useCase(listOf("Mở khoá")).first())
-            assertEquals(Result.Success(true), useCase(listOf("xin chào", "MO KHOA đi")).first())
-            assertEquals(Result.Success(true), useCase(listOf("Unlock!")).first())
-            assertEquals(Result.Success(false), useCase(listOf("unlocked", "mở cửa")).first())
+            val keywords = listOf("unlock", "mở khóa")
+            assertEquals(Result.Success(true), useCase(listOf("Mở khoá"), keywords).first())
+            assertEquals(Result.Success(true), useCase(listOf("xin chào", "MO KHOA đi"), keywords).first())
+            assertEquals(Result.Success(true), useCase(listOf("Unlock!"), keywords).first())
+            assertEquals(Result.Success(false), useCase(listOf("unlocked", "mở cửa"), keywords).first())
+        }
+
+    @Test
+    fun keyword_toleratesSmallRecognizerSlips() =
+        runBlocking {
+            val useCase = MatchVoiceKeywordUseCase()
+            assertEquals(Result.Success(true), useCase(listOf("mở hóa"), listOf("mở khóa")).first())
+            assertEquals(Result.Success(false), useCase(listOf("khóa"), listOf("mở khóa")).first())
+            assertEquals(Result.Success(false), useCase(listOf("kon", "call"), listOf("mở khóa")).first())
+        }
+
+    @Test
+    fun keyword_keepsMarksOfNonLatinScripts() =
+        runBlocking {
+            val useCase = MatchVoiceKeywordUseCase()
+            // Devanagari vowel signs are meaningful: नमस्ते must not collapse into नमसत.
+            assertEquals(Result.Success(true), useCase(listOf("नमस्ते"), listOf("नमस्ते")).first())
+            assertEquals(Result.Success(false), useCase(listOf("नमक"), listOf("नमस्ते")).first())
+            // Scripts written without spaces still match inside a longer hypothesis.
+            assertEquals(Result.Success(true), useCase(listOf("ロック解除"), listOf("ロック解除")).first())
         }
 }

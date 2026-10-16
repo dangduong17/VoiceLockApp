@@ -7,17 +7,21 @@ import com.example.voicelock.data.model.voice.AuthFailure
 import com.example.voicelock.data.model.voice.AuthStage
 import com.example.voicelock.data.model.voice.TwoStageAuthUiEvent
 import com.example.voicelock.data.model.voice.TwoStageAuthUiState
+import com.example.voicelock.data.model.voice.VoiceKeywordProfile
 import com.example.voicelock.data.model.voice.VoiceScores
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
 import com.example.voicelock.data.model.voice.canStart
 import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
+import com.example.voicelock.domain.usecase.voice.GetVoiceKeywordProfileUseCase
 import com.example.voicelock.domain.usecase.voice.IsVoiceEnrolledUseCase
 import com.example.voicelock.domain.usecase.voice.MatchVoiceKeywordUseCase
 import com.example.voicelock.domain.usecase.voice.VerifyOwnerVoiceUseCase
 import com.example.voicelock.domain.usecase.voice.WarmUpVoiceModelUseCase
 import com.example.voicelock.util.Result
+import com.example.voicelock.util.Constant
 import com.example.voicelock.util.getDataOrDefault
+import com.example.voicelock.util.getDataOrNull
 import com.example.voicelock.voice.AudioRecorderHelper
 import com.example.voicelock.voice.KeywordAudioRecognizer
 import com.example.voicelock.voice.VoiceModelMissingException
@@ -26,20 +30,25 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
+import java.util.Locale
 
 /**
  * Two-stage check on ONE recording — the user says the passphrase once:
- *  1. [KeywordAudioRecognizer] feeds the clip to Android's SpeechRecognizer and
- *     [MatchVoiceKeywordUseCase] validates the text ("Unlock" / "Mở khóa").
+ *  1. [KeywordAudioRecognizer] feeds the clip to Android's SpeechRecognizer in the language the owner
+ *     enrolled in, and [MatchVoiceKeywordUseCase] fuzzy-matches it against what the recognizer heard
+ *     from the owner's own enrollment samples ([VoiceKeywordProfile]).
  *  2. [VerifyOwnerVoiceUseCase] runs Sherpa-ONNX speaker verification + MFCC/DTW phrase match.
- * Both stages run in parallel on the same samples; access needs both to pass. On devices that
- * cannot recognize pre-recorded audio, Stage 1 is skipped and Stage 2 alone decides.
+ * Both stages run in parallel on the same samples; access needs both to pass. Stage 1 is skipped
+ * only when it could not be set up at enrollment (phrase language not on the device, Android < 13);
+ * Stage 2 then applies a stricter personal phrase threshold. A Stage-1 failure at unlock time never
+ * downgrades to Stage 2 alone.
  */
 class TwoStageAuthViewModel(
     private val audioRecorderHelper: AudioRecorderHelper,
     private val keywordAudioRecognizer: KeywordAudioRecognizer,
     private val isVoiceEnrolledUseCase: IsVoiceEnrolledUseCase,
     private val warmUpVoiceModelUseCase: WarmUpVoiceModelUseCase,
+    private val getVoiceKeywordProfileUseCase: GetVoiceKeywordProfileUseCase,
     private val matchVoiceKeywordUseCase: MatchVoiceKeywordUseCase,
     private val verifyOwnerVoiceUseCase: VerifyOwnerVoiceUseCase,
     private val markAppUnlockedUseCase: MarkAppUnlockedUseCase,
@@ -74,7 +83,7 @@ class TwoStageAuthViewModel(
     @SuppressLint("MissingPermission")
     fun startAuthentication() {
         if (!getCurrentState().canStart()) return
-        setState { copy(stage = AuthStage.CAPTURING_VOICE, recognizedText = "", scores = null, failure = AuthFailure.NONE) }
+        setState { copy(stage = AuthStage.CAPTURING_VOICE, heardText = null, scores = null, failure = AuthFailure.NONE) }
 
         authJob =
             launchIO(onError = { throwable -> fail(AuthFailure.UNEXPECTED_ERROR, throwable) }) {
@@ -82,14 +91,24 @@ class TwoStageAuthViewModel(
                 setState { copy(stage = AuthStage.VERIFYING) }
 
                 val mode = getCurrentState().mode
+                val keywordProfile = getVoiceKeywordProfileUseCase().getDataOrNull() ?: legacyKeywordProfile()
+                // Decided up front from enrollment, never from a runtime failure: if the phrase was
+                // transcribed at enrollment, Stage 1 must pass now (a recognizer error rejects).
+                val isKeywordChecked = keywordProfile.transcripts.isNotEmpty() && keywordAudioRecognizer.isSupportedOnDevice()
                 val (keywordOutcome, verifyResult) =
                     coroutineScope {
-                        val keyword = async { keywordAudioRecognizer.recognize(samples) }
-                        val verify = async { verifyOwnerVoiceUseCase(samples, mode).first() }
+                        // Also run when Stage 1 does not gate the attempt, so the user always sees what
+                        // was heard; the outcome is then shown but not used for the decision.
+                        val keyword = async { if (keywordAudioRecognizer.isSupportedOnDevice()) recognizeKeyword(samples, keywordProfile) else null }
+                        val verify = async { verifyOwnerVoiceUseCase(samples, mode, isKeywordChecked).first() }
                         keyword.await() to verify.await()
                     }
 
-                val keywordFailure = checkKeyword(keywordOutcome)
+                if (keywordOutcome != null) {
+                    val heard = (keywordOutcome as? KeywordAudioRecognizer.Outcome.Candidates)?.texts?.firstOrNull()?.trim().orEmpty()
+                    setState { copy(heardText = heard) }
+                }
+                val keywordFailure = if (isKeywordChecked && keywordOutcome != null) checkKeyword(keywordOutcome, keywordProfile) else null
                 when {
                     verifyResult is Result.Error -> fail(AuthFailure.UNEXPECTED_ERROR, verifyResult.error)
                     keywordFailure != null -> {
@@ -112,19 +131,33 @@ class TwoStageAuthViewModel(
         }
     }
 
-    /** Returns null when Stage 1 passes (or is unavailable on this device). */
-    private suspend fun checkKeyword(outcome: KeywordAudioRecognizer.Outcome): AuthFailure? =
+    /**
+     * Profiles enrolled before the phrase was transcribed: system language + the built-in
+     * "Unlock" / "Mở khóa" keywords. Re-enrolling records the owner's own phrase and language.
+     */
+    private fun legacyKeywordProfile() =
+        VoiceKeywordProfile(languageTag = Locale.getDefault().toLanguageTag(), transcripts = Constant.VOICE_UNLOCK_KEYWORDS)
+
+    private suspend fun recognizeKeyword(
+        samples: FloatArray,
+        profile: VoiceKeywordProfile,
+    ): KeywordAudioRecognizer.Outcome = keywordAudioRecognizer.recognize(samples, profile.languageTag, biasingStrings = profile.transcripts)
+
+    /** Returns null only when Stage 1 passes; any recognizer problem fails closed. */
+    private suspend fun checkKeyword(
+        outcome: KeywordAudioRecognizer.Outcome,
+        profile: VoiceKeywordProfile,
+    ): AuthFailure? =
         when (outcome) {
             is KeywordAudioRecognizer.Outcome.Candidates -> {
-                setState { copy(recognizedText = outcome.texts.first()) }
-                val isMatch = matchVoiceKeywordUseCase(outcome.texts).getDataOrDefault(false)
+                val isMatch = matchVoiceKeywordUseCase(outcome.texts, profile.transcripts).getDataOrDefault(false)
                 if (isMatch) null else AuthFailure.KEYWORD_MISMATCH
             }
-            KeywordAudioRecognizer.Outcome.NoSpeech -> AuthFailure.KEYWORD_MISMATCH
+            is KeywordAudioRecognizer.Outcome.NoSpeech -> AuthFailure.KEYWORD_MISMATCH
             is KeywordAudioRecognizer.Outcome.Failed -> AuthFailure.RECOGNIZER_ERROR
             KeywordAudioRecognizer.Outcome.Unsupported -> {
-                Timber.w("Keyword stage unavailable on this device; deciding on speaker + phrase only")
-                null
+                Timber.w("Keyword stage expected but the recognizer is unavailable: rejecting")
+                AuthFailure.RECOGNIZER_ERROR
             }
         }
 

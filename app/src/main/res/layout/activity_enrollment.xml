@@ -95,10 +95,25 @@
         android:gravity="center"
         android:textColor="@color/text_primary"
         android:textSize="15sp"
-        app:layout_constraintBottom_toTopOf="@id/tvEnrollError"
+        app:layout_constraintBottom_toTopOf="@id/tvHeardTexts"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnRecord" />
+
+    <TextView
+        android:id="@+id/tvHeardTexts"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/tvEnrollError"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvEnrollStatus" />
 
     <TextView
         android:id="@+id/tvEnrollError"
@@ -113,7 +128,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnEnrollAction"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvEnrollStatus" />
+        app:layout_constraintTop_toBottomOf="@id/tvHeardTexts" />
 
     <TextView
         android:id="@+id/btnEnrollAction"

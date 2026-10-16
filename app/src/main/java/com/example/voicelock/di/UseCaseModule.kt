@@ -15,6 +15,7 @@ import com.example.voicelock.domain.usecase.pinlock.SetPinUseCase
 import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
 import com.example.voicelock.domain.usecase.voice.EnrollOwnerVoiceUseCase
+import com.example.voicelock.domain.usecase.voice.GetVoiceKeywordProfileUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
 import com.example.voicelock.domain.usecase.voice.IsVoiceEnrolledUseCase
 import com.example.voicelock.domain.usecase.voice.MatchVoiceKeywordUseCase
@@ -64,6 +65,7 @@ val voiceUseCaseModule = module {
     factoryOf(::VerifyOwnerVoiceUseCase)
     factoryOf(::MatchVoiceKeywordUseCase)
     factoryOf(::GetVoiceSettingsUseCase)
+    factoryOf(::GetVoiceKeywordProfileUseCase)
     factoryOf(::SetVoiceUnlockEnabledUseCase)
     factoryOf(::SetVoiceLockEnabledUseCase)
 }

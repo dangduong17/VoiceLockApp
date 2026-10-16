@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.util.Base64
 import androidx.core.content.edit
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
+import com.example.voicelock.data.model.voice.VoiceKeywordProfile
 import com.example.voicelock.data.model.voice.VoiceScores
 import com.example.voicelock.data.model.voice.VoiceThresholds
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
@@ -17,6 +18,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import timber.log.Timber
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -58,7 +60,22 @@ class VoiceBiometricsManager(
 
     fun getEnrolledSampleCount(): Int = if (isEnrolled()) securePrefs.getInt(KEY_SAMPLE_COUNT, 0) else 0
 
-    suspend fun enrollOwnerVoice(recordings: List<FloatArray>): VoiceEnrollmentResult =
+    /** Null for profiles enrolled before the Stage-1 phrase was recorded (legacy keyword list applies). */
+    fun getKeywordProfile(): VoiceKeywordProfile? {
+        if (!isEnrolled()) return null
+        val languageTag = securePrefs.getString(KEY_KEYWORD_LANGUAGE, null) ?: return null
+        val transcripts =
+            runCatching {
+                val array = JSONArray(securePrefs.getString(KEY_KEYWORD_TRANSCRIPTS, "[]"))
+                List(array.length()) { array.getString(it) }
+            }.getOrDefault(emptyList())
+        return VoiceKeywordProfile(languageTag = languageTag, transcripts = transcripts)
+    }
+
+    suspend fun enrollOwnerVoice(
+        recordings: List<FloatArray>,
+        keywordProfile: VoiceKeywordProfile,
+    ): VoiceEnrollmentResult =
         withContext(Dispatchers.Default) {
             require(recordings.isNotEmpty()) { "At least one recording is required" }
 
@@ -76,22 +93,36 @@ class VoiceBiometricsManager(
                 return@withContext VoiceEnrollmentResult.InconsistentSamples(consistency)
             }
 
-            val phraseTemplate = AcousticPhraseMatcher.extractFeatures(trimmed.first())
+            // Every sample becomes a phrase template; how alike the owner's own samples are sets their
+            // personal phrase threshold (see phraseThreshold).
+            val phraseTemplates = trimmed.map { AcousticPhraseMatcher.extractFeatures(it) }
+            val intraPhraseSimilarity = meanPairwiseSimilarity(phraseTemplates)
+            Timber.d("Voice enrollment intra-phrase similarity=%.3f", intraPhraseSimilarity)
             withContext(Dispatchers.IO) {
                 securePrefs.edit(commit = true) {
                     putString(KEY_MODEL, modelAssetPath)
                     putString(KEY_CENTROID, encodeFloats(centroid))
                     putString(KEY_SAMPLE_EMBEDDINGS, encodeFloats(embeddings.flatMap { it.asList() }.toFloatArray()))
-                    putString(KEY_PHRASE_TEMPLATE, encodeBytes(AcousticPhraseMatcher.serialize(phraseTemplate)))
+                    putString(KEY_PHRASE_TEMPLATE, encodeBytes(AcousticPhraseMatcher.serialize(phraseTemplates.first())))
+                    putString(KEY_PHRASE_TEMPLATES, JSONArray(phraseTemplates.map { encodeBytes(AcousticPhraseMatcher.serialize(it)) }).toString())
+                    putFloat(KEY_PHRASE_INTRA_SIMILARITY, intraPhraseSimilarity)
                     putInt(KEY_SAMPLE_COUNT, recordings.size)
+                    putString(KEY_KEYWORD_LANGUAGE, keywordProfile.languageTag)
+                    putString(KEY_KEYWORD_TRANSCRIPTS, JSONArray(keywordProfile.transcripts).toString())
                 }
             }
             VoiceEnrollmentResult.Success(consistency)
         }
 
+    /**
+     * [isKeywordChecked] says whether Stage 1 (text) also gates this attempt. When it does not (the
+     * phrase's language could not be transcribed), the phrase match is the only check on WHAT was
+     * said, so its threshold is tightened.
+     */
     suspend fun verify(
         samples: FloatArray,
         mode: VoiceVerificationMode,
+        isKeywordChecked: Boolean,
         thresholds: VoiceThresholds = mode.defaultThresholds,
     ): VoiceVerifyResult {
         val profile = withContext(Dispatchers.IO) { loadProfile() } ?: return VoiceVerifyResult.NotEnrolled
@@ -104,17 +135,26 @@ class VoiceBiometricsManager(
                     val speakerScore = async { speakerSimilarity(computeEmbedding(speech), profile) }
                     val phraseScore =
                         async {
-                            AcousticPhraseMatcher.dtwSimilarity(
-                                AcousticPhraseMatcher.extractFeatures(speech),
-                                profile.phraseTemplate,
-                            )
+                            val attempt = AcousticPhraseMatcher.extractFeatures(speech)
+                            profile.phraseTemplates.maxOf { AcousticPhraseMatcher.dtwSimilarity(attempt, it) }
                         }
-                    VoiceScores(speakerSimilarity = speakerScore.await(), phraseSimilarity = phraseScore.await())
+                    VoiceScores(
+                        speakerSimilarity = speakerScore.await(),
+                        phraseSimilarity = phraseScore.await(),
+                        phraseThreshold = phraseThreshold(profile, thresholds, isKeywordChecked),
+                    )
                 }
-            Timber.d("Voice verify mode=%s speaker=%.3f phrase=%.3f", mode, scores.speakerSimilarity, scores.phraseSimilarity)
+            Timber.d(
+                "Voice verify mode=%s keyword=%s speaker=%.3f phrase=%.3f phraseThreshold=%.3f",
+                mode,
+                isKeywordChecked,
+                scores.speakerSimilarity,
+                scores.phraseSimilarity,
+                scores.phraseThreshold,
+            )
 
             val isSpeakerMatch = scores.speakerSimilarity >= thresholds.speakerSimilarity
-            val isPhraseMatch = scores.phraseSimilarity >= thresholds.phraseSimilarity
+            val isPhraseMatch = scores.phraseSimilarity >= scores.phraseThreshold
             if (isSpeakerMatch && isPhraseMatch) {
                 VoiceVerifyResult.Verified(scores)
             } else {
@@ -129,7 +169,11 @@ class VoiceBiometricsManager(
             remove(KEY_CENTROID)
             remove(KEY_SAMPLE_EMBEDDINGS)
             remove(KEY_PHRASE_TEMPLATE)
+            remove(KEY_PHRASE_TEMPLATES)
+            remove(KEY_PHRASE_INTRA_SIMILARITY)
             remove(KEY_SAMPLE_COUNT)
+            remove(KEY_KEYWORD_LANGUAGE)
+            remove(KEY_KEYWORD_TRANSCRIPTS)
         }
     }
 
@@ -179,10 +223,50 @@ class VoiceBiometricsManager(
             VoiceProfile(
                 centroid = centroid,
                 sampleEmbeddings = sampleEmbeddings,
-                phraseTemplate = AcousticPhraseMatcher.deserialize(decodeBytes(securePrefs.getString(KEY_PHRASE_TEMPLATE, null)!!)),
+                phraseTemplates = loadPhraseTemplates(),
+                intraPhraseSimilarity =
+                    securePrefs.getFloat(KEY_PHRASE_INTRA_SIMILARITY, Float.NaN).takeUnless { it.isNaN() },
             )
         }.onFailure { Timber.e(it, "Stored voice profile is corrupted") }
             .getOrNull()
+    }
+
+    /** All enrolled templates; profiles from before multi-template enrollment have only one. */
+    private fun loadPhraseTemplates(): List<Array<FloatArray>> {
+        val encoded =
+            securePrefs.getString(KEY_PHRASE_TEMPLATES, null)
+                ?.let { json -> JSONArray(json).let { array -> List(array.length()) { array.getString(it) } } }
+                ?: listOf(securePrefs.getString(KEY_PHRASE_TEMPLATE, null)!!)
+        return encoded.map { AcousticPhraseMatcher.deserialize(decodeBytes(it)) }
+    }
+
+    private fun meanPairwiseSimilarity(templates: List<Array<FloatArray>>): Float {
+        val scores =
+            templates.indices.flatMap { i ->
+                (i + 1 until templates.size).map { j -> AcousticPhraseMatcher.dtwSimilarity(templates[i], templates[j]) }
+            }
+        return if (scores.isEmpty()) Float.NaN else scores.average().toFloat()
+    }
+
+    /**
+     * Personal phrase threshold: an attempt must be nearly as close to the owner's templates as the
+     * owner's own samples are to each other. Measured on a real device, the right phrase scored
+     * 0.67–0.69 and other phrases 0.56–0.60 against one template, so a fixed 0.45 let anything
+     * through. Never below the mode's floor; stricter when Stage 1 does not gate the attempt.
+     */
+    private fun phraseThreshold(
+        profile: VoiceProfile,
+        thresholds: VoiceThresholds,
+        isKeywordChecked: Boolean,
+    ): Float {
+        val intra = profile.intraPhraseSimilarity
+        val personal =
+            when {
+                intra != null -> intra - if (isKeywordChecked) PHRASE_MARGIN_WITH_KEYWORD else PHRASE_MARGIN_WITHOUT_KEYWORD
+                isKeywordChecked -> thresholds.phraseSimilarity
+                else -> LEGACY_PHRASE_THRESHOLD_WITHOUT_KEYWORD
+            }
+        return personal.coerceAtMost(MAX_PHRASE_THRESHOLD).coerceAtLeast(thresholds.phraseSimilarity)
     }
 
     /**
@@ -250,7 +334,8 @@ class VoiceBiometricsManager(
     private class VoiceProfile(
         val centroid: FloatArray,
         val sampleEmbeddings: List<FloatArray>,
-        val phraseTemplate: Array<FloatArray>,
+        val phraseTemplates: List<Array<FloatArray>>,
+        val intraPhraseSimilarity: Float?,
     )
 
     companion object {
@@ -265,7 +350,16 @@ class VoiceBiometricsManager(
         private const val KEY_CENTROID = "voice_profile_centroid"
         private const val KEY_SAMPLE_EMBEDDINGS = "voice_profile_sample_embeddings"
         private const val KEY_PHRASE_TEMPLATE = "voice_profile_phrase_template"
+        private const val KEY_PHRASE_TEMPLATES = "voice_profile_phrase_templates"
+        private const val KEY_PHRASE_INTRA_SIMILARITY = "voice_profile_phrase_intra_similarity"
+
+        private const val PHRASE_MARGIN_WITH_KEYWORD = 0.10f
+        private const val PHRASE_MARGIN_WITHOUT_KEYWORD = 0.05f
+        private const val MAX_PHRASE_THRESHOLD = 0.85f
+        private const val LEGACY_PHRASE_THRESHOLD_WITHOUT_KEYWORD = 0.65f
         private const val KEY_SAMPLE_COUNT = "voice_profile_sample_count"
+        private const val KEY_KEYWORD_LANGUAGE = "voice_profile_keyword_language"
+        private const val KEY_KEYWORD_TRANSCRIPTS = "voice_profile_keyword_transcripts"
     }
 }
 

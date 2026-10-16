@@ -27,7 +27,8 @@ data class TwoStageAuthUiState(
     /** True when started by LockOverlayActivity to unlock another app (mode is then fixed to UNLOCK). */
     val isAppUnlock: Boolean = false,
     val mode: VoiceVerificationMode = VoiceVerificationMode.UNLOCK,
-    val recognizedText: String = "",
+    /** What the recognizer heard in the last attempt: null = not recognized yet, "" = nothing understood. */
+    val heardText: String? = null,
     val scores: VoiceScores? = null,
     val failure: AuthFailure = AuthFailure.NONE,
 )

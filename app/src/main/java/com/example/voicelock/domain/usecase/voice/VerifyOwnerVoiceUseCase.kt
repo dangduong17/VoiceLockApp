@@ -12,5 +12,6 @@ class VerifyOwnerVoiceUseCase(
     operator fun invoke(
         samples: FloatArray,
         mode: VoiceVerificationMode,
-    ): Flow<Result<VoiceVerifyResult>> = voiceProfileRepository.verifyOwnerVoice(samples, mode)
+        isKeywordChecked: Boolean,
+    ): Flow<Result<VoiceVerifyResult>> = voiceProfileRepository.verifyOwnerVoice(samples, mode, isKeywordChecked)
 }

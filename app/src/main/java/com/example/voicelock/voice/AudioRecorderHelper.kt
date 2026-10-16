@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.math.log10
 
 /**
  * Captures a fixed-length clip of 16 kHz mono PCM audio as normalized floats in [-1, 1],
@@ -18,6 +19,9 @@ import timber.log.Timber
  * Prefers ENCODING_PCM_FLOAT and falls back to 16-bit PCM (converted in place) on devices
  * whose HAL refuses float capture. Recording is cancellable: cancelling the calling coroutine
  * stops capture within one read chunk and always releases the AudioRecord.
+ *
+ * [durationMs] is an upper bound: capture ends early once the speaker has talked and then been
+ * silent for [END_SILENCE_MS], so a short passphrase does not wait for the full window.
  */
 class AudioRecorderHelper {
 
@@ -26,6 +30,7 @@ class AudioRecorderHelper {
         withContext(Dispatchers.IO) {
             val totalSamples = (SAMPLE_RATE * durationMs / 1000L).toInt()
             val output = FloatArray(totalSamples)
+            val endpointer = Endpointer()
             val session = openSession()
             try {
                 session.audioRecord.startRecording()
@@ -38,9 +43,11 @@ class AudioRecorderHelper {
                     val toRead = minOf(session.chunkSize, totalSamples - offset)
                     val read = session.read(output, offset, toRead)
                     check(read >= 0) { "AudioRecord read failed with code $read" }
+                    val isUtteranceOver = endpointer.accept(output, offset, read)
                     offset += read
+                    if (isUtteranceOver) break
                 }
-                output
+                if (offset < totalSamples) output.copyOf(offset) else output
             } finally {
                 runCatching { session.audioRecord.stop() }
                 session.audioRecord.release()
@@ -117,9 +124,47 @@ class AudioRecorderHelper {
         }
     }
 
+    /**
+     * Energy endpointer over 100 ms chunks: speech is a chunk clearly above the quietest chunk seen
+     * so far (the noise floor); the utterance is over after [END_SILENCE_MS] of non-speech that
+     * follows at least [MIN_SPEECH_MS] of speech.
+     */
+    private class Endpointer {
+        private var noiseFloorDb = Float.MAX_VALUE
+        private var speechMs = 0
+        private var silenceAfterSpeechMs = 0
+
+        fun accept(
+            buffer: FloatArray,
+            offset: Int,
+            length: Int,
+        ): Boolean {
+            if (length <= 0) return false
+            var sum = 0.0
+            for (i in offset until offset + length) sum += buffer[i] * buffer[i]
+            val db = (10.0 * log10(maxOf(sum / length, 1e-12))).toFloat()
+            noiseFloorDb = minOf(noiseFloorDb, db)
+            val chunkMs = length * 1000 / SAMPLE_RATE
+
+            val isSpeech = db > SPEECH_MIN_DB && db > noiseFloorDb + SPEECH_ABOVE_NOISE_DB
+            if (isSpeech) {
+                speechMs += chunkMs
+                silenceAfterSpeechMs = 0
+            } else if (speechMs > 0) {
+                silenceAfterSpeechMs += chunkMs
+            }
+            return speechMs >= MIN_SPEECH_MS && silenceAfterSpeechMs >= END_SILENCE_MS
+        }
+    }
+
     companion object {
         const val SAMPLE_RATE = 16_000
         const val DEFAULT_DURATION_MS = 2_500L
         private const val CHUNK_SAMPLES = 1_600 // 100 ms
+
+        private const val SPEECH_MIN_DB = -50f
+        private const val SPEECH_ABOVE_NOISE_DB = 12f
+        private const val MIN_SPEECH_MS = 300
+        private const val END_SILENCE_MS = 600
     }
 }

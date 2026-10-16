@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
+import com.example.voicelock.data.model.voice.VoiceKeywordProfile
 import com.example.voicelock.data.model.voice.VoiceSettings
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
@@ -69,16 +70,27 @@ class VoiceProfileRepositoryImpl(
         }.flowOn(Dispatchers.IO)
             .catchAsResult()
 
-    override fun enrollOwnerVoice(recordings: List<FloatArray>): Flow<Result<VoiceEnrollmentResult>> =
-        flow<Result<VoiceEnrollmentResult>> { emit(Result.Success(voiceBiometricsManager.enrollOwnerVoice(recordings))) }
+    override fun getKeywordProfile(): Flow<Result<VoiceKeywordProfile?>> =
+        flow<Result<VoiceKeywordProfile?>> { emit(Result.Success(voiceBiometricsManager.getKeywordProfile())) }
+            .flowOn(Dispatchers.IO)
+            .catchAsResult()
+
+    override fun enrollOwnerVoice(
+        recordings: List<FloatArray>,
+        keywordProfile: VoiceKeywordProfile,
+    ): Flow<Result<VoiceEnrollmentResult>> =
+        flow<Result<VoiceEnrollmentResult>> {
+            emit(Result.Success(voiceBiometricsManager.enrollOwnerVoice(recordings, keywordProfile)))
+        }
             .flowOn(Dispatchers.IO)
             .catchAsResult()
 
     override fun verifyOwnerVoice(
         samples: FloatArray,
         mode: VoiceVerificationMode,
+        isKeywordChecked: Boolean,
     ): Flow<Result<VoiceVerifyResult>> =
-        flow<Result<VoiceVerifyResult>> { emit(Result.Success(voiceBiometricsManager.verify(samples, mode))) }
+        flow<Result<VoiceVerifyResult>> { emit(Result.Success(voiceBiometricsManager.verify(samples, mode, isKeywordChecked))) }
             .flowOn(Dispatchers.IO)
             .catchAsResult()
 

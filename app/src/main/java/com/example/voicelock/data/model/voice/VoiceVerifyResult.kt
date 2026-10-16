@@ -3,6 +3,8 @@ package com.example.voicelock.data.model.voice
 data class VoiceScores(
     val speakerSimilarity: Float,
     val phraseSimilarity: Float,
+    /** The (personal) phrase threshold this attempt was judged against. */
+    val phraseThreshold: Float,
 )
 
 sealed interface VoiceVerifyResult {

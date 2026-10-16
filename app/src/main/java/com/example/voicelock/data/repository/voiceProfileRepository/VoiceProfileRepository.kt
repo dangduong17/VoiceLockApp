@@ -1,6 +1,7 @@
 package com.example.voicelock.data.repository.voiceProfileRepository
 
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
+import com.example.voicelock.data.model.voice.VoiceKeywordProfile
 import com.example.voicelock.data.model.voice.VoiceSettings
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
@@ -18,10 +19,16 @@ interface VoiceProfileRepository {
 
     fun warmUpModel(): Flow<Result<Unit>>
 
-    fun enrollOwnerVoice(recordings: List<FloatArray>): Flow<Result<VoiceEnrollmentResult>>
+    fun getKeywordProfile(): Flow<Result<VoiceKeywordProfile?>>
+
+    fun enrollOwnerVoice(
+        recordings: List<FloatArray>,
+        keywordProfile: VoiceKeywordProfile,
+    ): Flow<Result<VoiceEnrollmentResult>>
 
     fun verifyOwnerVoice(
         samples: FloatArray,
         mode: VoiceVerificationMode,
+        isKeywordChecked: Boolean,
     ): Flow<Result<VoiceVerifyResult>>
 }

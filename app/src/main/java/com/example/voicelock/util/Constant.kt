@@ -11,6 +11,6 @@ object Constant {
 
     const val VOICE_ENROLLMENT_SAMPLES = 3
 
-    /** Stage-1 keywords, compared after lower-casing and stripping diacritics. */
+    /** Stage-1 phrases for voice profiles enrolled before the owner's own phrase was transcribed. */
     val VOICE_UNLOCK_KEYWORDS = listOf("unlock", "mở khóa")
 }
