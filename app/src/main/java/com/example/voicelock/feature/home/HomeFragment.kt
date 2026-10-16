@@ -13,6 +13,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     override fun init(view: View, savedInstanceState: Bundle?) {
         initView()
         settingEvent()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Also refreshes after returning from voice enrollment / PIN setup screens.
         viewModel.initData()
     }
 

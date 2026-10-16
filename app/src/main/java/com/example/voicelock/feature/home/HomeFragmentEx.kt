@@ -30,6 +30,14 @@ fun HomeFragment.settingEvent() {
         viewModel.toggleVoiceLock(isChecked)
     }
 
+    binding.rowVoiceUnlock.setPreventDoubleClick {
+        viewModel.onVoiceUnlockRowClicked()
+    }
+
+    binding.tvVoiceReadyTitle.setPreventDoubleClick {
+        viewModel.onVoiceUnlockRowClicked()
+    }
+
     binding.btnPin.setPreventDoubleClick {
         viewModel.onPinClicked()
     }
@@ -57,7 +65,16 @@ fun HomeFragment.updateUiState(state: HomeUiState) {
     val lockNowStatusText = if (state.isProtectionEnabled) "BẢO VỆ ĐANG BẬT" else "BẢO VỆ ĐANG TẮT"
     binding.tvBadgeText.text = lockNowStatusText
 
-    binding.tvVoiceInfo.text = "Đã lưu ${state.voiceSamplesCount} mẫu giọng • PIN dự phòng đã ${if (state.isBackupPinEnabled) "bật" else "tắt"}"
+    binding.tvVoiceReadyTitle.setText(if (state.isVoiceEnrolled) R.string.voice_ready else R.string.voice_not_enrolled)
+    binding.tvVoiceInfo.text =
+        if (state.isVoiceEnrolled) {
+            "Đã lưu ${state.voiceSamplesCount} mẫu giọng • PIN dự phòng đã ${if (state.isBackupPinEnabled) "bật" else "tắt"}"
+        } else {
+            getString(R.string.voice_not_enrolled_info)
+        }
+    binding.tvVoiceUnlockSub.setText(
+        if (state.isVoiceEnrolled) R.string.unlock_by_voice_sub else R.string.voice_not_enrolled_info,
+    )
 
     if (binding.switchVoiceUnlock.isChecked != state.isVoiceUnlockEnabled) {
         binding.switchVoiceUnlock.isChecked = state.isVoiceUnlockEnabled
@@ -107,5 +124,21 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
         is HomeUiEvent.NavigateToAppLock -> {
             navigator.navigateTo(R.id.action_homeFragment_to_appLockFragment)
         }
+
+        is HomeUiEvent.NavigateToVoiceEnrollment -> {
+            restoreVoiceSwitches()
+            navigator.navigateTo(R.id.action_homeFragment_to_enrollmentActivity)
+        }
+
+        is HomeUiEvent.NavigateToVoiceTest -> {
+            navigator.navigateTo(R.id.action_homeFragment_to_twoStageAuthActivity)
+        }
     }
+}
+
+/** A switch flipped on before enrollment snaps back to the saved value. */
+private fun HomeFragment.restoreVoiceSwitches() {
+    val state = viewModel.uiState.value
+    binding.switchVoiceUnlock.isChecked = state.isVoiceUnlockEnabled
+    binding.switchVoiceLock.isChecked = state.isVoiceLockEnabled
 }

@@ -6,7 +6,6 @@ import com.example.voicelock.data.model.pinlock.PinLockMode
 sealed class SettingsUiEvent {
     data class ShowToast(val message: String) : SettingsUiEvent()
     data object NavigateToHome : SettingsUiEvent()
-    data object NavigateToVoiceCommands : SettingsUiEvent()
     data object NavigateToPermissions : SettingsUiEvent()
     data class NavigateToPinLock(val mode: PinLockMode, val pinLength: Int) : SettingsUiEvent()
     data class NavigateToPatternLock(val mode: PatternLockMode) : SettingsUiEvent()
@@ -16,4 +15,6 @@ sealed class SettingsUiEvent {
     data object NavigateToHelpFeedback : SettingsUiEvent()
     data object NavigateToAbout : SettingsUiEvent()
     data object NavigateToAppLock : SettingsUiEvent()
+    data object NavigateToVoiceEnrollment : SettingsUiEvent()
+    data object NavigateToVoiceTest : SettingsUiEvent()
 }

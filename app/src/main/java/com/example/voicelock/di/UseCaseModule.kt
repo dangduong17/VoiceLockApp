@@ -14,6 +14,14 @@ import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
 import com.example.voicelock.domain.usecase.pinlock.SetPinUseCase
 import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
+import com.example.voicelock.domain.usecase.voice.EnrollOwnerVoiceUseCase
+import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
+import com.example.voicelock.domain.usecase.voice.IsVoiceEnrolledUseCase
+import com.example.voicelock.domain.usecase.voice.MatchVoiceKeywordUseCase
+import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
+import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
+import com.example.voicelock.domain.usecase.voice.VerifyOwnerVoiceUseCase
+import com.example.voicelock.domain.usecase.voice.WarmUpVoiceModelUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
@@ -49,6 +57,17 @@ val appLockUseCaseModule = module {
     factoryOf(::IsAppUnlockedUseCase)
 }
 
+val voiceUseCaseModule = module {
+    factoryOf(::IsVoiceEnrolledUseCase)
+    factoryOf(::WarmUpVoiceModelUseCase)
+    factoryOf(::EnrollOwnerVoiceUseCase)
+    factoryOf(::VerifyOwnerVoiceUseCase)
+    factoryOf(::MatchVoiceKeywordUseCase)
+    factoryOf(::GetVoiceSettingsUseCase)
+    factoryOf(::SetVoiceUnlockEnabledUseCase)
+    factoryOf(::SetVoiceLockEnabledUseCase)
+}
+
 val useCaseModule = module {
     includes(
         homeUseCaseModule,
@@ -57,5 +76,6 @@ val useCaseModule = module {
         pinLockUseCaseModule,
         patternLockUseCaseModule,
         appLockUseCaseModule,
+        voiceUseCaseModule,
     )
 }

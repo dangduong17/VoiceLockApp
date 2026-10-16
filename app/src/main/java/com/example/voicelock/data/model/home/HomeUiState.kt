@@ -3,9 +3,10 @@ package com.example.voicelock.data.model.home
 data class HomeUiState(
     val userName: String = "Minh",
     val isProtectionEnabled: Boolean = true,
-    val voiceSamplesCount: Int = 3,
+    val isVoiceEnrolled: Boolean = false,
+    val voiceSamplesCount: Int = 0,
     val isBackupPinEnabled: Boolean = true,
-    val isVoiceUnlockEnabled: Boolean = true,
+    val isVoiceUnlockEnabled: Boolean = false,
     val isVoiceLockEnabled: Boolean = false,
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,

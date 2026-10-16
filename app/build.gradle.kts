@@ -23,6 +23,11 @@ android {
         buildConfig = true
     }
 
+    androidResources {
+        // Store the CAM++ model uncompressed so the AssetManager can read it without inflating ~28 MB.
+        noCompress += "onnx"
+    }
+
     buildTypes {
         release {
             optimization {
@@ -56,6 +61,9 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.datastore.preferences)
+
+    // Sherpa-ONNX speaker verification (AAR from https://github.com/k2-fsa/sherpa-onnx/releases)
+    implementation(files("libs/sherpa-onnx-1.13.8.aar"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -7,25 +7,31 @@ import com.example.voicelock.data.model.applock.LockOverlayUiState
 import com.example.voicelock.data.model.lock.LockMethod
 import com.example.voicelock.data.model.pinlock.PinInfo
 import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
+import com.example.voicelock.data.model.voice.VoiceSettings
+import com.example.voicelock.data.model.voice.isVoiceUnlockActive
 import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
+import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
 import com.example.voicelock.util.getDataOrDefault
 
 /**
- * Pattern is the primary lock method, PIN is the backup — [buildAvailableMethods] is the single
- * place that encodes this priority order. Adding a future method (fingerprint, face, voice, ...)
- * only means appending it here; [onTryAnotherMethod] already cycles through whatever the user
- * has configured without any other change.
+ * Voice is the primary lock method (when enrolled and switched on), then Pattern, then PIN as
+ * the backup — [buildAvailableMethods] is the single place that encodes this priority order.
+ * Adding a future method (fingerprint, face, ...) only means appending it here;
+ * [onTryAnotherMethod] already cycles through whatever the user has configured.
  */
 class LockOverlayViewModel(
     private val getPinInfoUseCase: GetPinInfoUseCase,
     private val getPatternInfoUseCase: GetPatternInfoUseCase,
+    private val getVoiceSettingsUseCase: GetVoiceSettingsUseCase,
 ) : BaseViewModel<LockOverlayUiState, LockOverlayUiEvent>(LockOverlayUiState()) {
 
     fun decideVerificationMethod() {
         launchIO {
             val pinInfo = getPinInfoUseCase().getDataOrDefault(PinInfo(isPinSet = false, pinLength = 6))
             val isPatternSet = getPatternInfoUseCase().getDataOrDefault(false)
-            val methods = buildAvailableMethods(isPatternSet = isPatternSet, isPinSet = pinInfo.isPinSet)
+            val isVoiceActive = getVoiceSettingsUseCase().getDataOrDefault(VoiceSettings()).isVoiceUnlockActive()
+            val methods =
+                buildAvailableMethods(isVoiceActive = isVoiceActive, isPatternSet = isPatternSet, isPinSet = pinInfo.isPinSet)
 
             setState {
                 copy(
@@ -56,10 +62,12 @@ class LockOverlayViewModel(
     }
 
     private fun buildAvailableMethods(
+        isVoiceActive: Boolean,
         isPatternSet: Boolean,
         isPinSet: Boolean,
     ): List<LockMethod> =
         buildList {
+            if (isVoiceActive) add(LockMethod.VOICE)
             if (isPatternSet) add(LockMethod.PATTERN)
             if (isPinSet) add(LockMethod.PIN)
         }

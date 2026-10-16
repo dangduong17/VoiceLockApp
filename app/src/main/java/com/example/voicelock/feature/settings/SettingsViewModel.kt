@@ -7,10 +7,14 @@ import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
+import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
+import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
 import com.example.voicelock.util.handleApiCall
 
 class SettingsViewModel(
     private val getSettingsUseCase: GetSettingsUseCase,
+    private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
+    private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
 ) : BaseViewModel<SettingsUiState, SettingsUiEvent>(SettingsUiState()) {
 
     fun initData() {
@@ -25,12 +29,33 @@ class SettingsViewModel(
         )
     }
 
+    /** Same rule as HomeViewModel: turning a voice switch on before enrolling opens enrollment. */
     fun toggleVoiceUnlock(isEnabled: Boolean) {
+        val state = getCurrentState()
+        if (isEnabled == state.isVoiceUnlockEnabled) return
+        if (!state.isVoiceEnrolled) {
+            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment) }
+            return
+        }
         setState { copy(isVoiceUnlockEnabled = isEnabled) }
+        handleApiCall(apiCall = { setVoiceUnlockEnabledUseCase(isEnabled) })
     }
 
     fun toggleVoiceLock(isEnabled: Boolean) {
+        val state = getCurrentState()
+        if (isEnabled == state.isVoiceLockEnabled) return
+        if (!state.isVoiceEnrolled) {
+            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment) }
+            return
+        }
         setState { copy(isVoiceLockEnabled = isEnabled) }
+        handleApiCall(apiCall = { setVoiceLockEnabledUseCase(isEnabled) })
+    }
+
+    fun onVoiceUnlockRowClicked() {
+        val event =
+            if (getCurrentState().isVoiceEnrolled) SettingsUiEvent.NavigateToVoiceTest else SettingsUiEvent.NavigateToVoiceEnrollment
+        launchIO { setEvent(event) }
     }
 
     fun onHomeTabClicked() {
@@ -38,7 +63,8 @@ class SettingsViewModel(
     }
 
     fun onVoiceCommandsClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToVoiceCommands) }
+        // "Voice commands & samples" = (re-)record the voice password.
+        launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment) }
     }
 
     fun onPermissionsClicked() {

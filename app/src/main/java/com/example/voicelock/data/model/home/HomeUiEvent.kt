@@ -11,4 +11,6 @@ sealed class HomeUiEvent {
     data object NavigateToFingerprintSetup : HomeUiEvent()
     data object NavigateToSecurityQuestions : HomeUiEvent()
     data object NavigateToAppLock : HomeUiEvent()
+    data object NavigateToVoiceEnrollment : HomeUiEvent()
+    data object NavigateToVoiceTest : HomeUiEvent()
 }

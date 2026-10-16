@@ -117,4 +117,50 @@
     <string name="permissions_mic_sub">Dùng để xác minh giọng nói và lệnh thoại</string>
 
     <string name="lock_try_another_method">Thử phương thức khác</string>
+
+    <string name="voice_mic_permission_denied">Cần quyền micro để dùng giọng nói</string>
+    <string name="voice_not_enrolled">Chưa đăng ký giọng nói</string>
+    <string name="voice_not_enrolled_info">Nhấn để ghi 3 mẫu giọng nói</string>
+    <string name="voice_unlock_settings_sub_enrolled">Trên lớp khóa • Đã lưu %1$d mẫu</string>
+    <string name="voice_enroll_error_model_missing">Thiếu tệp mô hình giọng nói (.onnx) trong assets</string>
+    <string name="voice_auth_error_model_missing">Thiếu tệp mô hình giọng nói (.onnx) trong assets</string>
+    <string name="voice_auth_use_other_method">Dùng PIN hoặc hình vẽ</string>
+
+    <string name="voice_enroll_title">Đăng ký giọng nói</string>
+    <string name="voice_enroll_subtitle">Nói câu mật khẩu (ví dụ “Mở khóa” hoặc “Unlock”) 3 lần liên tiếp, rõ ràng và cùng một cách nói.</string>
+    <string name="voice_enroll_record">Ghi âm mẫu giọng</string>
+    <string name="voice_enroll_sample_count">Mẫu %1$d/%2$d</string>
+    <string name="voice_enroll_status_idle">Nhấn micro rồi nói câu mật khẩu (lần %1$d)</string>
+    <string name="voice_enroll_status_recording">Đang nghe… hãy nói ngay</string>
+    <string name="voice_enroll_status_processing">Đang tạo dấu giọng nói…</string>
+    <string name="voice_enroll_status_completed">Đã lưu giọng nói của bạn</string>
+    <string name="voice_enroll_action_record">Ghi âm</string>
+    <string name="voice_enroll_action_done">Hoàn tất</string>
+    <string name="voice_enroll_restart">Ghi lại từ đầu</string>
+    <string name="voice_enroll_error_no_speech">Không nghe thấy giọng nói, vui lòng nói to và rõ hơn</string>
+    <string name="voice_enroll_error_inconsistent">Các mẫu không giống nhau, vui lòng ghi lại cả 3 mẫu ở nơi yên tĩnh</string>
+    <string name="voice_enroll_error_recording">Không thể mở micro, vui lòng thử lại</string>
+    <string name="voice_enroll_error_processing">Không thể xử lý giọng nói. Kiểm tra tệp mô hình .onnx trong assets</string>
+
+    <string name="voice_auth_title">Xác minh giọng nói</string>
+    <string name="voice_auth_mode_unlock">Mở khóa</string>
+    <string name="voice_auth_mode_lock">Khóa</string>
+    <string name="voice_auth_stage_checking">Đang kiểm tra…</string>
+    <string name="voice_auth_stage_not_enrolled">Bạn chưa đăng ký giọng nói</string>
+    <string name="voice_auth_stage_idle">Nhấn bắt đầu rồi nói “Mở khóa”</string>
+    <string name="voice_auth_stage_capturing">Nói “Mở khóa” ngay</string>
+    <string name="voice_auth_stage_verifying">Đang xác minh giọng nói…</string>
+    <string name="voice_auth_stage_success">Mở khóa thành công</string>
+    <string name="voice_auth_recognized">Đã nghe: “%1$s”</string>
+    <string name="voice_auth_scores">giọng %1$.2f • câu %2$.2f</string>
+    <string name="voice_auth_action_start">Bắt đầu</string>
+    <string name="voice_auth_action_retry">Thử lại</string>
+    <string name="voice_auth_action_enroll">Đăng ký giọng nói</string>
+    <string name="voice_auth_error_keyword">Sai từ khóa, vui lòng nói “Mở khóa”</string>
+    <string name="voice_auth_error_recognizer">Không thể nhận dạng giọng nói, vui lòng thử lại</string>
+    <string name="voice_auth_error_no_speech">Không nghe thấy giọng nói</string>
+    <string name="voice_auth_error_speaker">Giọng nói không khớp với chủ sở hữu</string>
+    <string name="voice_auth_error_phrase">Câu mật khẩu không khớp với mẫu đã đăng ký</string>
+    <string name="voice_auth_error_both">Giọng nói và câu mật khẩu đều không khớp</string>
+    <string name="voice_auth_error_unexpected">Đã xảy ra lỗi, vui lòng thử lại</string>
 </resources>

@@ -19,6 +19,16 @@ class NavigatorImpl(
 
     private fun safeAction(action: () -> Unit) {
         if (!isAtCurrentDestination()) return
+        // addObserver on an already-resumed lifecycle delivers ON_RESUME immediately, and an
+        // <activity> destination never changes currentDestination, so without this guard both the
+        // observer and the direct call below would navigate (e.g. starting an Activity twice).
+        var hasRun = false
+        val runOnce = {
+            if (!hasRun) {
+                hasRun = true
+                action()
+            }
+        }
         runCatching {
             navObserver =
                 object : LifecycleEventObserver {
@@ -30,7 +40,7 @@ class NavigatorImpl(
                             lifecycle.removeObserver(this)
                             runCatching {
                                 if (navController.currentDestination?.id == currentDestinationId) {
-                                    action()
+                                    runOnce()
                                 }
                             }
                         }
@@ -54,7 +64,7 @@ class NavigatorImpl(
             )
 
             if (navController.currentDestination?.id == currentDestinationId) {
-                action()
+                runOnce()
             }
         }
     }

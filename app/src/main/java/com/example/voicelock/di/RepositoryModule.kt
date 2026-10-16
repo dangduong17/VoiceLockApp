@@ -8,6 +8,8 @@ import com.example.voicelock.data.repository.installedAppsRepository.InstalledAp
 import com.example.voicelock.data.repository.installedAppsRepository.InstalledAppsRepositoryImpl
 import com.example.voicelock.data.repository.lockRepository.LockRepository
 import com.example.voicelock.data.repository.lockRepository.LockRepositoryImpl
+import com.example.voicelock.data.repository.voiceProfileRepository.VoiceProfileRepository
+import com.example.voicelock.data.repository.voiceProfileRepository.VoiceProfileRepositoryImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -17,5 +19,6 @@ val repositoryModule = module {
     singleOf(::LockRepositoryImpl) bind LockRepository::class
     singleOf(::AppLockRepositoryImpl) bind AppLockRepository::class
     singleOf(::AppLockSessionRepositoryImpl) bind AppLockSessionRepository::class
+    singleOf(::VoiceProfileRepositoryImpl) bind VoiceProfileRepository::class
     single<InstalledAppsRepository> { InstalledAppsRepositoryImpl(context = androidContext()) }
 }

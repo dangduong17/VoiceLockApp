@@ -8,4 +8,9 @@ object Constant {
 
     const val APP_LOCK_SESSION_TTL_MS = 10_000L
     const val APP_LOCK_POLL_INTERVAL_MS = 500L
+
+    const val VOICE_ENROLLMENT_SAMPLES = 3
+
+    /** Stage-1 keywords, compared after lower-casing and stripping diacritics. */
+    val VOICE_UNLOCK_KEYWORDS = listOf("unlock", "mở khóa")
 }

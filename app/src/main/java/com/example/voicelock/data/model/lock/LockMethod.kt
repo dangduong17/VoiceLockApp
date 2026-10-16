@@ -7,6 +7,7 @@ package com.example.voicelock.data.model.lock
  * between them, so adding a method here plus its own verification screen is all that's needed.
  */
 enum class LockMethod {
+    VOICE,
     PATTERN,
     PIN,
 }

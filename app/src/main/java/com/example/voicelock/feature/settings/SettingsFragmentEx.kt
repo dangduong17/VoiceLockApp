@@ -25,6 +25,10 @@ fun SettingsFragment.settingEvent() {
         viewModel.toggleVoiceLock(isChecked)
     }
 
+    binding.rowVoiceUnlock.setPreventDoubleClick {
+        viewModel.onVoiceUnlockRowClicked()
+    }
+
     binding.btnVoiceCommands.setPreventDoubleClick {
         viewModel.onVoiceCommandsClicked()
     }
@@ -75,8 +79,22 @@ fun SettingsFragment.updateUiState(state: SettingsUiState) {
         binding.switchVoiceLock.isChecked = state.isVoiceLockEnabled
     }
 
+    binding.tvVoiceUnlockSub.text =
+        if (state.isVoiceEnrolled) {
+            getString(R.string.voice_unlock_settings_sub_enrolled, state.voiceSamplesCount)
+        } else {
+            getString(R.string.voice_not_enrolled_info)
+        }
+
     binding.tvPinSub.text = state.pinStatusText
     binding.tvPatternSub.text = state.patternStatusText
+}
+
+/** A switch flipped on before enrollment snaps back to the saved value. */
+private fun SettingsFragment.restoreVoiceSwitches() {
+    val state = viewModel.uiState.value
+    binding.switchVoiceUnlock.isChecked = state.isVoiceUnlockEnabled
+    binding.switchVoiceLock.isChecked = state.isVoiceLockEnabled
 }
 
 fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
@@ -89,8 +107,13 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
             displayToast(event.message)
         }
 
-        is SettingsUiEvent.NavigateToVoiceCommands -> {
-            displayToast("Mở Lệnh và mẫu giọng nói")
+        is SettingsUiEvent.NavigateToVoiceEnrollment -> {
+            restoreVoiceSwitches()
+            navigator.navigateTo(R.id.action_settingsFragment_to_enrollmentActivity)
+        }
+
+        is SettingsUiEvent.NavigateToVoiceTest -> {
+            navigator.navigateTo(R.id.action_settingsFragment_to_twoStageAuthActivity)
         }
 
         is SettingsUiEvent.NavigateToPermissions -> {
