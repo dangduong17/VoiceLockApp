@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">VoiceLock</string>
+    <string name="greeting_title">Chào bạn, Minh</string>
+    <string name="greeting_subtitle">Mọi thứ đã sẵn sàng để bảo vệ.</string>
+
+    <string name="protection_status_enabled">BẢO VỆ ĐANG BẬT</string>
+    <string name="voice_ready">Giọng nói đã sẵn sàng</string>
+    <string name="voice_info">Đã lưu 3 mẫu giọng • PIN dự phòng đã bật</string>
+    <string name="lock_now">Khóa ngay</string>
+
+    <string name="unlock_by_voice">Mở khóa bằng giọng nói</string>
+    <string name="unlock_by_voice_sub">Xác minh trên lớp khóa VoiceLock</string>
+
+    <string name="lock_by_voice">Khóa bằng giọng nói</string>
+    <string name="lock_by_voice_sub">Lắng nghe nền đang tắt</string>
+
+    <string name="security_recovery_header">BẢO MẬT &amp; KHÔI PHỤC</string>
+
+    <string name="pin_code">Mã PIN</string>
+    <string name="pin_code_sub">6 chữ số • Đã thiết lập</string>
+
+    <string name="pattern_lock">Hình vẽ</string>
+    <string name="setup">Thiết lập</string>
+
+    <string name="fingerprint">Vân tay</string>
+    <string name="not_enabled">Chưa bật</string>
+
+    <string name="security_question">Câu hỏi bảo mật</string>
+
+    <string name="nav_protection">Bảo vệ</string>
+    <string name="nav_voice">Giọng nói</string>
+    <string name="nav_settings">Cài đặt</string>
 </resources>
