@@ -21,7 +21,8 @@ class PatternLockFragment : BaseFragment<FragmentPatternLockBinding, PatternLock
             arguments?.getString(BundleKey.KEY_LOCK_MODE)?.let {
                 runCatching { PatternLockMode.valueOf(it) }.getOrDefault(PatternLockMode.SETUP)
             } ?: PatternLockMode.SETUP
-        viewModel.initData(mode)
+        val targetPackageName = arguments?.getString(BundleKey.KEY_LOCK_TARGET_PACKAGE)
+        viewModel.initData(mode = mode, targetPackageName = targetPackageName)
     }
 
     override fun subscribeObserver(view: View) {

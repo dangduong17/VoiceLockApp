@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.gson)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

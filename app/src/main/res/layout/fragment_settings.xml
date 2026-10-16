@@ -609,6 +609,54 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/divider_line" />
+
+                <!-- Item 5: App Lock -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/btnAppLock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/ivAppLockCircle"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_circle_icon"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_apps"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvAppLockTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="@string/app_lock_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/ivAppLockCircle"
+                        app:layout_constraintEnd_toStartOf="@id/ivAppLockArrow"
+                        app:layout_constraintStart_toEndOf="@id/ivAppLockCircle"
+                        app:layout_constraintTop_toTopOf="@id/ivAppLockCircle" />
+
+                    <ImageView
+                        android:id="@+id/ivAppLockArrow"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
             </LinearLayout>
 
             <!-- Notice Footnote 2 -->

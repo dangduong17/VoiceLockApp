@@ -9,5 +9,7 @@ sealed class PatternLockUiEvent {
 
     data object TooShort : PatternLockUiEvent()
 
-    data object Success : PatternLockUiEvent()
+    data class Success(
+        val mode: PatternLockMode,
+    ) : PatternLockUiEvent()
 }

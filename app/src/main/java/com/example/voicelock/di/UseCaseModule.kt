@@ -1,5 +1,10 @@
 package com.example.voicelock.di
 
+import com.example.voicelock.domain.usecase.applock.GetInstalledAppsUseCase
+import com.example.voicelock.domain.usecase.applock.GetLockedPackagesUseCase
+import com.example.voicelock.domain.usecase.applock.IsAppUnlockedUseCase
+import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
+import com.example.voicelock.domain.usecase.applock.SetAppLockedUseCase
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
 import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
@@ -36,6 +41,14 @@ val patternLockUseCaseModule = module {
     factoryOf(::VerifyPatternUseCase)
 }
 
+val appLockUseCaseModule = module {
+    factoryOf(::GetInstalledAppsUseCase)
+    factoryOf(::GetLockedPackagesUseCase)
+    factoryOf(::SetAppLockedUseCase)
+    factoryOf(::MarkAppUnlockedUseCase)
+    factoryOf(::IsAppUnlockedUseCase)
+}
+
 val useCaseModule = module {
     includes(
         homeUseCaseModule,
@@ -43,5 +56,6 @@ val useCaseModule = module {
         lockUseCaseModule,
         pinLockUseCaseModule,
         patternLockUseCaseModule,
+        appLockUseCaseModule,
     )
 }

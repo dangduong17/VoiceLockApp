@@ -10,4 +10,5 @@ sealed class HomeUiEvent {
     data class NavigateToPatternLock(val mode: PatternLockMode) : HomeUiEvent()
     data object NavigateToFingerprintSetup : HomeUiEvent()
     data object NavigateToSecurityQuestions : HomeUiEvent()
+    data object NavigateToAppLock : HomeUiEvent()
 }

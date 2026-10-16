@@ -2,6 +2,7 @@ package com.example.voicelock.feature.patternlock
 
 import android.view.View
 import com.example.voicelock.R
+import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.patternlock.PatternLockStage
 import com.example.voicelock.data.model.patternlock.PatternLockUiEvent
 import com.example.voicelock.data.model.patternlock.PatternLockUiState
@@ -34,7 +35,12 @@ fun PatternLockFragment.settingEvent() {
 fun PatternLockFragment.updateUiState(state: PatternLockUiState) {
     val (title, subtitle) =
         when (state.stage) {
-            PatternLockStage.VERIFY -> getString(R.string.pattern_title_verify) to getString(R.string.pattern_subtitle_verify)
+            PatternLockStage.VERIFY ->
+                if (state.mode == PatternLockMode.UNLOCK) {
+                    getString(R.string.pattern_title_unlock) to getString(R.string.pattern_subtitle_unlock)
+                } else {
+                    getString(R.string.pattern_title_verify) to getString(R.string.pattern_subtitle_verify)
+                }
             PatternLockStage.ENTER -> getString(R.string.pattern_title_enter) to getString(R.string.pattern_subtitle_enter)
             PatternLockStage.CONFIRM -> getString(R.string.pattern_title_confirm) to getString(R.string.pattern_subtitle_confirm)
         }
@@ -67,8 +73,13 @@ fun PatternLockFragment.handleUiEvent(event: PatternLockUiEvent) {
         }
 
         is PatternLockUiEvent.Success -> {
-            displayToast(getString(R.string.pattern_set_success))
-            navigator.navigateUp()
+            if (event.mode == PatternLockMode.UNLOCK) {
+                displayToast(getString(R.string.pattern_unlock_success))
+                requireActivity().finish()
+            } else {
+                displayToast(getString(R.string.pattern_set_success))
+                navigator.navigateUp()
+            }
         }
     }
 }

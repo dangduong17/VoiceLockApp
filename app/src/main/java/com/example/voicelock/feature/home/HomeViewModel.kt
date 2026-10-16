@@ -60,4 +60,8 @@ class HomeViewModel(
     fun onQuestionsClicked() {
         launchIO { setEvent(HomeUiEvent.NavigateToSecurityQuestions) }
     }
+
+    fun onAppLockClicked() {
+        launchIO { setEvent(HomeUiEvent.NavigateToAppLock) }
+    }
 }
