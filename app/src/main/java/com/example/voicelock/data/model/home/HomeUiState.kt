@@ -1,7 +1,6 @@
 package com.example.voicelock.data.model.home
 
 data class HomeUiState(
-    val userName: String = "Minh",
     val isProtectionEnabled: Boolean = true,
     val isVoiceEnrolled: Boolean = false,
     val voiceSamplesCount: Int = 0,

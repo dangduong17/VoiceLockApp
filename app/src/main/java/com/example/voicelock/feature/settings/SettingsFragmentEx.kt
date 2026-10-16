@@ -109,11 +109,11 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.NavigateToVoiceEnrollment -> {
             restoreVoiceSwitches()
-            navigator.navigateTo(R.id.action_settingsFragment_to_enrollmentActivity)
+            navigator.navigateTo(R.id.action_settingsFragment_to_enrollmentFragment)
         }
 
         is SettingsUiEvent.NavigateToVoiceTest -> {
-            navigator.navigateTo(R.id.action_settingsFragment_to_twoStageAuthActivity)
+            navigator.navigateTo(R.id.action_settingsFragment_to_twoStageAuthFragment)
         }
 
         is SettingsUiEvent.NavigateToPermissions -> {

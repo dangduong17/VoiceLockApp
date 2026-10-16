@@ -1,4 +1,4 @@
-package com.example.voicelock.voice
+package com.example.voicelock.data.local.voice
 
 import android.content.Context
 import android.content.Intent
@@ -15,6 +15,8 @@ import android.speech.RecognitionSupportCallback
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.annotation.RequiresApi
+import com.example.voicelock.data.model.voice.SpeechRecognitionOutcome
+import com.example.voicelock.data.model.voice.SpeechRecognitionSupport
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -32,7 +34,7 @@ import kotlin.coroutines.resume
  * Android's SpeechRecognizer through EXTRA_AUDIO_SOURCE (API 33+), so the user speaks once and the
  * very same samples also feed Sherpa-ONNX and the DTW matcher.
  *
- * Returns [Outcome.Unsupported] when the device cannot recognize pre-recorded audio (API < 33, no
+ * Returns [SpeechRecognitionOutcome.Unsupported] when the device cannot recognize pre-recorded audio (API < 33, no
  * recognizer, engine refuses the audio source, or it never answers); callers then fall back to the
  * speaker + phrase checks only.
  *
@@ -43,25 +45,6 @@ import kotlin.coroutines.resume
 class KeywordAudioRecognizer(
     private val context: Context,
 ) {
-    sealed interface Outcome {
-        /** [detectedLanguage] is set when language detection was requested and the engine reported one. */
-        data class Candidates(
-            val texts: List<String>,
-            val detectedLanguage: String? = null,
-        ) : Outcome
-
-        /** No text; [detectedLanguage] may still be known (e.g. speech in a language with no model). */
-        data class NoSpeech(
-            val detectedLanguage: String? = null,
-        ) : Outcome
-
-        data object Unsupported : Outcome
-
-        data class Failed(
-            val errorCode: Int,
-        ) : Outcome
-    }
-
     /** Pre-recorded audio can be recognized at all (API 33+); per-language support is separate. */
     fun isSupportedOnDevice(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
@@ -71,14 +54,14 @@ class KeywordAudioRecognizer(
         biasingStrings: List<String> = emptyList(),
         detectLanguageAmong: List<String> = emptyList(),
         useOnline: Boolean = false,
-    ): Outcome {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return Outcome.Unsupported
+    ): SpeechRecognitionOutcome {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return SpeechRecognitionOutcome.Unsupported
         val audio = withContext(Dispatchers.Default) { prepareAudio(samples) }
         val outcome =
             withTimeoutOrNull(RECOGNITION_TIMEOUT_MS) {
                 withContext(Dispatchers.Main) { recognizeOnMain(audio, languageTag, biasingStrings, detectLanguageAmong, useOnline) }
-            } ?: Outcome.Unsupported.also { Timber.w("SpeechRecognizer did not answer for injected audio") }
-        Timber.d("Keyword recognition language=%s online=%s outcome=%s", languageTag, useOnline, outcome)
+            } ?: SpeechRecognitionOutcome.Unsupported.also { Timber.tag(TAG).w("SpeechRecognizer did not answer for injected audio") }
+        Timber.tag(TAG).d("Keyword recognition language=%s online=%s outcome=%s", languageTag, useOnline, outcome)
         return outcome
     }
 
@@ -88,23 +71,13 @@ class KeywordAudioRecognizer(
      */
     suspend fun getInstalledLanguages(): List<String> = getRecognitionSupport().installed
 
-    /** What the device's speech-to-text can do per language (API 33+; empty lists when unknown). */
-    data class SupportInfo(
-        /** Offline models already on the device. */
-        val installed: List<String>,
-        /** Offline models that can be downloaded (see [downloadLanguage]). */
-        val downloadable: List<String>,
-        /** Languages the online (network) recognizer handles. */
-        val online: List<String>,
-    )
-
-    suspend fun getRecognitionSupport(): SupportInfo {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return SupportInfo(emptyList(), emptyList(), emptyList())
+    suspend fun getRecognitionSupport(): SpeechRecognitionSupport {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return SpeechRecognitionSupport()
         val info =
             withTimeoutOrNull(SUPPORT_QUERY_TIMEOUT_MS) {
                 withContext(Dispatchers.Main) { querySupport() }
-            } ?: SupportInfo(emptyList(), emptyList(), emptyList())
-        Timber.d("Recognizer support installed=%s downloadable=%d online=%d", info.installed, info.downloadable.size, info.online.size)
+            } ?: SpeechRecognitionSupport()
+        Timber.tag(TAG).d("Recognizer support installed=%s downloadable=%d online=%d", info.installed, info.downloadable.size, info.online.size)
         return info
     }
 
@@ -121,7 +94,7 @@ class KeywordAudioRecognizer(
             withTimeoutOrNull(DOWNLOAD_TIMEOUT_MS) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     val result = withContext(Dispatchers.Main) { requestDownload(languageTag) }
-                    Timber.d("Model download for %s reported %s", languageTag, result)
+                    Timber.tag(TAG).d("Model download for %s reported %s", languageTag, result)
                     // SCHEDULED = the system will fetch it (e.g. waiting for a network); keep checking.
                     if (result == DownloadResult.FAILED) false else waitUntilInstalled(languageTag)
                 } else {
@@ -129,7 +102,7 @@ class KeywordAudioRecognizer(
                     waitUntilInstalled(languageTag)
                 }
             } ?: false
-        Timber.d("Download of %s finished installed=%s", languageTag, isInstalled)
+        Timber.tag(TAG).d("Download of %s finished installed=%s", languageTag, isInstalled)
         return isInstalled
     }
 
@@ -164,13 +137,13 @@ class KeywordAudioRecognizer(
                         override fun onScheduled() = finish(DownloadResult.SCHEDULED)
 
                         override fun onError(error: Int) {
-                            Timber.w("Model download for %s failed error=%d", languageTag, error)
+                            Timber.tag(TAG).w("Model download for %s failed error=%d", languageTag, error)
                             finish(DownloadResult.FAILED)
                         }
                     },
                 )
             }.onFailure {
-                Timber.w(it, "triggerModelDownload failed for %s", languageTag)
+                Timber.tag(TAG).w(it, "triggerModelDownload failed for %s", languageTag)
                 finish(DownloadResult.FAILED)
             }
         }
@@ -179,22 +152,22 @@ class KeywordAudioRecognizer(
     private fun triggerDownloadFireAndForget(languageTag: String) {
         val recognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
         runCatching { recognizer.triggerModelDownload(downloadIntent(languageTag)) }
-            .onFailure { Timber.w(it, "triggerModelDownload failed for %s", languageTag) }
+            .onFailure { Timber.tag(TAG).w(it, "triggerModelDownload failed for %s", languageTag) }
         Handler(Looper.getMainLooper()).postDelayed({ recognizer.destroy() }, DESTROY_AFTER_TRIGGER_MS)
     }
 
     private fun downloadIntent(languageTag: String): Intent =
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun querySupport(): SupportInfo =
+    private suspend fun querySupport(): SpeechRecognitionSupport =
         suspendCancellableCoroutine { continuation ->
             if (!SpeechRecognizer.isOnDeviceRecognitionAvailable(context)) {
-                continuation.resume(SupportInfo(emptyList(), emptyList(), emptyList()))
+                continuation.resume(SpeechRecognitionSupport())
                 return@suspendCancellableCoroutine
             }
             val recognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
             val mainHandler = Handler(Looper.getMainLooper())
-            fun finish(info: SupportInfo) {
+            fun finish(info: SpeechRecognitionSupport) {
                 mainHandler.post { recognizer.destroy() }
                 if (continuation.isActive) continuation.resume(info)
             }
@@ -205,7 +178,7 @@ class KeywordAudioRecognizer(
                 object : RecognitionSupportCallback {
                     override fun onSupportResult(recognitionSupport: RecognitionSupport) =
                         finish(
-                            SupportInfo(
+                            SpeechRecognitionSupport(
                                 installed = recognitionSupport.installedOnDeviceLanguages,
                                 downloadable = recognitionSupport.supportedOnDeviceLanguages,
                                 online = recognitionSupport.onlineLanguages,
@@ -213,8 +186,8 @@ class KeywordAudioRecognizer(
                         )
 
                     override fun onError(error: Int) {
-                        Timber.w("checkRecognitionSupport error=%d", error)
-                        finish(SupportInfo(emptyList(), emptyList(), emptyList()))
+                        Timber.tag(TAG).w("checkRecognitionSupport error=%d", error)
+                        finish(SpeechRecognitionSupport())
                     }
                 },
             )
@@ -235,10 +208,10 @@ class KeywordAudioRecognizer(
         biasingStrings: List<String>,
         detectLanguageAmong: List<String>,
         useOnline: Boolean,
-    ): Outcome =
+    ): SpeechRecognitionOutcome =
         suspendCancellableCoroutine { continuation ->
             if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-                continuation.resume(Outcome.Unsupported)
+                continuation.resume(SpeechRecognitionOutcome.Unsupported)
                 return@suspendCancellableCoroutine
             }
             val recognizer =
@@ -260,7 +233,7 @@ class KeywordAudioRecognizer(
                 runCatching { readSide.close() }
             }
 
-            fun finish(outcome: Outcome) {
+            fun finish(outcome: SpeechRecognitionOutcome) {
                 release()
                 if (continuation.isActive) continuation.resume(outcome)
             }
@@ -272,7 +245,7 @@ class KeywordAudioRecognizer(
                             results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty()
                                 .filter { it.isNotBlank() }
                                 .ifEmpty { lastPartial }
-                        finish(if (texts.isEmpty()) Outcome.NoSpeech(detectedLanguage) else Outcome.Candidates(texts, detectedLanguage))
+                        finish(if (texts.isEmpty()) SpeechRecognitionOutcome.NoSpeech(detectedLanguage) else SpeechRecognitionOutcome.Candidates(texts, detectedLanguage))
                     }
 
                     override fun onPartialResults(partialResults: Bundle?) {
@@ -283,13 +256,13 @@ class KeywordAudioRecognizer(
                     }
 
                     override fun onError(error: Int) {
-                        Timber.w("SpeechRecognizer (injected audio) error=%d partial=%s", error, lastPartial)
+                        Timber.tag(TAG).w("SpeechRecognizer (injected audio) error=%d partial=%s", error, lastPartial)
                         finish(
                             when (error) {
                                 SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT ->
-                                    if (lastPartial.isNotEmpty()) Outcome.Candidates(lastPartial, detectedLanguage) else Outcome.NoSpeech(detectedLanguage)
-                                in UNSUPPORTED_ERRORS -> Outcome.Unsupported
-                                else -> Outcome.Failed(error)
+                                    if (lastPartial.isNotEmpty()) SpeechRecognitionOutcome.Candidates(lastPartial, detectedLanguage) else SpeechRecognitionOutcome.NoSpeech(detectedLanguage)
+                                in UNSUPPORTED_ERRORS -> SpeechRecognitionOutcome.Unsupported
+                                else -> SpeechRecognitionOutcome.Failed(error)
                             },
                         )
                     }
@@ -377,15 +350,17 @@ class KeywordAudioRecognizer(
                     }
                 }
             } catch (e: InterruptedException) {
-                Timber.w(e, "Audio stream to SpeechRecognizer interrupted")
+                Timber.tag(TAG).w(e, "Audio stream to SpeechRecognizer interrupted")
             } catch (e: IOException) {
                 // The recognizer closed its end early (error or cancellation) — nothing left to do.
-                Timber.w(e, "Audio stream to SpeechRecognizer closed early")
+                Timber.tag(TAG).w(e, "Audio stream to SpeechRecognizer closed early")
             }
         }, "keyword-audio-writer").start()
     }
 
     private companion object {
+        private const val TAG = "KeywordAudioRecognizer"
+
         const val RECOGNITION_TIMEOUT_MS = 6_000L
         const val SUPPORT_QUERY_TIMEOUT_MS = 3_000L
         const val DOWNLOAD_TIMEOUT_MS = 60_000L

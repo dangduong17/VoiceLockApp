@@ -8,6 +8,10 @@ import com.example.voicelock.data.repository.installedAppsRepository.InstalledAp
 import com.example.voicelock.data.repository.installedAppsRepository.InstalledAppsRepositoryImpl
 import com.example.voicelock.data.repository.lockRepository.LockRepository
 import com.example.voicelock.data.repository.lockRepository.LockRepositoryImpl
+import com.example.voicelock.data.repository.speechToTextRepository.SpeechToTextRepository
+import com.example.voicelock.data.repository.speechToTextRepository.SpeechToTextRepositoryImpl
+import com.example.voicelock.data.repository.voiceCaptureRepository.VoiceCaptureRepository
+import com.example.voicelock.data.repository.voiceCaptureRepository.VoiceCaptureRepositoryImpl
 import com.example.voicelock.data.repository.voiceProfileRepository.VoiceProfileRepository
 import com.example.voicelock.data.repository.voiceProfileRepository.VoiceProfileRepositoryImpl
 import org.koin.android.ext.koin.androidContext
@@ -20,5 +24,7 @@ val repositoryModule = module {
     singleOf(::AppLockRepositoryImpl) bind AppLockRepository::class
     singleOf(::AppLockSessionRepositoryImpl) bind AppLockSessionRepository::class
     singleOf(::VoiceProfileRepositoryImpl) bind VoiceProfileRepository::class
+    singleOf(::VoiceCaptureRepositoryImpl) bind VoiceCaptureRepository::class
+    singleOf(::SpeechToTextRepositoryImpl) bind SpeechToTextRepository::class
     single<InstalledAppsRepository> { InstalledAppsRepositoryImpl(context = androidContext()) }
 }

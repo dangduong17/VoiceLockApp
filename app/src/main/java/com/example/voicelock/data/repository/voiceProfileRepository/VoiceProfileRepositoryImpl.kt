@@ -11,7 +11,7 @@ import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
 import com.example.voicelock.util.Result
 import com.example.voicelock.util.catchAsResult
-import com.example.voicelock.voice.VoiceBiometricsManager
+import com.example.voicelock.data.local.voice.VoiceBiometricsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

@@ -1,10 +1,8 @@
 package com.example.voicelock.feature.applock
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import com.example.voicelock.R
@@ -14,7 +12,6 @@ import com.example.voicelock.data.model.applock.hasFallbackMethod
 import com.example.voicelock.data.model.lock.LockMethod
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
-import com.example.voicelock.feature.voice.auth.TwoStageAuthActivity
 import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.collectFlowOnView
 import com.example.voicelock.util.setPreventDoubleClick
@@ -22,12 +19,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * Plain Activity shell (same "outside the BaseFragment mandate" status as MainActivity) that
- * hosts a small, dynamically-chosen nav graph reusing the existing PinLockFragment/PatternLockFragment
- * in UNLOCK mode, so a locked app's foreground can be gated by the existing verification stack.
+ * hosts a small, dynamically-chosen nav graph reusing the existing TwoStageAuthFragment (voice),
+ * PinLockFragment and PatternLockFragment in unlock mode, so a locked app's foreground can be gated by
+ * the existing verification stack.
  * Started by AppLockMonitorService with FLAG_ACTIVITY_NEW_TASK.
  *
- * Voice (TwoStageAuthActivity, launched for result) comes first when enrolled, then Pattern,
- * with PIN as the backup (see LockOverlayViewModel); this
+ * Voice comes first when enrolled, then Pattern, with PIN as the backup (see LockOverlayViewModel); this
  * screen offers a "try another method" button so a user who forgets the primary method can
  * still fall back to whichever other method they've configured.
  */
@@ -35,19 +32,6 @@ class LockOverlayActivity : AppCompatActivity() {
 
     private val viewModel: LockOverlayViewModel by viewModel()
     private var targetPackageName: String = ""
-
-    /**
-     * TwoStageAuthActivity marks the app unlocked itself; RESULT_OK just closes the overlay.
-     * Any other result (back, "use PIN or pattern") falls back to the next configured method.
-     */
-    private val voiceUnlockLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            when {
-                result.resultCode == RESULT_OK -> finish()
-                viewModel.uiState.value.hasFallbackMethod() -> viewModel.onTryAnotherMethod()
-                else -> finish()
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,10 +67,8 @@ class LockOverlayActivity : AppCompatActivity() {
     ) {
         when (method) {
             LockMethod.VOICE -> {
-                val intent =
-                    Intent(this, TwoStageAuthActivity::class.java)
-                        .putExtra(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName)
-                voiceUnlockLauncher.launch(intent)
+                val args = Bundle().apply { putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName) }
+                showDestination(R.id.twoStageAuthFragment, args)
             }
 
             LockMethod.PATTERN -> {

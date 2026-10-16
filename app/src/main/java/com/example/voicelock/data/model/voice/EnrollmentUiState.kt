@@ -46,3 +46,33 @@ data class EnrollmentUiState(
 )
 
 fun EnrollmentUiState.canRecord(): Boolean = phase == EnrollmentPhase.IDLE
+
+/** Everything the progress area renders, so it always changes together. */
+data class EnrollmentProgress(
+    val phase: EnrollmentPhase,
+    val recordedCount: Int,
+    val requiredCount: Int,
+    val recognizedPhrase: String,
+    val languageTag: String,
+    val pendingLanguageTag: String,
+)
+
+fun EnrollmentUiState.getProgress(): EnrollmentProgress =
+    EnrollmentProgress(
+        phase = phase,
+        recordedCount = recordedCount,
+        requiredCount = requiredCount,
+        recognizedPhrase = recognizedPhrase,
+        languageTag = languageTag,
+        pendingLanguageTag = pendingLanguageTag,
+    )
+
+/** The error plus the values its message is formatted with. */
+data class EnrollmentErrorInfo(
+    val error: EnrollmentError,
+    val rejectedHeardText: String,
+    val pendingLanguageTag: String,
+)
+
+fun EnrollmentUiState.getErrorInfo(): EnrollmentErrorInfo =
+    EnrollmentErrorInfo(error = error, rejectedHeardText = rejectedHeardText, pendingLanguageTag = pendingLanguageTag)

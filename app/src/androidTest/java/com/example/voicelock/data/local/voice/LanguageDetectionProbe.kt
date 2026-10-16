@@ -1,4 +1,4 @@
-package com.example.voicelock.voice
+package com.example.voicelock.data.local.voice
 
 import android.content.Context
 import android.os.Bundle

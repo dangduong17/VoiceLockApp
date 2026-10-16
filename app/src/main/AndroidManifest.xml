@@ -51,17 +51,7 @@
             android:taskAffinity=""
             android:theme="@style/Theme.VoiceLock" />
 
-        <activity
-            android:name=".feature.voice.enrollment.EnrollmentActivity"
-            android:launchMode="singleTop"
-            android:exported="false"
-            android:theme="@style/Theme.VoiceLock" />
 
-        <activity
-            android:name=".feature.voice.auth.TwoStageAuthActivity"
-            android:launchMode="singleTop"
-            android:exported="false"
-            android:theme="@style/Theme.VoiceLock" />
 
         <service
             android:name=".service.AppLockMonitorService"

@@ -14,11 +14,17 @@ import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
 import com.example.voicelock.domain.usecase.pinlock.SetPinUseCase
 import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
+import com.example.voicelock.domain.usecase.voice.DetectSpeechUseCase
+import com.example.voicelock.domain.usecase.voice.DownloadSpeechLanguageUseCase
 import com.example.voicelock.domain.usecase.voice.EnrollOwnerVoiceUseCase
+import com.example.voicelock.domain.usecase.voice.GetSpeechRecognitionSupportUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceKeywordProfileUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
+import com.example.voicelock.domain.usecase.voice.IsSpeechToTextAvailableUseCase
 import com.example.voicelock.domain.usecase.voice.IsVoiceEnrolledUseCase
 import com.example.voicelock.domain.usecase.voice.MatchVoiceKeywordUseCase
+import com.example.voicelock.domain.usecase.voice.RecognizeSpeechUseCase
+import com.example.voicelock.domain.usecase.voice.RecordVoiceSampleUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.VerifyOwnerVoiceUseCase
@@ -68,6 +74,12 @@ val voiceUseCaseModule = module {
     factoryOf(::GetVoiceKeywordProfileUseCase)
     factoryOf(::SetVoiceUnlockEnabledUseCase)
     factoryOf(::SetVoiceLockEnabledUseCase)
+    factoryOf(::RecordVoiceSampleUseCase)
+    factoryOf(::RecognizeSpeechUseCase)
+    factoryOf(::GetSpeechRecognitionSupportUseCase)
+    factoryOf(::DownloadSpeechLanguageUseCase)
+    factoryOf(::IsSpeechToTextAvailableUseCase)
+    factoryOf(::DetectSpeechUseCase)
 }
 
 val useCaseModule = module {

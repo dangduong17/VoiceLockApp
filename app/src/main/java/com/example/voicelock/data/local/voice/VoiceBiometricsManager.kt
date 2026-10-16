@@ -1,4 +1,4 @@
-package com.example.voicelock.voice
+package com.example.voicelock.data.local.voice
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -6,6 +6,7 @@ import android.util.Base64
 import androidx.core.content.edit
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
 import com.example.voicelock.data.model.voice.VoiceKeywordProfile
+import com.example.voicelock.data.model.voice.VoiceModelMissingException
 import com.example.voicelock.data.model.voice.VoiceScores
 import com.example.voicelock.data.model.voice.VoiceThresholds
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
@@ -88,7 +89,7 @@ class VoiceBiometricsManager(
             val embeddings = trimmed.map { computeEmbedding(it) }
             val centroid = averageEmbedding(embeddings)
             val consistency = embeddings.minOf { cosineSimilarity(it, centroid) }
-            Timber.d("Voice enrollment consistency=%.3f", consistency)
+            Timber.tag(TAG).d("Voice enrollment consistency=%.3f", consistency)
             if (consistency < MIN_ENROLLMENT_CONSISTENCY) {
                 return@withContext VoiceEnrollmentResult.InconsistentSamples(consistency)
             }
@@ -97,7 +98,7 @@ class VoiceBiometricsManager(
             // personal phrase threshold (see phraseThreshold).
             val phraseTemplates = trimmed.map { AcousticPhraseMatcher.extractFeatures(it) }
             val intraPhraseSimilarity = meanPairwiseSimilarity(phraseTemplates)
-            Timber.d("Voice enrollment intra-phrase similarity=%.3f", intraPhraseSimilarity)
+            Timber.tag(TAG).d("Voice enrollment intra-phrase similarity=%.3f", intraPhraseSimilarity)
             withContext(Dispatchers.IO) {
                 securePrefs.edit(commit = true) {
                     putString(KEY_MODEL, modelAssetPath)
@@ -144,7 +145,7 @@ class VoiceBiometricsManager(
                         phraseThreshold = phraseThreshold(profile, thresholds, isKeywordChecked),
                     )
                 }
-            Timber.d(
+            Timber.tag(TAG).d(
                 "Voice verify mode=%s keyword=%s speaker=%.3f phrase=%.3f phraseThreshold=%.3f",
                 mode,
                 isKeywordChecked,
@@ -227,7 +228,7 @@ class VoiceBiometricsManager(
                 intraPhraseSimilarity =
                     securePrefs.getFloat(KEY_PHRASE_INTRA_SIMILARITY, Float.NaN).takeUnless { it.isNaN() },
             )
-        }.onFailure { Timber.e(it, "Stored voice profile is corrupted") }
+        }.onFailure { Timber.tag(TAG).e(it, "Stored voice profile is corrupted") }
             .getOrNull()
     }
 
@@ -339,6 +340,8 @@ class VoiceBiometricsManager(
     )
 
     companion object {
+        private const val TAG = "VoiceBiometricsManager"
+
         /** File name inside app/src/main/assets (Sherpa-ONNX reads it through the AssetManager). */
         const val DEFAULT_MODEL_ASSET_PATH = "3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx"
         private const val DEFAULT_NUM_THREADS = 2
@@ -363,7 +366,3 @@ class VoiceBiometricsManager(
     }
 }
 
-/** The CAM++ .onnx file is not in app/src/main/assets. */
-class VoiceModelMissingException(
-    modelAssetPath: String,
-) : IllegalStateException("Speaker model not found in assets: $modelAssetPath")

@@ -17,4 +17,10 @@
         android:label="PatternLockFragment"
         tools:layout="@layout/fragment_pattern_lock" />
 
+    <fragment
+        android:id="@+id/twoStageAuthFragment"
+        android:name="com.example.voicelock.feature.voice.auth.TwoStageAuthFragment"
+        android:label="TwoStageAuthFragment"
+        tools:layout="@layout/fragment_two_stage_auth" />
+
 </navigation>

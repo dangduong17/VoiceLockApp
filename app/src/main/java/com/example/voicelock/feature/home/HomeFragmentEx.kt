@@ -60,7 +60,6 @@ fun HomeFragment.settingEvent() {
 }
 
 fun HomeFragment.updateUiState(state: HomeUiState) {
-    binding.tvGreeting.text = "Chào bạn, ${state.userName}"
     
     val lockNowStatusText = if (state.isProtectionEnabled) "BẢO VỆ ĐANG BẬT" else "BẢO VỆ ĐANG TẮT"
     binding.tvBadgeText.text = lockNowStatusText
@@ -68,7 +67,11 @@ fun HomeFragment.updateUiState(state: HomeUiState) {
     binding.tvVoiceReadyTitle.setText(if (state.isVoiceEnrolled) R.string.voice_ready else R.string.voice_not_enrolled)
     binding.tvVoiceInfo.text =
         if (state.isVoiceEnrolled) {
-            "Đã lưu ${state.voiceSamplesCount} mẫu giọng • PIN dự phòng đã ${if (state.isBackupPinEnabled) "bật" else "tắt"}"
+            getString(
+                R.string.voice_info_enrolled,
+                state.voiceSamplesCount,
+                getString(if (state.isBackupPinEnabled) R.string.voice_info_backup_pin_on else R.string.voice_info_backup_pin_off),
+            )
         } else {
             getString(R.string.voice_not_enrolled_info)
         }
@@ -127,11 +130,11 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
 
         is HomeUiEvent.NavigateToVoiceEnrollment -> {
             restoreVoiceSwitches()
-            navigator.navigateTo(R.id.action_homeFragment_to_enrollmentActivity)
+            navigator.navigateTo(R.id.action_homeFragment_to_enrollmentFragment)
         }
 
         is HomeUiEvent.NavigateToVoiceTest -> {
-            navigator.navigateTo(R.id.action_homeFragment_to_twoStageAuthActivity)
+            navigator.navigateTo(R.id.action_homeFragment_to_twoStageAuthFragment)
         }
     }
 }

@@ -6,7 +6,7 @@ package com.example.voicelock.data.model.voice
  * [speakerSimilarity] is the cosine similarity between the CAM++ embedding of the attempt and the
  * enrolled centroid; [phraseSimilarity] is the DTW similarity returned by AcousticPhraseMatcher.
  * The defaults are conservative starting points — calibrate them on real devices by logging the
- * scores of genuine and impostor attempts (see TwoStageAuthActivity's score readout).
+ * scores of genuine and impostor attempts (see the score readout on TwoStageAuthFragment).
  */
 data class VoiceThresholds(
     val speakerSimilarity: Float,

@@ -1,25 +1,32 @@
 package com.example.voicelock.feature.voice.enrollment
 
-import android.annotation.SuppressLint
 import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
 import com.example.voicelock.data.model.voice.EnrollmentError
 import com.example.voicelock.data.model.voice.EnrollmentPhase
 import com.example.voicelock.data.model.voice.EnrollmentUiState
+import com.example.voicelock.data.model.voice.SpeechRecognitionOutcome
+import com.example.voicelock.data.model.voice.SpeechRecognitionSupport
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
 import com.example.voicelock.data.model.voice.VoiceKeywordProfile
+import com.example.voicelock.data.model.voice.VoiceModelMissingException
 import com.example.voicelock.data.model.voice.canRecord
+import com.example.voicelock.data.model.voice.getDetectedLanguage
+import com.example.voicelock.data.model.voice.getTexts
+import com.example.voicelock.data.model.voice.isInstalled
+import com.example.voicelock.domain.usecase.voice.DetectSpeechUseCase
+import com.example.voicelock.domain.usecase.voice.DownloadSpeechLanguageUseCase
 import com.example.voicelock.domain.usecase.voice.EnrollOwnerVoiceUseCase
+import com.example.voicelock.domain.usecase.voice.GetSpeechRecognitionSupportUseCase
 import com.example.voicelock.domain.usecase.voice.MatchVoiceKeywordUseCase
+import com.example.voicelock.domain.usecase.voice.RecognizeSpeechUseCase
+import com.example.voicelock.domain.usecase.voice.RecordVoiceSampleUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.WarmUpVoiceModelUseCase
+import com.example.voicelock.util.Result
 import com.example.voicelock.util.getDataOrDefault
 import com.example.voicelock.util.onError
 import com.example.voicelock.util.onSuccess
-import com.example.voicelock.voice.AcousticPhraseMatcher
-import com.example.voicelock.voice.AudioRecorderHelper
-import com.example.voicelock.voice.KeywordAudioRecognizer
-import com.example.voicelock.voice.VoiceModelMissingException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
@@ -39,8 +46,11 @@ import java.util.Locale
  * Recordings are kept here rather than in the UiState: they are large and must not be diffed.
  */
 class EnrollmentViewModel(
-    private val audioRecorderHelper: AudioRecorderHelper,
-    private val keywordAudioRecognizer: KeywordAudioRecognizer,
+    private val recordVoiceSampleUseCase: RecordVoiceSampleUseCase,
+    private val detectSpeechUseCase: DetectSpeechUseCase,
+    private val recognizeSpeechUseCase: RecognizeSpeechUseCase,
+    private val getSpeechRecognitionSupportUseCase: GetSpeechRecognitionSupportUseCase,
+    private val downloadSpeechLanguageUseCase: DownloadSpeechLanguageUseCase,
     private val matchVoiceKeywordUseCase: MatchVoiceKeywordUseCase,
     private val enrollOwnerVoiceUseCase: EnrollOwnerVoiceUseCase,
     private val warmUpVoiceModelUseCase: WarmUpVoiceModelUseCase,
@@ -62,16 +72,23 @@ class EnrollmentViewModel(
         launchIO { warmUpVoiceModelUseCase().first() }
     }
 
-    /** The caller must hold RECORD_AUDIO (EnrollmentActivity checks it before calling). */
-    @SuppressLint("MissingPermission")
+    /** The caller must hold RECORD_AUDIO (the screen checks it before calling). */
     fun recordNextSample() {
         if (!getCurrentState().canRecord()) return
         setState { copy(phase = EnrollmentPhase.RECORDING, error = EnrollmentError.NONE, rejectedHeardText = "") }
 
         sampleJob =
             launchIO(onError = { setState { copy(phase = EnrollmentPhase.IDLE, error = EnrollmentError.RECORDING_FAILED) } }) {
-                val samples = audioRecorderHelper.record()
-                if (!AcousticPhraseMatcher.hasSpeech(samples)) {
+                val samples =
+                    when (val recording = recordVoiceSampleUseCase(maxDurationMs = SAMPLE_MAX_DURATION_MS).first()) {
+                        is Result.Success -> recording.data
+                        is Result.Error -> {
+                            Timber.tag(TAG).e(recording.error, "Recording failed")
+                            setState { copy(phase = EnrollmentPhase.IDLE, error = EnrollmentError.RECORDING_FAILED) }
+                            return@launchIO
+                        }
+                    }
+                if (!detectSpeechUseCase(samples).getDataOrDefault(false)) {
                     setState { copy(phase = EnrollmentPhase.IDLE, error = EnrollmentError.NO_SPEECH) }
                     return@launchIO
                 }
@@ -103,6 +120,11 @@ class EnrollmentViewModel(
         if (phase == EnrollmentPhase.IDLE || phase == EnrollmentPhase.COMPLETED) resetSamples(EnrollmentError.NONE)
     }
 
+    override fun onCleared() {
+        sampleJob?.cancel()
+        super.onCleared()
+    }
+
     /**
      * Speech to text for one recording. Returns true (and narrows [transcriptsByLanguage]) when at
      * least one candidate language hears it as the same phrase as the samples accepted so far;
@@ -113,29 +135,29 @@ class EnrollmentViewModel(
         val languages = previous?.keys?.toList() ?: initialLanguages(sample) ?: return false
 
         val agreeing = LinkedHashMap<String, List<String>>()
-        var anySupported = false
+        var isAnyLanguageSupported = false
         var mismatchHeard: String? = null
         for (languageTag in languages) {
             val earlier = previous?.get(languageTag).orEmpty()
-            val outcome = keywordAudioRecognizer.recognize(sample, languageTag, biasingStrings = earlier)
-            if (outcome != KeywordAudioRecognizer.Outcome.Unsupported) anySupported = true
-            val texts =
-                (outcome as? KeywordAudioRecognizer.Outcome.Candidates)?.texts.orEmpty().map { it.trim() }.filter { it.isNotEmpty() }
+            val outcome = recognize(sample = sample, languageTag = languageTag, biasingStrings = earlier)
+            if (outcome != SpeechRecognitionOutcome.Unsupported) isAnyLanguageSupported = true
+            val texts = outcome.getTexts()
             if (texts.isEmpty()) continue
 
-            val isSamePhrase = earlier.isEmpty() || matchVoiceKeywordUseCase(texts, earlier).getDataOrDefault(false)
+            val isSamePhrase =
+                earlier.isEmpty() || matchVoiceKeywordUseCase(candidates = texts, expectedPhrases = earlier).getDataOrDefault(false)
             if (isSamePhrase) {
                 agreeing[languageTag] = earlier + texts.first()
             } else if (mismatchHeard == null) {
                 mismatchHeard = texts.first()
             }
         }
-        Timber.d("Enrollment sample #%d languages=%s agreeing=%s mismatch=%s", recordings.size + 1, languages, agreeing, mismatchHeard)
+        Timber.tag(TAG).d("Sample #%d languages=%s agreeing=%s mismatch=%s", recordings.size + 1, languages, agreeing, mismatchHeard)
 
         if (agreeing.isEmpty()) {
             val error =
                 when {
-                    !anySupported -> EnrollmentError.RECOGNITION_UNAVAILABLE
+                    !isAnyLanguageSupported -> EnrollmentError.RECOGNITION_UNAVAILABLE
                     mismatchHeard != null -> EnrollmentError.PHRASE_MISMATCH
                     else -> EnrollmentError.NOT_RECOGNIZED
                 }
@@ -155,23 +177,21 @@ class EnrollmentViewModel(
      */
     private suspend fun initialLanguages(sample: FloatArray): List<String>? {
         val systemLanguage = Locale.getDefault().toLanguageTag()
-        val support = keywordAudioRecognizer.getRecognitionSupport()
+        val support = getSpeechRecognitionSupportUseCase().getDataOrDefault(SpeechRecognitionSupport())
         val detectable = (support.installed + support.downloadable).distinctBy { it.lowercase(Locale.ROOT) }
         val detected =
             if (detectable.isNotEmpty()) {
-                when (val outcome = keywordAudioRecognizer.recognize(sample, systemLanguage, detectLanguageAmong = detectable)) {
-                    is KeywordAudioRecognizer.Outcome.Candidates -> outcome.detectedLanguage
-                    is KeywordAudioRecognizer.Outcome.NoSpeech -> outcome.detectedLanguage
-                    else -> null
-                }?.let { tag -> detectable.firstOrNull { it.equals(tag, ignoreCase = true) } ?: tag }
+                recognize(sample = sample, languageTag = systemLanguage, detectLanguageAmong = detectable)
+                    .getDetectedLanguage()
+                    ?.let { tag -> detectable.firstOrNull { it.equals(tag, ignoreCase = true) } ?: tag }
             } else {
                 null
             }
 
         var installed = support.installed
-        if (detected != null && installed.none { it.equals(detected, ignoreCase = true) }) {
+        if (detected != null && !support.isInstalled(detected)) {
             setState { copy(phase = EnrollmentPhase.DOWNLOADING_LANGUAGE, pendingLanguageTag = detected) }
-            if (!keywordAudioRecognizer.downloadLanguage(detected)) {
+            if (!downloadSpeechLanguageUseCase(detected).getDataOrDefault(false)) {
                 setState { copy(phase = EnrollmentPhase.IDLE, error = EnrollmentError.LANGUAGE_DOWNLOAD_FAILED) }
                 return null
             }
@@ -181,8 +201,21 @@ class EnrollmentViewModel(
         return (listOfNotNull(detected, systemLanguage) + installed + FALLBACK_LANGUAGE)
             .distinctBy { it.lowercase(Locale.ROOT) }
             .take(MAX_LANGUAGES_TO_TRY)
-            .also { Timber.d("Enrollment language candidates=%s (detected=%s, installed=%s)", it, detected, installed) }
+            .also { Timber.tag(TAG).d("Language candidates=%s (detected=%s, installed=%s)", it, detected, installed) }
     }
+
+    private suspend fun recognize(
+        sample: FloatArray,
+        languageTag: String,
+        biasingStrings: List<String> = emptyList(),
+        detectLanguageAmong: List<String> = emptyList(),
+    ): SpeechRecognitionOutcome =
+        recognizeSpeechUseCase(
+            samples = sample,
+            languageTag = languageTag,
+            biasingStrings = biasingStrings,
+            detectLanguageAmong = detectLanguageAmong,
+        ).getDataOrDefault(SpeechRecognitionOutcome.Failed(errorCode = RECOGNIZER_CALL_FAILED))
 
     private suspend fun enroll() {
         setState { copy(phase = EnrollmentPhase.PROCESSING) }
@@ -190,7 +223,7 @@ class EnrollmentViewModel(
         val (languageTag, transcripts) = transcriptsByLanguage!!.entries.first().let { it.key to it.value }
         val keywordProfile = VoiceKeywordProfile(languageTag = languageTag, transcripts = transcripts.distinct())
 
-        enrollOwnerVoiceUseCase(samples, keywordProfile).first()
+        enrollOwnerVoiceUseCase(recordings = samples, keywordProfile = keywordProfile).first()
             .onSuccess { result ->
                 when (result) {
                     is VoiceEnrollmentResult.Success -> {
@@ -208,7 +241,7 @@ class EnrollmentViewModel(
                     is VoiceEnrollmentResult.InconsistentSamples -> resetSamples(EnrollmentError.INCONSISTENT_SAMPLES)
                 }
             }.onError { throwable ->
-                Timber.e(throwable, "Voice enrollment failed")
+                Timber.tag(TAG).e(throwable, "Voice enrollment failed")
                 resetSamples(
                     if (throwable is VoiceModelMissingException) EnrollmentError.MODEL_MISSING else EnrollmentError.PROCESSING_FAILED,
                 )
@@ -231,7 +264,12 @@ class EnrollmentViewModel(
     }
 
     private companion object {
+        const val TAG = "EnrollmentViewModel"
+        const val SAMPLE_MAX_DURATION_MS = 2_500L
         const val MAX_LANGUAGES_TO_TRY = 6
         const val FALLBACK_LANGUAGE = "en-US"
+
+        /** Error code used when the speech-to-text call itself fails (not an engine error code). */
+        const val RECOGNIZER_CALL_FAILED = -1
     }
 }

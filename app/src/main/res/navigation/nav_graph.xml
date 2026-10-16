@@ -23,11 +23,11 @@
             android:id="@+id/action_homeFragment_to_appLockFragment"
             app:destination="@id/appLockFragment" />
         <action
-            android:id="@+id/action_homeFragment_to_enrollmentActivity"
-            app:destination="@id/enrollmentActivity" />
+            android:id="@+id/action_homeFragment_to_enrollmentFragment"
+            app:destination="@id/enrollmentFragment" />
         <action
-            android:id="@+id/action_homeFragment_to_twoStageAuthActivity"
-            app:destination="@id/twoStageAuthActivity" />
+            android:id="@+id/action_homeFragment_to_twoStageAuthFragment"
+            app:destination="@id/twoStageAuthFragment" />
     </fragment>
 
     <fragment
@@ -48,11 +48,11 @@
             android:id="@+id/action_settingsFragment_to_permissionsFragment"
             app:destination="@id/permissionsFragment" />
         <action
-            android:id="@+id/action_settingsFragment_to_enrollmentActivity"
-            app:destination="@id/enrollmentActivity" />
+            android:id="@+id/action_settingsFragment_to_enrollmentFragment"
+            app:destination="@id/enrollmentFragment" />
         <action
-            android:id="@+id/action_settingsFragment_to_twoStageAuthActivity"
-            app:destination="@id/twoStageAuthActivity" />
+            android:id="@+id/action_settingsFragment_to_twoStageAuthFragment"
+            app:destination="@id/twoStageAuthFragment" />
     </fragment>
 
     <fragment
@@ -83,16 +83,20 @@
         android:label="PermissionsFragment"
         tools:layout="@layout/fragment_permissions" />
 
-    <activity
-        android:id="@+id/enrollmentActivity"
-        android:name="com.example.voicelock.feature.voice.enrollment.EnrollmentActivity"
-        android:label="EnrollmentActivity"
-        tools:layout="@layout/activity_enrollment" />
+    <fragment
+        android:id="@+id/enrollmentFragment"
+        android:name="com.example.voicelock.feature.voice.enrollment.EnrollmentFragment"
+        android:label="EnrollmentFragment"
+        tools:layout="@layout/fragment_enrollment" />
 
-    <activity
-        android:id="@+id/twoStageAuthActivity"
-        android:name="com.example.voicelock.feature.voice.auth.TwoStageAuthActivity"
-        android:label="TwoStageAuthActivity"
-        tools:layout="@layout/activity_two_stage_auth" />
+    <fragment
+        android:id="@+id/twoStageAuthFragment"
+        android:name="com.example.voicelock.feature.voice.auth.TwoStageAuthFragment"
+        android:label="TwoStageAuthFragment"
+        tools:layout="@layout/fragment_two_stage_auth">
+        <action
+            android:id="@+id/action_twoStageAuthFragment_to_enrollmentFragment"
+            app:destination="@id/enrollmentFragment" />
+    </fragment>
 
 </navigation>

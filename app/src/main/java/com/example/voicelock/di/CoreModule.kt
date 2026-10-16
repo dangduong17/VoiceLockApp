@@ -5,9 +5,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.voicelock.data.local.appLockDataStore
 import com.example.voicelock.data.local.createSecurePrefs
-import com.example.voicelock.voice.AudioRecorderHelper
-import com.example.voicelock.voice.KeywordAudioRecognizer
-import com.example.voicelock.voice.VoiceBiometricsManager
+import com.example.voicelock.data.local.voice.AudioRecorderHelper
+import com.example.voicelock.data.local.voice.KeywordAudioRecognizer
+import com.example.voicelock.data.local.voice.VoiceBiometricsManager
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 

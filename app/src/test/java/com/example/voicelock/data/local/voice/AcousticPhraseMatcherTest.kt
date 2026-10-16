@@ -1,4 +1,4 @@
-package com.example.voicelock.voice
+package com.example.voicelock.data.local.voice
 
 import com.example.voicelock.domain.usecase.voice.MatchVoiceKeywordUseCase
 import com.example.voicelock.util.Result

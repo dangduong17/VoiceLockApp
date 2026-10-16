@@ -1,4 +1,4 @@
-package com.example.voicelock.voice
+package com.example.voicelock.data.local.voice
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -79,7 +79,7 @@ class AudioRecorderHelper {
                 )
             }.getOrNull() ?: return null
         if (record.state != AudioRecord.STATE_INITIALIZED) {
-            Timber.w("AudioRecord init failed for encoding $encoding")
+            Timber.tag(TAG).w("AudioRecord init failed for encoding $encoding")
             record.release()
             return null
         }
@@ -158,6 +158,8 @@ class AudioRecorderHelper {
     }
 
     companion object {
+        private const val TAG = "AudioRecorderHelper"
+
         const val SAMPLE_RATE = 16_000
         const val DEFAULT_DURATION_MS = 2_500L
         private const val CHUNK_SAMPLES = 1_600 // 100 ms

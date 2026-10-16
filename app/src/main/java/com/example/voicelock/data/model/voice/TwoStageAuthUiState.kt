@@ -36,6 +36,24 @@ data class TwoStageAuthUiState(
 fun TwoStageAuthUiState.canStart(): Boolean =
     stage == AuthStage.IDLE || stage == AuthStage.SUCCESS || stage == AuthStage.FAILED
 
-sealed interface TwoStageAuthUiEvent {
-    data object Authenticated : TwoStageAuthUiEvent
+/** Capturing or verifying (or still loading): the start button and mode toggle are locked. */
+fun AuthStage.isBusy(): Boolean =
+    when (this) {
+        AuthStage.CHECKING_ENROLLMENT, AuthStage.CAPTURING_VOICE, AuthStage.VERIFYING -> true
+        AuthStage.NOT_ENROLLED, AuthStage.IDLE, AuthStage.SUCCESS, AuthStage.FAILED -> false
+    }
+
+/** Stage and failure always render together (the failure text replaces the stage text). */
+data class AuthStageInfo(
+    val stage: AuthStage,
+    val failure: AuthFailure,
+)
+
+fun TwoStageAuthUiState.getStageInfo(): AuthStageInfo = AuthStageInfo(stage = stage, failure = failure)
+
+sealed class TwoStageAuthUiEvent {
+    /** [isAppUnlock]: the screen was opened by the lock overlay and should close it. */
+    data class Authenticated(
+        val isAppUnlock: Boolean,
+    ) : TwoStageAuthUiEvent()
 }
