@@ -10,22 +10,52 @@
 
     <string name="unlock_by_voice">Mở khóa bằng giọng nói</string>
     <string name="unlock_by_voice_sub">Xác minh trên lớp khóa VoiceLock</string>
+    <string name="unlock_by_voice_settings_sub">Trên lớp khóa • Đã lưu 3 mẫu</string>
 
     <string name="lock_by_voice">Khóa bằng giọng nói</string>
     <string name="lock_by_voice_sub">Lắng nghe nền đang tắt</string>
 
+    <string name="voice_commands_title">Lệnh và mẫu giọng nói</string>
+    <string name="voice_commands_sub">Quản lý câu mở khóa và lệnh khóa</string>
+
+    <string name="app_permissions_title">Quyền ứng dụng</string>
+    <string name="app_permissions_sub">Micro và lớp khóa đã cho phép</string>
+
+    <string name="mic_notice">Micro chỉ hoạt động khi xác minh hoặc khi bạn bật Lắng nghe nền.</string>
+
     <string name="security_recovery_header">BẢO MẬT &amp; KHÔI PHỤC</string>
+    <string name="voice_access_header">GIỌNG NÓI &amp; QUYỀN TRUY CẬP</string>
+    <string name="app_support_header">ỨNG DỤNG &amp; HỖ TRỢ</string>
 
     <string name="pin_code">Mã PIN</string>
     <string name="pin_code_sub">6 chữ số • Đã thiết lập</string>
 
     <string name="pattern_lock">Hình vẽ</string>
+    <string name="pattern_lock_sub">Chưa thiết lập</string>
     <string name="setup">Thiết lập</string>
 
     <string name="fingerprint">Vân tay</string>
+    <string name="fingerprint_sub">Chưa bật • Xác minh qua Android</string>
     <string name="not_enabled">Chưa bật</string>
 
     <string name="security_question">Câu hỏi bảo mật</string>
+    <string name="security_question_sub">Đã lưu • Dùng để khôi phục PIN</string>
+
+    <string name="android_lock_notice">Lớp khóa VoiceLock không thay thế khóa màn hình Android. Luôn giữ mã khóa thiết bị.</string>
+
+    <string name="theme_language_title">Giao diện và ngôn ngữ</string>
+    <string name="theme_language_sub">Sáng • Tiếng Việt</string>
+
+    <string name="help_feedback_title">Trợ giúp và phản hồi</string>
+    <string name="help_feedback_sub">Hướng dẫn sử dụng • Liên hệ hỗ trợ</string>
+
+    <string name="about_title">Về VoiceLock</string>
+    <string name="about_sub">Phiên bản 1.0.0 • Quyền riêng tư</string>
+
+    <string name="auto_save_notice">Các thay đổi được lưu tự động.</string>
+
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_subtitle">Bảo vệ theo cách của bạn.</string>
 
     <string name="nav_protection">Bảo vệ</string>
     <string name="nav_voice">Giọng nói</string>

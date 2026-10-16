@@ -1,5 +1,6 @@
 package com.example.voicelock.feature.home
 
+import com.example.voicelock.R
 import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
 import com.example.voicelock.util.displayToast
@@ -11,6 +12,10 @@ fun HomeFragment.initView() {
 }
 
 fun HomeFragment.settingEvent() {
+    binding.tabSettings.setPreventDoubleClick {
+        navigator.navigateTo(R.id.action_homeFragment_to_settingsFragment)
+    }
+
     binding.btnLockNow.setPreventDoubleClickScaleView {
         viewModel.onLockNowClicked()
     }
