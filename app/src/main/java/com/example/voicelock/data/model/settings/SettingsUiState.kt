@@ -1,9 +1,10 @@
 package com.example.voicelock.data.model.settings
 
 data class SettingsUiState(
-    val isVoiceUnlockEnabled: Boolean = true,
+    val isVoiceEnrolled: Boolean = false,
+    val isVoiceUnlockEnabled: Boolean = false,
     val isVoiceLockEnabled: Boolean = false,
-    val voiceSamplesCount: Int = 3,
+    val voiceSamplesCount: Int = 0,
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,

@@ -7,10 +7,14 @@ import com.example.voicelock.data.model.home.HomeUiState
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
+import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
+import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
 import com.example.voicelock.util.handleApiCall
 
 class HomeViewModel(
     private val getHomeStatusUseCase: GetHomeStatusUseCase,
+    private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
+    private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
 ) : BaseViewModel<HomeUiState, HomeUiEvent>(HomeUiState()) {
 
     fun initData() {
@@ -33,12 +37,35 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Voice switches only make sense with an enrolled voice: turning one on before enrolling
+     * opens enrollment instead (the fragment snaps the switch back to the saved state).
+     */
     fun toggleVoiceUnlock(isEnabled: Boolean) {
+        val state = getCurrentState()
+        if (isEnabled == state.isVoiceUnlockEnabled) return
+        if (!state.isVoiceEnrolled) {
+            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment) }
+            return
+        }
         setState { copy(isVoiceUnlockEnabled = isEnabled) }
+        handleApiCall(apiCall = { setVoiceUnlockEnabledUseCase(isEnabled) })
     }
 
     fun toggleVoiceLock(isEnabled: Boolean) {
+        val state = getCurrentState()
+        if (isEnabled == state.isVoiceLockEnabled) return
+        if (!state.isVoiceEnrolled) {
+            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment) }
+            return
+        }
         setState { copy(isVoiceLockEnabled = isEnabled) }
+        handleApiCall(apiCall = { setVoiceLockEnabledUseCase(isEnabled) })
+    }
+
+    fun onVoiceUnlockRowClicked() {
+        val event = if (getCurrentState().isVoiceEnrolled) HomeUiEvent.NavigateToVoiceTest else HomeUiEvent.NavigateToVoiceEnrollment
+        launchIO { setEvent(event) }
     }
 
     fun onPinClicked() {

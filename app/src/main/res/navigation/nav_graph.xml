@@ -22,6 +22,12 @@
         <action
             android:id="@+id/action_homeFragment_to_appLockFragment"
             app:destination="@id/appLockFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_enrollmentFragment"
+            app:destination="@id/enrollmentFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_twoStageAuthFragment"
+            app:destination="@id/twoStageAuthFragment" />
     </fragment>
 
     <fragment
@@ -41,6 +47,12 @@
         <action
             android:id="@+id/action_settingsFragment_to_permissionsFragment"
             app:destination="@id/permissionsFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_enrollmentFragment"
+            app:destination="@id/enrollmentFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_twoStageAuthFragment"
+            app:destination="@id/twoStageAuthFragment" />
     </fragment>
 
     <fragment
@@ -70,5 +82,21 @@
         android:name="com.example.voicelock.feature.permissions.PermissionsFragment"
         android:label="PermissionsFragment"
         tools:layout="@layout/fragment_permissions" />
+
+    <fragment
+        android:id="@+id/enrollmentFragment"
+        android:name="com.example.voicelock.feature.voice.enrollment.EnrollmentFragment"
+        android:label="EnrollmentFragment"
+        tools:layout="@layout/fragment_enrollment" />
+
+    <fragment
+        android:id="@+id/twoStageAuthFragment"
+        android:name="com.example.voicelock.feature.voice.auth.TwoStageAuthFragment"
+        android:label="TwoStageAuthFragment"
+        tools:layout="@layout/fragment_two_stage_auth">
+        <action
+            android:id="@+id/action_twoStageAuthFragment_to_enrollmentFragment"
+            app:destination="@id/enrollmentFragment" />
+    </fragment>
 
 </navigation>

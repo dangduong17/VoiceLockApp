@@ -19,11 +19,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * Plain Activity shell (same "outside the BaseFragment mandate" status as MainActivity) that
- * hosts a small, dynamically-chosen nav graph reusing the existing PinLockFragment/PatternLockFragment
- * in UNLOCK mode, so a locked app's foreground can be gated by the existing verification stack.
+ * hosts a small, dynamically-chosen nav graph reusing the existing TwoStageAuthFragment (voice),
+ * PinLockFragment and PatternLockFragment in unlock mode, so a locked app's foreground can be gated by
+ * the existing verification stack.
  * Started by AppLockMonitorService with FLAG_ACTIVITY_NEW_TASK.
  *
- * Pattern is the primary lock method and PIN is the backup (see LockOverlayViewModel); this
+ * Voice comes first when enrolled, then Pattern, with PIN as the backup (see LockOverlayViewModel); this
  * screen offers a "try another method" button so a user who forgets the primary method can
  * still fall back to whichever other method they've configured.
  */
@@ -65,6 +66,11 @@ class LockOverlayActivity : AppCompatActivity() {
         pinLength: Int,
     ) {
         when (method) {
+            LockMethod.VOICE -> {
+                val args = Bundle().apply { putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName) }
+                showDestination(R.id.twoStageAuthFragment, args)
+            }
+
             LockMethod.PATTERN -> {
                 val args =
                     Bundle().apply {
