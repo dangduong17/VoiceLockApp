@@ -1,8 +1,10 @@
 package com.example.voicelock.util
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import com.example.voicelock.base.launchIO
 
@@ -76,6 +78,16 @@ inline fun <R, T> ViewModel.handleApiCall(
         }
     }
 }
+
+/**
+ * Shared catch clause for Repository/UseCase flows: lets cancellation propagate instead of
+ * swallowing it into a Result.Error, then maps every other failure to Result.Error.
+ */
+fun <T> Flow<Result<T>>.catchAsResult(): Flow<Result<T>> =
+    catch { throwable ->
+        if (throwable is CancellationException) throw throwable
+        emit(Result.Error(throwable))
+    }
 
 suspend fun <T> Flow<Result<T>>.getDataOrDefault(defaultValue: T): T =
     first().let { result -> if (result is Result.Success) result.data else defaultValue }

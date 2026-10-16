@@ -13,12 +13,37 @@
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_pinLockFragment"
+            app:destination="@id/pinLockFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_patternLockFragment"
+            app:destination="@id/patternLockFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.voicelock.feature.settings.SettingsFragment"
         android:label="SettingsFragment"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_pinLockFragment"
+            app:destination="@id/pinLockFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_patternLockFragment"
+            app:destination="@id/patternLockFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pinLockFragment"
+        android:name="com.example.voicelock.feature.pinlock.PinLockFragment"
+        android:label="PinLockFragment"
+        tools:layout="@layout/fragment_pin_lock" />
+
+    <fragment
+        android:id="@+id/patternLockFragment"
+        android:name="com.example.voicelock.feature.patternlock.PatternLockFragment"
+        android:label="PatternLockFragment"
+        tools:layout="@layout/fragment_pattern_lock" />
 
 </navigation>

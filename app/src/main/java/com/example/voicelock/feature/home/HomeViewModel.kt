@@ -4,6 +4,8 @@ import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
 import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
+import com.example.voicelock.data.model.patternlock.PatternLockMode
+import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.util.handleApiCall
 
@@ -40,11 +42,15 @@ class HomeViewModel(
     }
 
     fun onPinClicked() {
-        launchIO { setEvent(HomeUiEvent.NavigateToPinSetup) }
+        val state = getCurrentState()
+        val mode = if (state.isPinSet) PinLockMode.CHANGE else PinLockMode.SETUP
+        launchIO { setEvent(HomeUiEvent.NavigateToPinLock(mode = mode, pinLength = state.pinLength)) }
     }
 
     fun onPatternClicked() {
-        launchIO { setEvent(HomeUiEvent.NavigateToPatternSetup) }
+        val state = getCurrentState()
+        val mode = if (state.isPatternSet) PatternLockMode.CHANGE else PatternLockMode.SETUP
+        launchIO { setEvent(HomeUiEvent.NavigateToPatternLock(mode)) }
     }
 
     fun onFingerprintClicked() {

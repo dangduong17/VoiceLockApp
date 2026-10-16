@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 
@@ -73,4 +74,17 @@ fun View.setPreventDoubleClickScaleView(
 
 fun Fragment.displayToast(msg: String) {
     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+}
+
+/**
+ * Horizontal shake animation for invalid-input feedback (wrong PIN/pattern)
+ */
+fun View.shakeError() {
+    val animation =
+        TranslateAnimation(0f, 12f, 0f, 0f).apply {
+            duration = 60
+            repeatCount = 4
+            repeatMode = TranslateAnimation.REVERSE
+        }
+    startAnimation(animation)
 }

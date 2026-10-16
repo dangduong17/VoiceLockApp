@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_screen"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="48dp">
+
+    <TextView
+        android:id="@+id/tvPinScreenTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvPinScreenSubtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvPinScreenTitle" />
+
+    <TextView
+        android:id="@+id/tvToggleLength"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:padding="4dp"
+        android:textColor="@color/primary_blue"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvPinScreenSubtitle" />
+
+    <LinearLayout
+        android:id="@+id/layoutDots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvToggleLength">
+
+        <View
+            android:id="@+id/dot1"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_margin="7dp"
+            android:background="@drawable/dot_empty" />
+
+        <View
+            android:id="@+id/dot2"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_margin="7dp"
+            android:background="@drawable/dot_empty" />
+
+        <View
+            android:id="@+id/dot3"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_margin="7dp"
+            android:background="@drawable/dot_empty" />
+
+        <View
+            android:id="@+id/dot4"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_margin="7dp"
+            android:background="@drawable/dot_empty" />
+
+        <View
+            android:id="@+id/dot5"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_margin="7dp"
+            android:background="@drawable/dot_empty" />
+
+        <View
+            android:id="@+id/dot6"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_margin="7dp"
+            android:background="@drawable/dot_empty" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvLockoutMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textColor="@color/error_red"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutDots" />
+
+    <GridLayout
+        android:id="@+id/gridKeypad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:columnCount="3"
+        android:rowCount="4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/btn1"
+            style="@style/PinKeypadKey"
+            android:text="1" />
+
+        <TextView
+            android:id="@+id/btn2"
+            style="@style/PinKeypadKey"
+            android:text="2" />
+
+        <TextView
+            android:id="@+id/btn3"
+            style="@style/PinKeypadKey"
+            android:text="3" />
+
+        <TextView
+            android:id="@+id/btn4"
+            style="@style/PinKeypadKey"
+            android:text="4" />
+
+        <TextView
+            android:id="@+id/btn5"
+            style="@style/PinKeypadKey"
+            android:text="5" />
+
+        <TextView
+            android:id="@+id/btn6"
+            style="@style/PinKeypadKey"
+            android:text="6" />
+
+        <TextView
+            android:id="@+id/btn7"
+            style="@style/PinKeypadKey"
+            android:text="7" />
+
+        <TextView
+            android:id="@+id/btn8"
+            style="@style/PinKeypadKey"
+            android:text="8" />
+
+        <TextView
+            android:id="@+id/btn9"
+            style="@style/PinKeypadKey"
+            android:text="9" />
+
+        <View
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_margin="6dp" />
+
+        <TextView
+            android:id="@+id/btn0"
+            style="@style/PinKeypadKey"
+            android:text="0" />
+
+        <ImageView
+            android:id="@+id/btnDelete"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_keypad_button"
+            android:padding="22dp"
+            android:src="@drawable/ic_backspace"
+            app:tint="@color/text_primary" />
+
+    </GridLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

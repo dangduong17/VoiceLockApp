@@ -60,4 +60,34 @@
     <string name="nav_protection">Bảo vệ</string>
     <string name="nav_voice">Giọng nói</string>
     <string name="nav_settings">Cài đặt</string>
+
+    <string name="pin_set_status">Đã thiết lập</string>
+    <string name="pin_not_set_status">Chưa thiết lập</string>
+    <string name="pattern_set_status">Đã thiết lập</string>
+    <string name="pattern_not_set_status">Chưa thiết lập</string>
+
+    <string name="pin_title_verify">Nhập mã PIN hiện tại</string>
+    <string name="pin_subtitle_verify">Xác minh để đổi mã PIN</string>
+    <string name="pin_title_enter">Tạo mã PIN mới</string>
+    <string name="pin_subtitle_enter">Nhập %1$d chữ số</string>
+    <string name="pin_title_confirm">Xác nhận mã PIN</string>
+    <string name="pin_subtitle_confirm">Nhập lại mã PIN để xác nhận</string>
+    <string name="pin_toggle_use_4">Dùng mã 4 số</string>
+    <string name="pin_toggle_use_6">Dùng mã 6 số</string>
+    <string name="pin_wrong_remaining">Sai mã PIN. Còn %1$d lần thử</string>
+    <string name="pin_mismatch">Mã PIN không khớp, vui lòng nhập lại</string>
+    <string name="pin_set_success">Đã lưu mã PIN mới</string>
+
+    <string name="pattern_title_verify">Vẽ hình mở khóa hiện tại</string>
+    <string name="pattern_subtitle_verify">Xác minh để đổi hình vẽ</string>
+    <string name="pattern_title_enter">Tạo hình vẽ mới</string>
+    <string name="pattern_subtitle_enter">Vẽ hình kết nối ít nhất 4 điểm</string>
+    <string name="pattern_title_confirm">Xác nhận hình vẽ</string>
+    <string name="pattern_subtitle_confirm">Vẽ lại hình vẽ để xác nhận</string>
+    <string name="pattern_too_short">Vẽ ít nhất 4 điểm</string>
+    <string name="pattern_wrong_remaining">Sai hình vẽ. Còn %1$d lần thử</string>
+    <string name="pattern_mismatch">Hình vẽ không khớp, vui lòng vẽ lại</string>
+    <string name="pattern_set_success">Đã lưu hình vẽ mới</string>
+
+    <string name="lockout_message">Quá nhiều lần thử sai. Vui lòng thử lại sau %1$d giây</string>
 </resources>
