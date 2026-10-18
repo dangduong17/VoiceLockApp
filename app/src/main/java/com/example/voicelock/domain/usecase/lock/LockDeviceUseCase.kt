@@ -4,14 +4,11 @@ import com.example.voicelock.data.model.lock.DeviceLockResult
 import com.example.voicelock.data.repository.appLockSessionRepository.AppLockSessionRepository
 import com.example.voicelock.data.repository.deviceLockRepository.DeviceLockRepository
 import com.example.voicelock.util.Result
-import com.example.voicelock.util.catchAsResult
+import com.example.voicelock.util.resultFlow
 import com.example.voicelock.util.getDataOrDefault
 import com.example.voicelock.util.getDataOrNull
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 
 /**
  * F1 "lock now" (voice command or the Home button). Locked apps always ask again (their unlock
@@ -22,7 +19,7 @@ class LockDeviceUseCase(
     private val appLockSessionRepository: AppLockSessionRepository,
 ) {
     operator fun invoke(): Flow<Result<DeviceLockResult>> =
-        flow<Result<DeviceLockResult>> {
+        resultFlow {
             appLockSessionRepository.clearAll().getDataOrNull()
             val isAdminActive = deviceLockRepository.isDeviceAdminActive().getDataOrDefault(false)
             val result =
@@ -31,7 +28,6 @@ class LockDeviceUseCase(
                 } else {
                     DeviceLockResult.APPS_LOCKED
                 }
-            emit(Result.Success(result))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            result
+        }
 }

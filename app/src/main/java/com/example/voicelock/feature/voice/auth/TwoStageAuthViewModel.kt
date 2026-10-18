@@ -212,7 +212,7 @@ class TwoStageAuthViewModel(
 
             is VoiceVerifyResult.Verified -> {
                 // Same session bookkeeping as a PIN/pattern unlock, so the monitor lets the app through.
-                targetPackageName?.let { markAppUnlockedUseCase(it).first() }
+                markAppUnlockedUseCase(targetPackageName).getDataOrNull()
                 setState { copy(stage = AuthStage.SUCCESS, scores = result.scores) }
                 setEvent(TwoStageAuthUiEvent.Authenticated(isAppUnlock = targetPackageName != null))
             }

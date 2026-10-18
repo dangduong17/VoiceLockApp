@@ -7,7 +7,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import com.example.voicelock.base.BaseBottomSheetDialogFragment
 import com.example.voicelock.base.BaseDialogFragment
@@ -38,3 +40,12 @@ inline fun <T> Flow<T>.collectFlowOnView(
         collect { onCollect(it) }
     }
 }
+
+/** Seconds left of a lockout, from [seconds] down to 0, one value per [Constant.LOCKOUT_TICK_MS]. */
+fun countdownFlow(seconds: Int): Flow<Int> =
+    flow {
+        for (remaining in seconds downTo 0) {
+            emit(remaining)
+            if (remaining > 0) delay(Constant.LOCKOUT_TICK_MS)
+        }
+    }

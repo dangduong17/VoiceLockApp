@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.example.voicelock.R
 import com.example.voicelock.util.BundleKey
+import androidx.core.os.bundleOf
 
 /**
  * F1 entry point for the voice lock command, opened from the Quick Settings tile, the launcher
@@ -28,7 +29,7 @@ class VoiceCommandActivity : AppCompatActivity() {
         }
         if (savedInstanceState == null) {
             val navHostFragment = supportFragmentManager.findFragmentById(R.id.navHostVoiceCommand) as NavHostFragment
-            val args = Bundle().apply { putBoolean(BundleKey.KEY_VOICE_LOCK_COMMAND, true) }
+            val args = bundleOf(BundleKey.KEY_VOICE_LOCK_COMMAND to true)
             navHostFragment.navController.setGraph(R.navigation.nav_graph_voice_command, args)
         }
     }

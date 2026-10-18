@@ -4,6 +4,6 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="#FF38BDF8"
+        android:fillColor="@color/cyan_badge"
         android:pathData="M12,1L3,5v6c0,5.55 3.84,10.74 9,12c5.16,-1.26 9,-6.45 9,-12V5l-9,-4zM10.9,15.5l-3.4,-3.4l1.4,-1.4l2,2l4.6,-4.6l1.4,1.4l-6,6z" />
 </vector>

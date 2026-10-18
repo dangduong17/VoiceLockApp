@@ -2,8 +2,6 @@ package com.example.voicelock.util
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.net.Uri
-import android.provider.Settings
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorRes
@@ -71,12 +69,7 @@ fun Fragment.showPermissionDeniedMessage(message: String) {
 
 fun Fragment.openAppSettings() {
     val context = context ?: return
-    runCatching {
-        startActivity(
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
-    }
+    startActivitySafely(context.appDetailsSettingsIntent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
 private const val MESSAGE_MAX_LINES = 3

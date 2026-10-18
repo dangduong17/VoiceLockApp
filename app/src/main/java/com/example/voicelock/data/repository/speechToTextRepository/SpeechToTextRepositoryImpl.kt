@@ -4,6 +4,7 @@ import com.example.voicelock.data.local.voice.KeywordAudioRecognizer
 import com.example.voicelock.data.model.voice.SpeechRecognitionOutcome
 import com.example.voicelock.data.model.voice.SpeechRecognitionSupport
 import com.example.voicelock.util.Result
+import com.example.voicelock.util.resultFlow
 import com.example.voicelock.util.catchAsResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -16,14 +17,10 @@ class SpeechToTextRepositoryImpl(
 ) : SpeechToTextRepository {
 
     override fun isAvailable(): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> { emit(Result.Success(keywordAudioRecognizer.isSupportedOnDevice())) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { keywordAudioRecognizer.isSupportedOnDevice() }
 
     override fun getSupport(): Flow<Result<SpeechRecognitionSupport>> =
-        flow<Result<SpeechRecognitionSupport>> { emit(Result.Success(keywordAudioRecognizer.getRecognitionSupport())) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { keywordAudioRecognizer.getRecognitionSupport() }
 
     override fun recognize(
         samples: FloatArray,
@@ -46,7 +43,5 @@ class SpeechToTextRepositoryImpl(
             .catchAsResult()
 
     override fun downloadLanguage(languageTag: String): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> { emit(Result.Success(keywordAudioRecognizer.downloadLanguage(languageTag))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { keywordAudioRecognizer.downloadLanguage(languageTag) }
 }

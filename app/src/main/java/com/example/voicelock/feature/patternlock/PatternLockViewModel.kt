@@ -13,9 +13,10 @@ import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
 import com.example.voicelock.domain.usecase.patternlock.SetPatternUseCase
 import com.example.voicelock.domain.usecase.patternlock.VerifyPatternUseCase
+import com.example.voicelock.util.countdownFlow
+import com.example.voicelock.util.getDataOrNull
 import com.example.voicelock.util.handleApiCall
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 
 class PatternLockViewModel(
     private val setPatternUseCase: SetPatternUseCase,
@@ -90,11 +91,11 @@ class PatternLockViewModel(
     private fun onVerifySuccess() {
         val mode = getCurrentState().mode
         if (mode == PatternLockMode.UNLOCK) {
-            val packageName = targetPackageName
-            handleApiCall(
-                apiCall = { markAppUnlockedUseCase(packageName.orEmpty()) },
-                onSuccess = { launchIO { setEvent(PatternLockUiEvent.Success(mode)) } },
-            )
+            launchIO {
+                // Same session bookkeeping as every unlock method, so the monitor lets the app through.
+                markAppUnlockedUseCase(targetPackageName).getDataOrNull()
+                setEvent(PatternLockUiEvent.Success(mode))
+            }
         } else {
             setState { copy(stage = PatternLockStage.ENTER) }
         }
@@ -120,16 +121,9 @@ class PatternLockViewModel(
 
     private fun startLockout(remainingSeconds: Int) {
         lockoutJob?.cancel()
-        setState { copy(isLocked = true, lockoutRemainingSeconds = remainingSeconds) }
         lockoutJob =
             launchIO {
-                var remaining = remainingSeconds
-                while (remaining > 0) {
-                    delay(1000)
-                    remaining--
-                    setState { copy(lockoutRemainingSeconds = remaining) }
-                }
-                setState { copy(isLocked = false, lockoutRemainingSeconds = 0) }
+                countdownFlow(remainingSeconds).collect { remaining -> setState { copy(lockoutRemainingSeconds = remaining) } }
             }
     }
 

@@ -19,7 +19,6 @@ class BiometricAuthFragment : BaseFragment<FragmentBiometricAuthBinding, Biometr
     BiometricAuthViewModel::class,
 ) {
     override fun init(view: View, savedInstanceState: Bundle?) {
-        initView()
         settingEvent()
         onSystemBack { backEvent() }
         viewModel.initData(targetPackageName = arguments?.getString(BundleKey.KEY_LOCK_TARGET_PACKAGE))

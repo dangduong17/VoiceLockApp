@@ -39,7 +39,7 @@ class LockOverlayViewModel(
 
     fun decideVerificationMethod() {
         launchIO {
-            val pinInfo = getPinInfoUseCase().getDataOrDefault(PinInfo(isPinSet = false, pinLength = 6))
+            val pinInfo = getPinInfoUseCase().getDataOrDefault(PinInfo.NOT_SET)
             val isPatternSet = getPatternInfoUseCase().getDataOrDefault(false)
             val isSecurityQuestionSet = getSecurityQuestionUseCase().getDataOrNull() != null
             val isVoiceActive = getVoiceSettingsUseCase().getDataOrDefault(VoiceSettingsDtoModel()).isVoiceUnlockActive()

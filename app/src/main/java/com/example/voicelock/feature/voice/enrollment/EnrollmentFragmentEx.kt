@@ -1,9 +1,6 @@
 package com.example.voicelock.feature.voice.enrollment
 
 import android.Manifest
-import android.content.pm.PackageManager
-import android.view.View
-import androidx.core.content.ContextCompat
 import com.example.voicelock.R
 import com.example.voicelock.data.model.voice.EnrollmentError
 import com.example.voicelock.data.model.voice.EnrollmentErrorInfo
@@ -14,10 +11,10 @@ import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showPermissionDeniedMessage
 import java.util.Locale
-
-fun EnrollmentFragment.initView() {
-    // Basic setup if any
-}
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import com.example.voicelock.util.isPermissionGranted
+import com.example.voicelock.util.setEnabledWithAlpha
 
 fun EnrollmentFragment.backEvent() {
     navigator.navigateUp()
@@ -30,9 +27,7 @@ fun EnrollmentFragment.settingEvent() {
 }
 
 fun EnrollmentFragment.recordEvent() {
-    val isGranted =
-        ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-    if (isGranted) {
+    if (requireContext().isPermissionGranted(Manifest.permission.RECORD_AUDIO)) {
         viewModel.recordNextSample()
     } else {
         micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -72,14 +67,12 @@ fun EnrollmentFragment.updateProgress(progress: EnrollmentProgress) = with(bindi
     val isBusy = phase != EnrollmentPhase.IDLE && phase != EnrollmentPhase.COMPLETED
     // While a language pack downloads the main button becomes "Cancel", so the user is never stuck.
     val isCancellable = phase == EnrollmentPhase.DOWNLOADING_LANGUAGE
-    progressRecording.visibility = if (isBusy) View.VISIBLE else View.GONE
-    btnRecord.isEnabled = phase == EnrollmentPhase.IDLE
-    btnRecord.alpha = if (phase == EnrollmentPhase.IDLE) 1f else 0.5f
-    btnEnrollAction.isEnabled = !isBusy || isCancellable
-    btnEnrollAction.alpha = if (isBusy && !isCancellable) 0.5f else 1f
+    progressRecording.isVisible = isBusy
+    btnRecord.setEnabledWithAlpha(phase == EnrollmentPhase.IDLE)
+    btnEnrollAction.setEnabledWithAlpha(!isBusy || isCancellable)
     btnEnrollAction.text = getString(getActionTextRes(phase))
     val canRestart = !isBusy && (progress.recordedCount > 0 || phase == EnrollmentPhase.COMPLETED)
-    btnEnrollRestart.visibility = if (canRestart) View.VISIBLE else View.INVISIBLE
+    btnEnrollRestart.isInvisible = !canRestart
 }
 
 private fun EnrollmentFragment.getStatusText(progress: EnrollmentProgress): String =
@@ -128,20 +121,22 @@ fun EnrollmentFragment.updateError(errorInfo: EnrollmentErrorInfo) {
             EnrollmentError.MODEL_MISSING -> getString(R.string.voice_enroll_error_model_missing)
             EnrollmentError.SAME_AS_UNLOCK -> getString(R.string.voice_lock_enroll_error_same_as_unlock)
         }
-    binding.tvEnrollError.visibility = if (message == null) View.GONE else View.VISIBLE
+    binding.tvEnrollError.isVisible = message != null
     binding.tvEnrollError.text = message.orEmpty()
 }
 
 /** Speech to text of every accepted recording, one line each. */
 fun EnrollmentFragment.updateSampleTranscripts(transcripts: List<String>) {
-    binding.tvHeardTexts.visibility = if (transcripts.isEmpty()) View.GONE else View.VISIBLE
+    binding.tvHeardTexts.isVisible = transcripts.isNotEmpty()
     binding.tvHeardTexts.text =
         transcripts.mapIndexed { index, text ->
             getString(R.string.voice_heard_sample_line, index + 1, getString(R.string.voice_heard_quoted, text))
-        }.joinToString("\n")
+        }.joinToString(separator = TRANSCRIPT_SEPARATOR)
 }
 
 private fun EnrollmentFragment.getLanguageDisplayName(languageTag: String): String {
     val displayLocale = resources.configuration.locales[0]
     return Locale.forLanguageTag(languageTag).getDisplayName(displayLocale).replaceFirstChar { it.titlecase(displayLocale) }
 }
+
+private const val TRANSCRIPT_SEPARATOR = "\n"

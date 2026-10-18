@@ -8,11 +8,8 @@ import com.example.voicelock.data.model.lock.LockoutState
 import com.example.voicelock.util.Constant
 import com.example.voicelock.util.HashUtils
 import com.example.voicelock.util.Result
-import com.example.voicelock.util.catchAsResult
-import kotlinx.coroutines.Dispatchers
+import com.example.voicelock.util.resultFlow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import java.security.MessageDigest
 import kotlin.math.ceil
 
@@ -21,20 +18,16 @@ class LockRepositoryImpl(
 ) : LockRepository {
 
     override fun isPinSet(): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> { emit(Result.Success(securePrefs.contains(KEY_PIN_HASH))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { securePrefs.contains(KEY_PIN_HASH) }
 
     override fun getPinLength(): Flow<Result<Int>> =
-        flow<Result<Int>> { emit(Result.Success(securePrefs.getInt(KEY_PIN_LENGTH, DEFAULT_PIN_LENGTH))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { securePrefs.getInt(KEY_PIN_LENGTH, Constant.PIN_LENGTH_DEFAULT) }
 
     override fun savePin(
         pin: String,
         length: Int,
     ): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             val salt = HashUtils.generateSalt()
             val hash = HashUtils.hash(value = pin, salt = salt)
             securePrefs.edit {
@@ -43,25 +36,21 @@ class LockRepositoryImpl(
                 putInt(KEY_PIN_LENGTH, length)
             }
             resetAttempts(LockType.PIN)
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     override fun verifyPinHash(pin: String): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> {
+        resultFlow {
             val salt = securePrefs.getString(KEY_PIN_SALT, null)
             val storedHash = securePrefs.getString(KEY_PIN_HASH, null)
-            emit(Result.Success(matchesHash(value = pin, salt = salt, storedHash = storedHash)))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            matchesHash(value = pin, salt = salt, storedHash = storedHash)
+        }
 
     override fun isPatternSet(): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> { emit(Result.Success(securePrefs.contains(KEY_PATTERN_HASH))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { securePrefs.contains(KEY_PATTERN_HASH) }
 
     override fun savePattern(cells: List<Int>): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             val salt = HashUtils.generateSalt()
             val hash = HashUtils.hash(value = cells.joinToString(","), salt = salt)
             securePrefs.edit {
@@ -69,25 +58,21 @@ class LockRepositoryImpl(
                 putString(KEY_PATTERN_HASH, hash)
             }
             resetAttempts(LockType.PATTERN)
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     override fun verifyPatternHash(cells: List<Int>): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> {
+        resultFlow {
             val salt = securePrefs.getString(KEY_PATTERN_SALT, null)
             val storedHash = securePrefs.getString(KEY_PATTERN_HASH, null)
-            emit(Result.Success(matchesHash(value = cells.joinToString(","), salt = salt, storedHash = storedHash)))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            matchesHash(value = cells.joinToString(","), salt = salt, storedHash = storedHash)
+        }
 
     override fun getLockoutState(type: LockType): Flow<Result<LockoutState>> =
-        flow<Result<LockoutState>> { emit(Result.Success(currentLockoutState(type))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { currentLockoutState(type) }
 
     override fun recordFailedAttempt(type: LockType): Flow<Result<LockoutState>> =
-        flow<Result<LockoutState>> {
+        resultFlow {
             val attemptsKey = attemptsKey(type)
             val lockedUntilKey = lockedUntilKey(type)
             val newAttempts = securePrefs.getInt(attemptsKey, 0) + 1
@@ -107,16 +92,14 @@ class LockRepositoryImpl(
                     securePrefs.edit { putInt(attemptsKey, newAttempts) }
                     LockoutState(failedAttempts = newAttempts, isLocked = false, remainingSeconds = 0)
                 }
-            emit(Result.Success(state))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            state
+        }
 
     override fun resetFailedAttempts(type: LockType): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             resetAttempts(type)
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     private fun resetAttempts(type: LockType) {
         securePrefs.edit {
@@ -134,7 +117,7 @@ class LockRepositoryImpl(
 
         return when {
             lockedUntil > now -> {
-                val remainingSeconds = ceil((lockedUntil - now) / 1000.0).toInt()
+                val remainingSeconds = ceil((lockedUntil - now) / MILLIS_PER_SECOND).toInt()
                 LockoutState(failedAttempts = failedAttempts, isLocked = true, remainingSeconds = remainingSeconds)
             }
             lockedUntil != 0L -> {
@@ -187,7 +170,7 @@ class LockRepositoryImpl(
         private const val KEY_QUESTION_FAILED_ATTEMPTS = "security_question_failed_attempts"
         private const val KEY_QUESTION_LOCKED_UNTIL = "security_question_locked_until"
 
-        private const val DEFAULT_PIN_LENGTH = 6
         private const val LOCKOUT_DURATION_MS = Constant.LOCK_LOCKOUT_DURATION_SECONDS * 1000L
+        private const val MILLIS_PER_SECOND = 1000.0
     }
 }

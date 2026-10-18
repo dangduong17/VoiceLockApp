@@ -2,10 +2,14 @@ package com.example.voicelock.util
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import com.example.voicelock.base.launchIO
 
 sealed interface UiState<out T> {
@@ -88,6 +92,18 @@ fun <T> Flow<Result<T>>.catchAsResult(): Flow<Result<T>> =
         if (throwable is CancellationException) throw throwable
         emit(Result.Error(throwable))
     }
+
+/**
+ * One-shot Repository/UseCase read or write: runs [block] on [dispatcher] and wraps its value
+ * (or failure) in a Result, the shape every Repository function returns.
+ */
+fun <T> resultFlow(
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    block: suspend () -> T,
+): Flow<Result<T>> =
+    flow<Result<T>> { emit(Result.Success(block())) }
+        .flowOn(dispatcher)
+        .catchAsResult()
 
 suspend fun <T> Flow<Result<T>>.getDataOrDefault(defaultValue: T): T =
     first().let { result -> if (result is Result.Success) result.data else defaultValue }

@@ -16,12 +16,11 @@ import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestion
 import com.example.voicelock.domain.usecase.securityquestion.SetSecurityQuestionUseCase
 import com.example.voicelock.domain.usecase.securityquestion.VerifySecurityAnswerUseCase
 import com.example.voicelock.util.Constant
+import com.example.voicelock.util.countdownFlow
 import com.example.voicelock.util.getDataOrNull
 import com.example.voicelock.util.handleApiCall
 import com.example.voicelock.util.normalizeForComparison
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 
 /**
  * F5 Security question. SETUP saves a question + answer; CHANGE first asks the current question;
@@ -130,7 +129,7 @@ class SecurityQuestionViewModel(
             SecurityQuestionMode.UNLOCK ->
                 launchIO {
                     // Same session bookkeeping as a PIN/pattern unlock, so the monitor lets the app through.
-                    targetPackageName?.let { markAppUnlockedUseCase(it).first() }
+                    markAppUnlockedUseCase(targetPackageName).getDataOrNull()
                     setEvent(SecurityQuestionUiEvent.Unlocked)
                 }
             SecurityQuestionMode.RESET_PIN -> launchIO { setEvent(SecurityQuestionUiEvent.NavigateToPinSetup) }
@@ -147,20 +146,9 @@ class SecurityQuestionViewModel(
 
     private fun startLockout(remainingSeconds: Int) {
         lockoutJob?.cancel()
-        setState { copy(isLocked = true, lockoutRemainingSeconds = remainingSeconds) }
         lockoutJob =
             launchIO {
-                var remaining = remainingSeconds
-                while (remaining > 0) {
-                    delay(LOCKOUT_TICK_MS)
-                    remaining--
-                    setState { copy(lockoutRemainingSeconds = remaining) }
-                }
-                setState { copy(isLocked = false, lockoutRemainingSeconds = 0) }
+                countdownFlow(remainingSeconds).collect { remaining -> setState { copy(lockoutRemainingSeconds = remaining) } }
             }
-    }
-
-    private companion object {
-        const val LOCKOUT_TICK_MS = 1_000L
     }
 }

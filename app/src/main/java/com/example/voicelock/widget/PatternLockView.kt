@@ -120,6 +120,7 @@ class PatternLockView
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (event.action == MotionEvent.ACTION_UP) performClick()
                     isDragging = false
                     if (selectedCells.size in 1 until MIN_NODES) {
                         patternListener?.onPatternTooShort()
@@ -131,6 +132,8 @@ class PatternLockView
             }
             return true
         }
+
+        override fun performClick(): Boolean = super.performClick()
 
         private fun handleTouch(
             x: Float,

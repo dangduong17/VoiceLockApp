@@ -15,7 +15,6 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding, SettingsViewModel
     SettingsViewModel::class,
 ) {
     override fun init(view: View, savedInstanceState: Bundle?) {
-        initView()
         settingEvent()
     }
 

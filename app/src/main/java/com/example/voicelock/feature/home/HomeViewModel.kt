@@ -2,28 +2,31 @@ package com.example.voicelock.feature.home
 
 import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
-import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricType
-import com.example.voicelock.data.model.biometric.getAvailability
-import com.example.voicelock.data.model.biometric.isActive
 import com.example.voicelock.data.model.biometric.withPreference
 import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
-import com.example.voicelock.data.model.patternlock.PatternLockMode
-import com.example.voicelock.data.model.pinlock.PinLockMode
-import com.example.voicelock.data.model.voice.VoiceVerificationMode
-import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
-import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
-import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
-import com.example.voicelock.domain.usecase.lock.LockDeviceUseCase
+import com.example.voicelock.data.model.home.toHomeUiState
 import com.example.voicelock.data.model.lock.DeviceLockResult
-import com.example.voicelock.util.getDataOrDefault
+import com.example.voicelock.data.model.lock.LockMethodUiEvent
+import com.example.voicelock.data.model.lock.getBiometricRowEvent
+import com.example.voicelock.data.model.lock.getFaceRowEvent
+import com.example.voicelock.data.model.lock.getPatternLockEvent
+import com.example.voicelock.data.model.lock.getPinLockEvent
+import com.example.voicelock.data.model.lock.getSecurityQuestionEvent
+import com.example.voicelock.data.model.lock.getVoiceLockEnrollmentEvent
+import com.example.voicelock.data.model.lock.getVoiceUnlockEnrollmentEvent
+import com.example.voicelock.data.model.lock.getVoiceUnlockRowEvent
+import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
+import com.example.voicelock.domain.usecase.lock.GetProtectionStatusUseCase
+import com.example.voicelock.domain.usecase.lock.LockDeviceUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
+import com.example.voicelock.util.getDataOrDefault
 import com.example.voicelock.util.handleApiCall
 
 class HomeViewModel(
-    private val getHomeStatusUseCase: GetHomeStatusUseCase,
+    private val getProtectionStatusUseCase: GetProtectionStatusUseCase,
     private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
     private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
     private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
@@ -32,15 +35,9 @@ class HomeViewModel(
 
     fun initData() {
         handleApiCall(
-            apiCall = { getHomeStatusUseCase() },
-            onSuccess = { status ->
-                setState { status }
-            },
-            onError = { throwable ->
-                launchIO {
-                    setEvent(HomeUiEvent.ShowLoadError(throwable.message))
-                }
-            },
+            apiCall = { getProtectionStatusUseCase() },
+            onSuccess = { status -> setState { status.toHomeUiState() } },
+            onError = { launchIO { setEvent(HomeUiEvent.ShowLoadError) } },
         )
     }
 
@@ -52,15 +49,11 @@ class HomeViewModel(
         }
     }
 
-    /**
-     * Voice switches only make sense with an enrolled voice: turning one on before enrolling
-     * opens enrollment instead (the fragment snaps the switch back to the saved state).
-     */
     fun toggleVoiceUnlock(isEnabled: Boolean) {
         val state = getCurrentState()
         if (isEnabled == state.isVoiceUnlockEnabled) return
-        if (!state.isVoiceEnrolled) {
-            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)) }
+        state.getVoiceUnlockEnrollmentEvent()?.let { event ->
+            sendLockMethodEvent(event)
             return
         }
         setState { copy(isVoiceUnlockEnabled = isEnabled) }
@@ -70,66 +63,37 @@ class HomeViewModel(
     fun toggleVoiceLock(isEnabled: Boolean) {
         val state = getCurrentState()
         if (isEnabled == state.isVoiceLockEnabled) return
-        if (!state.isVoiceLockCommandEnrolled) {
-            // F1: the lock command is its own recording, separate from the unlock passphrase.
-            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
+        state.getVoiceLockEnrollmentEvent()?.let { event ->
+            sendLockMethodEvent(event)
             return
         }
         setState { copy(isVoiceLockEnabled = isEnabled) }
         handleApiCall(
             apiCall = { setVoiceLockEnabledUseCase(isEnabled) },
-            onSuccess = { if (isEnabled) launchIO { setEvent(HomeUiEvent.OfferVoiceLockTile) } },
+            onSuccess = { if (isEnabled) sendLockMethodEvent(LockMethodUiEvent.OfferVoiceLockTile) },
         )
     }
 
-    /** F1: tapping the voice lock row records (or re-records) the lock command. */
-    fun onVoiceLockRowClicked() {
-        launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
-    }
-
     fun onVoiceUnlockRowClicked() {
-        val event = if (getCurrentState().isVoiceEnrolled) HomeUiEvent.NavigateToVoiceTest else HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)
-        launchIO { setEvent(event) }
+        sendLockMethodEvent(getCurrentState().getVoiceUnlockRowEvent())
     }
 
     fun onPinClicked() {
-        val state = getCurrentState()
-        val mode = if (state.isPinSet) PinLockMode.CHANGE else PinLockMode.SETUP
-        launchIO { setEvent(HomeUiEvent.NavigateToPinLock(mode = mode, pinLength = state.pinLength)) }
+        sendLockMethodEvent(getCurrentState().getPinLockEvent())
     }
 
     fun onPatternClicked() {
-        val state = getCurrentState()
-        val mode = if (state.isPatternSet) PatternLockMode.CHANGE else PatternLockMode.SETUP
-        launchIO { setEvent(HomeUiEvent.NavigateToPatternLock(mode)) }
+        sendLockMethodEvent(getCurrentState().getPatternLockEvent())
     }
 
-    /** Without a face profile this opens enrollment; otherwise the face test screen (re-enroll / delete). */
     fun onFaceClicked() {
-        val event =
-            if (getCurrentState().faceSettings.isEnrolled) HomeUiEvent.NavigateToFaceTest else HomeUiEvent.NavigateToFaceEnrollment
-        launchIO { setEvent(event) }
+        sendLockMethodEvent(getCurrentState().getFaceRowEvent())
     }
 
-    /**
-     * Fingerprint row: once on, a tap tests the system prompt; otherwise it turns the
-     * method on (confirmed with the prompt, see [onBiometricConfirmed]) or opens Android's
-     * enrollment screen when nothing is enrolled. Turning it off is done from Settings.
-     */
+    /** Fingerprint row: tests the prompt once on, otherwise turns it on. Turning it off is done from Settings. */
     fun onBiometricRowClicked(type: BiometricType) {
         val settings = getCurrentState().biometricSettings ?: return
-        val event =
-            if (settings.isActive(type)) {
-                HomeUiEvent.TestBiometric(type)
-            } else {
-                when (val availability = settings.getAvailability(type)) {
-                    BiometricAvailability.AVAILABLE -> HomeUiEvent.ConfirmBiometric(type)
-                    BiometricAvailability.NOT_ENROLLED -> HomeUiEvent.OpenBiometricEnrollment(type)
-                    BiometricAvailability.NO_HARDWARE, BiometricAvailability.UNAVAILABLE ->
-                        HomeUiEvent.ShowBiometricUnavailable(type, availability)
-                }
-            }
-        launchIO { setEvent(event) }
+        sendLockMethodEvent(settings.getBiometricRowEvent(type))
     }
 
     fun onBiometricConfirmed(type: BiometricType) {
@@ -138,12 +102,10 @@ class HomeViewModel(
     }
 
     fun onQuestionsClicked() {
-        // Changing an existing question first asks it (CHANGE mode), like changing the PIN.
-        val mode = if (getCurrentState().isSecurityQuestionSet) SecurityQuestionMode.CHANGE else SecurityQuestionMode.SETUP
-        launchIO { setEvent(HomeUiEvent.NavigateToSecurityQuestion(mode)) }
+        sendLockMethodEvent(getCurrentState().getSecurityQuestionEvent())
     }
 
-    fun onAppLockClicked() {
-        launchIO { setEvent(HomeUiEvent.NavigateToAppLock) }
+    private fun sendLockMethodEvent(event: LockMethodUiEvent) {
+        launchIO { setEvent(HomeUiEvent.LockMethod(event)) }
     }
 }

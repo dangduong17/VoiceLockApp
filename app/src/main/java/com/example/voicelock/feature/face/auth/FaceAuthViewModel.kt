@@ -221,7 +221,7 @@ class FaceAuthViewModel(
         if (getCurrentState().stage != FaceAuthStage.SCANNING) return
         timeoutJob?.cancel()
         // Same session bookkeeping as a PIN/pattern unlock, so the monitor lets the app through.
-        targetPackageName?.let { markAppUnlockedUseCase(it).first() }
+        markAppUnlockedUseCase(targetPackageName).getDataOrNull()
         setState { copy(stage = FaceAuthStage.SUCCESS, hint = FaceHint.NONE) }
         setEvent(FaceAuthUiEvent.Authenticated(isAppUnlock = targetPackageName != null))
     }

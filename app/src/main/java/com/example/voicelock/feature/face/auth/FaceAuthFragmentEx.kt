@@ -1,9 +1,6 @@
 package com.example.voicelock.feature.face.auth
 
 import android.Manifest
-import android.content.pm.PackageManager
-import android.view.View
-import androidx.core.content.ContextCompat
 import com.example.voicelock.R
 import com.example.voicelock.data.model.face.FaceAuthStage
 import com.example.voicelock.data.model.face.FaceAuthStatusInfo
@@ -17,10 +14,11 @@ import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showMessage
 import com.example.voicelock.util.showPermissionDeniedMessage
-
-fun FaceAuthFragment.initView() {
-    // Basic setup if any
-}
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import com.example.voicelock.util.isPermissionGranted
+import com.example.voicelock.util.setEnabledWithAlpha
+import com.example.voicelock.util.setTextColorRes
 
 fun FaceAuthFragment.backEvent() {
     navigator.navigateUp()
@@ -56,8 +54,7 @@ fun FaceAuthFragment.actionEvent() {
 }
 
 fun FaceAuthFragment.requestCamera() {
-    val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-    if (isGranted) {
+    if (requireContext().isPermissionGranted(Manifest.permission.CAMERA)) {
         onCameraPermissionResult(true)
     } else {
         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -93,24 +90,22 @@ fun FaceAuthFragment.releaseCamera() {
 fun FaceAuthFragment.updateStatus(info: FaceAuthStatusInfo) = with(binding) {
     val stage = info.stage
     tvFaceAuthStatus.text = getStageText(info)
-    tvFaceAuthStatus.setTextColor(ContextCompat.getColor(requireContext(), getStageColorRes(stage)))
+    tvFaceAuthStatus.setTextColorRes(getStageColorRes(stage))
 
     val hintText = if (stage == FaceAuthStage.SCANNING) getFaceHintText(info.hint) else null
-    tvFaceAuthHint.visibility = if (hintText == null) View.INVISIBLE else View.VISIBLE
+    tvFaceAuthHint.isInvisible = hintText == null
     tvFaceAuthHint.text = hintText.orEmpty()
 
-    tvFaceSimilarity.visibility = if (info.bestSimilarity == null) View.GONE else View.VISIBLE
+    tvFaceSimilarity.isVisible = info.bestSimilarity != null
     info.bestSimilarity?.let { tvFaceSimilarity.text = getString(R.string.face_auth_similarity, it, Constant.FACE_MATCH_THRESHOLD) }
 
     val isBusy = stage == FaceAuthStage.INITIALIZING || stage == FaceAuthStage.SCANNING
-    progressFaceScan.visibility = if (isBusy) View.VISIBLE else View.GONE
-    btnFaceAuthAction.isEnabled = !isBusy
-    btnFaceAuthAction.alpha = if (isBusy) 0.5f else 1f
+    progressFaceScan.isVisible = isBusy
+    btnFaceAuthAction.setEnabledWithAlpha(!isBusy)
     btnFaceAuthAction.text = getString(getActionTextRes(stage))
 
     val hasProfile = stage != FaceAuthStage.NOT_ENROLLED && stage != FaceAuthStage.INITIALIZING
-    btnFaceDelete.isEnabled = hasProfile
-    btnFaceDelete.alpha = if (hasProfile) 1f else 0.5f
+    btnFaceDelete.setEnabledWithAlpha(hasProfile)
 }
 
 private fun FaceAuthFragment.getStageText(info: FaceAuthStatusInfo): String =
@@ -145,7 +140,7 @@ private fun getActionTextRes(stage: FaceAuthStage): Int =
 
 /** Re-enroll / delete belong to the settings test screen, not to the lock overlay. */
 fun FaceAuthFragment.updateAppUnlock(isAppUnlock: Boolean) {
-    binding.layoutFaceManage.visibility = if (isAppUnlock) View.GONE else View.VISIBLE
+    binding.layoutFaceManage.isVisible = !isAppUnlock
 }
 
 fun FaceAuthFragment.handleUiEvent(event: FaceAuthUiEvent) {

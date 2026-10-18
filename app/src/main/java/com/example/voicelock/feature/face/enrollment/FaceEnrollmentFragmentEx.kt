@@ -1,9 +1,6 @@
 package com.example.voicelock.feature.face.enrollment
 
 import android.Manifest
-import android.content.pm.PackageManager
-import android.view.View
-import androidx.core.content.ContextCompat
 import com.example.voicelock.R
 import com.example.voicelock.data.model.face.FaceEnrollmentError
 import com.example.voicelock.data.model.face.FaceEnrollmentMessage
@@ -16,6 +13,11 @@ import com.example.voicelock.util.Constant
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showPermissionDeniedMessage
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import com.example.voicelock.util.isPermissionGranted
+import com.example.voicelock.util.setEnabledWithAlpha
+import com.example.voicelock.util.setTextColorRes
 
 fun FaceEnrollmentFragment.initView() {
     binding.tvFaceEnrollSubtitle.text = getString(R.string.face_enroll_subtitle, Constant.FACE_ENROLLMENT_SAMPLES)
@@ -46,8 +48,7 @@ fun FaceEnrollmentFragment.actionEvent() {
 }
 
 fun FaceEnrollmentFragment.requestCamera() {
-    val isGranted = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-    if (isGranted) {
+    if (requireContext().isPermissionGranted(Manifest.permission.CAMERA)) {
         onCameraPermissionResult(true)
     } else {
         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -89,13 +90,12 @@ fun FaceEnrollmentFragment.updateProgress(progress: FaceEnrollmentProgress) = wi
     val phase = progress.phase
     val isBusy =
         phase == FaceEnrollmentPhase.INITIALIZING || phase == FaceEnrollmentPhase.CAPTURING || phase == FaceEnrollmentPhase.PROCESSING
-    progressFaceScan.visibility = if (isBusy) View.VISIBLE else View.GONE
-    btnFaceEnrollAction.isEnabled = !isBusy
-    btnFaceEnrollAction.alpha = if (isBusy) 0.5f else 1f
+    progressFaceScan.isVisible = isBusy
+    btnFaceEnrollAction.setEnabledWithAlpha(!isBusy)
     btnFaceEnrollAction.text = getString(getActionTextRes(phase))
     val canRestart =
         phase == FaceEnrollmentPhase.COMPLETED || (phase == FaceEnrollmentPhase.CAPTURING && progress.capturedCount > 0)
-    btnFaceEnrollRestart.visibility = if (canRestart) View.VISIBLE else View.INVISIBLE
+    btnFaceEnrollRestart.isInvisible = !canRestart
 }
 
 private fun FaceEnrollmentFragment.getStatusText(progress: FaceEnrollmentProgress): String =
@@ -126,7 +126,7 @@ fun FaceEnrollmentFragment.updateMessage(message: FaceEnrollmentMessage) {
         }
     val text = errorText ?: getFaceHintText(message.hint)
     val colorRes = if (errorText != null) R.color.error_red else R.color.text_secondary
-    binding.tvFaceEnrollMessage.visibility = if (text == null) View.INVISIBLE else View.VISIBLE
+    binding.tvFaceEnrollMessage.isInvisible = text == null
     binding.tvFaceEnrollMessage.text = text.orEmpty()
-    binding.tvFaceEnrollMessage.setTextColor(ContextCompat.getColor(requireContext(), colorRes))
+    binding.tvFaceEnrollMessage.setTextColorRes(colorRes)
 }

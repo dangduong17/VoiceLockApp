@@ -12,6 +12,7 @@ import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.collectFlowOnView
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import com.example.voicelock.util.getEnum
 
 /**
  * Voice password enrollment: the user says their passphrase 3 times, in any language; every
@@ -25,14 +26,9 @@ class EnrollmentFragment : BaseFragment<FragmentEnrollmentBinding, EnrollmentVie
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted -> onMicPermissionResult(isGranted) }
 
     override fun init(view: View, savedInstanceState: Bundle?) {
-        initView()
         settingEvent()
         onSystemBack { backEvent() }
-        val mode =
-            arguments?.getString(BundleKey.KEY_VOICE_MODE)
-                ?.let { runCatching { VoiceVerificationMode.valueOf(it) }.getOrNull() }
-                ?: VoiceVerificationMode.UNLOCK
-        viewModel.initData(mode)
+        viewModel.initData(arguments.getEnum(BundleKey.KEY_VOICE_MODE, VoiceVerificationMode.UNLOCK))
     }
 
     override fun subscribeObserver(view: View) {

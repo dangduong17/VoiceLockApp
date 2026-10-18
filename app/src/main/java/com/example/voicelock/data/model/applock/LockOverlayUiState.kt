@@ -1,12 +1,13 @@
 package com.example.voicelock.data.model.applock
 
 import com.example.voicelock.data.model.lock.LockMethod
+import com.example.voicelock.util.Constant
 
 data class LockOverlayUiState(
     val isResolving: Boolean = true,
     val availableMethods: List<LockMethod> = emptyList(),
     val currentMethodIndex: Int = 0,
-    val pinLength: Int = 6,
+    val pinLength: Int = Constant.PIN_LENGTH_DEFAULT,
 )
 
 fun LockOverlayUiState.currentMethod(): LockMethod? = availableMethods.getOrNull(currentMethodIndex)

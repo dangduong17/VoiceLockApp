@@ -12,6 +12,7 @@ import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.util.Constant
 import com.example.voicelock.util.Result
+import com.example.voicelock.util.resultFlow
 import com.example.voicelock.util.catchAsResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -46,15 +47,14 @@ class BiometricRepositoryImpl(
         type: BiometricType,
         isEnabled: Boolean,
     ): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             val key =
                 when (type) {
                     BiometricType.FINGERPRINT -> KEY_FINGERPRINT_ENABLED
                 }
             dataStore.edit { preferences -> preferences[key] = isEnabled }
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     private fun getAvailability(type: BiometricType): BiometricAvailability {
         if (!hasSensor(type)) return BiometricAvailability.NO_HARDWARE

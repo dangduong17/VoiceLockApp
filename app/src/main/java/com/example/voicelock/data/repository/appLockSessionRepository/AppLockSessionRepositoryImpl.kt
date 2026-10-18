@@ -2,11 +2,9 @@ package com.example.voicelock.data.repository.appLockSessionRepository
 
 import com.example.voicelock.util.Constant
 import com.example.voicelock.util.Result
-import com.example.voicelock.util.catchAsResult
+import com.example.voicelock.util.resultFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -18,26 +16,23 @@ class AppLockSessionRepositoryImpl : AppLockSessionRepository {
     private val unlockedAt = ConcurrentHashMap<String, Long>()
 
     override fun markUnlocked(packageName: String): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow(Dispatchers.Default) {
             unlockedAt[packageName] = System.currentTimeMillis()
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.Default)
-            .catchAsResult()
+            Unit
+        }
 
     override fun isUnlocked(packageName: String): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> {
+        resultFlow(Dispatchers.Default) {
             val unlockedTimestamp = unlockedAt[packageName]
             val isStillValid =
                 unlockedTimestamp != null &&
                     (System.currentTimeMillis() - unlockedTimestamp) < Constant.APP_LOCK_SESSION_TTL_MS
-            emit(Result.Success(isStillValid))
-        }.flowOn(Dispatchers.Default)
-            .catchAsResult()
+            isStillValid
+        }
 
     override fun clearAll(): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow(Dispatchers.Default) {
             unlockedAt.clear()
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.Default)
-            .catchAsResult()
+            Unit
+        }
 }

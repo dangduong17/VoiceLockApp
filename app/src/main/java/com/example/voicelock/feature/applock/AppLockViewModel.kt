@@ -8,9 +8,11 @@ import com.example.voicelock.data.model.applock.toPresentation
 import com.example.voicelock.domain.usecase.applock.GetInstalledAppsUseCase
 import com.example.voicelock.domain.usecase.applock.GetLockedPackagesUseCase
 import com.example.voicelock.domain.usecase.applock.SetAppLockedUseCase
+import com.example.voicelock.util.Result
 import com.example.voicelock.util.UiState
 import com.example.voicelock.util.getDataOrDefault
 import com.example.voicelock.util.getDataOrNull
+import kotlinx.coroutines.flow.first
 
 class AppLockViewModel(
     private val getInstalledAppsUseCase: GetInstalledAppsUseCase,
@@ -23,14 +25,14 @@ class AppLockViewModel(
         if (current is UiState.Loading || current is UiState.Success) return
         setState { copy(itemsUiState = UiState.Loading) }
         launchIO(onError = { onLoadFailed(it) }) {
-            val installedApps = getInstalledAppsUseCase().getDataOrNull()
-            if (installedApps == null) {
-                onLoadFailed(IllegalStateException("Không tải được danh sách ứng dụng"))
-                return@launchIO
+            when (val installedApps = getInstalledAppsUseCase().first()) {
+                is Result.Error -> onLoadFailed(installedApps.error)
+                is Result.Success -> {
+                    val lockedPackages = getLockedPackagesUseCase().getDataOrDefault(emptySet())
+                    val items = installedApps.data.map { it.toPresentation().toAppLockItem(lockedPackages) }
+                    setState { copy(itemsUiState = UiState.Success(items)) }
+                }
             }
-            val lockedPackages = getLockedPackagesUseCase().getDataOrDefault(emptySet())
-            val items = installedApps.map { it.toPresentation().toAppLockItem(lockedPackages) }
-            setState { copy(itemsUiState = UiState.Success(items)) }
         }
     }
 

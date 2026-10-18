@@ -5,10 +5,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.example.voicelock.util.Result
+import com.example.voicelock.util.resultFlow
 import com.example.voicelock.util.catchAsResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -26,14 +26,13 @@ class AppLockRepositoryImpl(
         packageName: String,
         isLocked: Boolean,
     ): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             dataStore.edit { preferences ->
                 val current = preferences[KEY_LOCKED_PACKAGES] ?: emptySet()
                 preferences[KEY_LOCKED_PACKAGES] = if (isLocked) current + packageName else current - packageName
             }
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     companion object {
         private val KEY_LOCKED_PACKAGES = stringSetPreferencesKey("locked_packages")

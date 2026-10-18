@@ -44,13 +44,16 @@ class AppLockRestartReceiver :
     private companion object {
         const val TAG = "AppLockRestartReceiver"
 
+        // Fast-boot variants sent instead of BOOT_COMPLETED by some OEM builds (Xiaomi, HTC).
+        const val ACTION_QUICKBOOT_POWERON = "android.intent.action.QUICKBOOT_POWERON"
+        const val ACTION_HTC_QUICKBOOT_POWERON = "com.htc.intent.action.QUICKBOOT_POWERON"
+
         val RESTART_ACTIONS =
             setOf(
                 Intent.ACTION_BOOT_COMPLETED,
                 Intent.ACTION_MY_PACKAGE_REPLACED,
-                // Fast-boot variants sent instead of BOOT_COMPLETED by some OEM builds (Xiaomi, HTC).
-                "android.intent.action.QUICKBOOT_POWERON",
-                "com.htc.intent.action.QUICKBOOT_POWERON",
+                ACTION_QUICKBOOT_POWERON,
+                ACTION_HTC_QUICKBOOT_POWERON,
             )
     }
 }

@@ -317,6 +317,7 @@ class KeywordAudioRecognizer(
                     }
 
                     // API 34+: only called when detection was requested in the intent.
+                    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                     override fun onLanguageDetection(results: Bundle) {
                         // Engines report lower-case tags ("ja-jp"); normalize to BCP-47 ("ja-JP").
                         results.getString(SpeechRecognizer.DETECTED_LANGUAGE)?.let { detectedLanguage = Locale.forLanguageTag(it).toLanguageTag() }
