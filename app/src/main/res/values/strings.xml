@@ -294,4 +294,7 @@
     <string name="pin_forgot">Quên PIN?</string>
     <string name="common_loading">Đang tải…</string>
     <string name="common_back">Quay lại</string>
+    <!-- F0: rebuild the app lock after a reboot -->
+    <string name="permission_autostart_title">Tự khởi động</string>
+    <string name="permission_autostart_sub">Xiaomi: cho phép để khóa ứng dụng tự bật lại sau khi khởi động lại máy</string>
 </resources>

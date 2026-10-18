@@ -225,6 +225,74 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Row 4: Xiaomi auto-start (needed to rebuild the app lock after a reboot) -->
+        <View
+            android:id="@+id/dividerAutoStart"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_1dp"
+            android:layout_marginVertical="@dimen/_12dp"
+            android:background="@color/divider_line"
+            android:visibility="gone" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rowAutoStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivAutoStartCircle"
+                android:layout_width="@dimen/_40dp"
+                android:layout_height="@dimen/_40dp"
+                android:background="@drawable/bg_circle_icon"
+                android:importantForAccessibility="no"
+                android:padding="@dimen/_8dp"
+                android:src="@drawable/ic_lock"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvAutoStartTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12dp"
+                android:text="@string/permission_autostart_title"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/_14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/btnAutoStart"
+                app:layout_constraintStart_toEndOf="@id/ivAutoStartCircle"
+                app:layout_constraintTop_toTopOf="@id/ivAutoStartCircle" />
+
+            <TextView
+                android:id="@+id/tvAutoStartSub"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12dp"
+                android:layout_marginTop="@dimen/_2dp"
+                android:text="@string/permission_autostart_sub"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/_12sp"
+                app:layout_constraintEnd_toStartOf="@id/btnAutoStart"
+                app:layout_constraintStart_toEndOf="@id/ivAutoStartCircle"
+                app:layout_constraintTop_toBottomOf="@id/tvAutoStartTitle" />
+
+            <TextView
+                android:id="@+id/btnAutoStart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/_4dp"
+                android:text="@string/app_lock_open_settings"
+                android:textColor="@color/primary_blue"
+                android:textSize="@dimen/_13sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

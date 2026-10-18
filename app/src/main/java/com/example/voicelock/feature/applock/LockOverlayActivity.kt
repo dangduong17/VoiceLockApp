@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.example.voicelock.R
 import com.example.voicelock.data.model.applock.LockOverlayUiEvent
@@ -37,6 +39,7 @@ class LockOverlayActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock_overlay)
+        applySystemBarInsets()
         applyLockScreenWindowFlags()
 
         targetPackageName = intent.getStringExtra(BundleKey.KEY_LOCK_TARGET_PACKAGE).orEmpty()
@@ -121,6 +124,18 @@ class LockOverlayActivity : AppCompatActivity() {
         val graph = navController.navInflater.inflate(R.navigation.nav_graph_lock_overlay)
         graph.setStartDestination(destinationId)
         navController.setGraph(graph, args)
+    }
+
+    /**
+     * Target SDK 35+ draws edge-to-edge: without this padding the "try another method" button sits
+     * under the navigation bar (same handling as MainActivity).
+     */
+    private fun applySystemBarInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layoutOverlayRoot)) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
     }
 
     private fun applyLockScreenWindowFlags() {

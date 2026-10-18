@@ -9,6 +9,7 @@ import com.example.voicelock.data.local.face.FaceRecognitionEngine
 import com.example.voicelock.data.local.voice.AudioRecorderHelper
 import com.example.voicelock.data.local.voice.KeywordAudioRecognizer
 import com.example.voicelock.data.local.voice.VoiceBiometricsManager
+import com.example.voicelock.service.AppLockMonitorLauncher
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -17,6 +18,7 @@ val coreModule = module {
     single<DataStore<Preferences>> { androidContext().appLockDataStore }
     single { VoiceBiometricsManager(context = androidContext(), securePrefs = get()) }
     single { FaceRecognitionEngine(context = androidContext()) }
+    single { AppLockMonitorLauncher(context = androidContext(), getLockedPackagesUseCase = get()) }
     factory { AudioRecorderHelper() }
     factory { KeywordAudioRecognizer(androidContext()) }
 }
