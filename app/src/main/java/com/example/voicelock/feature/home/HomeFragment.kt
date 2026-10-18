@@ -15,7 +15,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     HomeViewModel::class,
 ) {
     override fun init(view: View, savedInstanceState: Bundle?) {
-        initView()
         settingEvent()
     }
 

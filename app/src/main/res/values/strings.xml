@@ -72,8 +72,17 @@
     <string name="pin_subtitle_enter">Nhập %1$d chữ số</string>
     <string name="pin_title_confirm">Xác nhận mã PIN</string>
     <string name="pin_subtitle_confirm">Nhập lại mã PIN để xác nhận</string>
-    <string name="pin_toggle_use_4">Dùng mã 4 số</string>
-    <string name="pin_toggle_use_6">Dùng mã 6 số</string>
+    <string name="pin_toggle_use_length">Dùng mã %1$d số</string>
+    <string name="pin_digit_0" translatable="false">0</string>
+    <string name="pin_digit_1" translatable="false">1</string>
+    <string name="pin_digit_2" translatable="false">2</string>
+    <string name="pin_digit_3" translatable="false">3</string>
+    <string name="pin_digit_4" translatable="false">4</string>
+    <string name="pin_digit_5" translatable="false">5</string>
+    <string name="pin_digit_6" translatable="false">6</string>
+    <string name="pin_digit_7" translatable="false">7</string>
+    <string name="pin_digit_8" translatable="false">8</string>
+    <string name="pin_digit_9" translatable="false">9</string>
     <string name="pin_wrong_remaining">Sai mã PIN. Còn %1$d lần thử</string>
     <string name="pin_mismatch">Mã PIN không khớp, vui lòng nhập lại</string>
     <string name="pin_set_success">Đã lưu mã PIN mới</string>

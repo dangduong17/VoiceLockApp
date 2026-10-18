@@ -1,19 +1,14 @@
 package com.example.voicelock.feature.patternlock
 
-import android.view.View
 import com.example.voicelock.R
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.patternlock.PatternLockStage
 import com.example.voicelock.data.model.patternlock.PatternLockUiEvent
-import com.example.voicelock.data.model.patternlock.PatternLockUiState
-import com.example.voicelock.data.model.patternlock.isInputEnabled
+import com.example.voicelock.data.model.patternlock.PatternLockHeaderInfo
 import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.showMessage
+import com.example.voicelock.util.updateLockoutMessage
 import com.example.voicelock.widget.PatternLockView
-
-fun PatternLockFragment.initView() {
-    // Basic setup if any
-}
 
 fun PatternLockFragment.backEvent() {
     navigator.navigateUp()
@@ -33,11 +28,11 @@ fun PatternLockFragment.settingEvent() {
     )
 }
 
-fun PatternLockFragment.updateUiState(state: PatternLockUiState) {
+fun PatternLockFragment.updateHeader(info: PatternLockHeaderInfo) {
     val (title, subtitle) =
-        when (state.stage) {
+        when (info.stage) {
             PatternLockStage.VERIFY ->
-                if (state.mode == PatternLockMode.UNLOCK) {
+                if (info.mode == PatternLockMode.UNLOCK) {
                     getString(R.string.pattern_title_unlock) to getString(R.string.pattern_subtitle_unlock)
                 } else {
                     getString(R.string.pattern_title_verify) to getString(R.string.pattern_subtitle_verify)
@@ -47,13 +42,14 @@ fun PatternLockFragment.updateUiState(state: PatternLockUiState) {
         }
     binding.tvPatternScreenTitle.text = title
     binding.tvPatternScreenSubtitle.text = subtitle
+}
 
-    binding.tvPatternLockoutMessage.visibility = if (state.isLocked) View.VISIBLE else View.GONE
-    if (state.isLocked) {
-        binding.tvPatternLockoutMessage.text = getString(R.string.lockout_message, state.lockoutRemainingSeconds)
-    }
+fun PatternLockFragment.updateLockout(remainingSeconds: Int) {
+    binding.tvPatternLockoutMessage.updateLockoutMessage(remainingSeconds)
+}
 
-    binding.patternLockView.setInputEnabled(state.isInputEnabled())
+fun PatternLockFragment.updateInputEnabled(isEnabled: Boolean) {
+    binding.patternLockView.setInputEnabled(isEnabled)
 }
 
 fun PatternLockFragment.handleUiEvent(event: PatternLockUiEvent) {

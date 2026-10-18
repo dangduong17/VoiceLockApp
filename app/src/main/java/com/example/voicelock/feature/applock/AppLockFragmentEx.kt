@@ -1,12 +1,10 @@
 package com.example.voicelock.feature.applock
 
 import android.content.Intent
-import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.example.voicelock.R
-import com.example.voicelock.data.model.applock.AppLockUiState
-import com.example.voicelock.data.model.applock.isMonitoringReady
-import com.example.voicelock.feature.applock.adapter.AppLockAdapter
+import com.example.voicelock.data.model.applock.AppLockItemUiModel
 import com.example.voicelock.service.AppLockMonitorService
 import com.example.voicelock.util.UiState
 import com.example.voicelock.util.handleUiState
@@ -15,21 +13,11 @@ import com.example.voicelock.util.hasUsageAccess
 import com.example.voicelock.util.setPreventDoubleClick
 
 fun AppLockFragment.initView() {
+    adapter.setListener(this)
     binding.rvApps.adapter = adapter
 }
 
 fun AppLockFragment.settingEvent() {
-    adapter.setListener(
-        object : AppLockAdapter.Listener {
-            override fun onToggleLocked(
-                packageName: String,
-                isLocked: Boolean,
-            ) {
-                viewModel.onToggleLocked(packageName, isLocked)
-            }
-        },
-    )
-
     binding.btnPermissionWarning.setPreventDoubleClick {
         navigator.navigateTo(R.id.action_appLockFragment_to_permissionsFragment)
     }
@@ -42,21 +30,19 @@ fun AppLockFragment.refreshPermissions() {
     )
 }
 
-fun AppLockFragment.updateUiState(state: AppLockUiState) {
-    val isMissingPermission = !state.isUsageAccessGranted || !state.isOverlayPermissionGranted
-    binding.btnPermissionWarning.visibility = if (isMissingPermission) View.VISIBLE else View.GONE
-
-    state.itemsUiState.handleUiState(
-        onSuccess = { items -> adapter.submitList(items) },
-    )
-
-    syncMonitorService(state)
+fun AppLockFragment.updatePermissionWarning(isMissingPermission: Boolean) {
+    binding.btnPermissionWarning.isVisible = isMissingPermission
 }
 
-private fun AppLockFragment.syncMonitorService(state: AppLockUiState) {
-    if (state.itemsUiState !is UiState.Success) return
+fun AppLockFragment.updateItemsUiState(itemsUiState: UiState<List<AppLockItemUiModel>>) {
+    itemsUiState.handleUiState(onSuccess = { items -> adapter.submitList(items) })
+}
+
+/** Starts / stops the monitor only when the decision changes, not on every state emission. */
+fun AppLockFragment.syncMonitorService(shouldRun: Boolean?) {
+    if (shouldRun == null) return
     val serviceIntent = Intent(requireContext(), AppLockMonitorService::class.java)
-    if (state.isMonitoringReady()) {
+    if (shouldRun) {
         ContextCompat.startForegroundService(requireContext(), serviceIntent)
     } else {
         requireContext().stopService(serviceIntent)

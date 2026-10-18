@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.view.View
 import com.example.voicelock.base.BaseFragment
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
-import com.example.voicelock.data.model.securityquestion.getLockout
 import com.example.voicelock.data.model.securityquestion.getScreenInfo
 import com.example.voicelock.data.model.securityquestion.isInputEnabled
 import com.example.voicelock.databinding.FragmentSecurityQuestionBinding
 import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.collectFlowOnView
+import com.example.voicelock.util.getEnum
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -28,17 +28,17 @@ class SecurityQuestionFragment : BaseFragment<FragmentSecurityQuestionBinding, S
         initView()
         settingEvent()
         onSystemBack { backEvent() }
-        val mode =
-            arguments?.getString(BundleKey.KEY_LOCK_MODE)
-                ?.let { runCatching { SecurityQuestionMode.valueOf(it) }.getOrNull() }
-                ?: SecurityQuestionMode.SETUP
-        viewModel.initData(mode = mode, targetPackageName = arguments?.getString(BundleKey.KEY_LOCK_TARGET_PACKAGE))
+        viewModel.initData(
+            mode = arguments.getEnum(BundleKey.KEY_LOCK_MODE, SecurityQuestionMode.SETUP),
+            targetPackageName = arguments?.getString(BundleKey.KEY_LOCK_TARGET_PACKAGE))
     }
 
     override fun subscribeObserver(view: View) {
         viewModel.uiState.map { it.getScreenInfo() }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateScreen(it) }
         viewModel.uiState.map { it.inputError }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateInputError(it) }
-        viewModel.uiState.map { it.getLockout() }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateLockout(it) }
+        viewModel.uiState.map { it.lockoutRemainingSeconds }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) {
+            updateLockout(it)
+        }
         viewModel.uiState.map { it.isInputEnabled() }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) {
             updateInputEnabled(it)
         }

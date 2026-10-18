@@ -38,11 +38,12 @@ data class SecurityQuestionUiState(
     val question: String = "",
     val inputError: SecurityQuestionInputError = SecurityQuestionInputError.NONE,
     val isBusy: Boolean = false,
-    val isLocked: Boolean = false,
     val lockoutRemainingSeconds: Int = 0,
 )
 
-fun SecurityQuestionUiState.isInputEnabled(): Boolean = !isBusy && !isLocked
+fun SecurityQuestionUiState.isLocked(): Boolean = lockoutRemainingSeconds > 0
+
+fun SecurityQuestionUiState.isInputEnabled(): Boolean = !isBusy && !isLocked()
 
 /** Title, visible section and button text all follow mode + stage + stored question. */
 data class SecurityQuestionScreenInfo(
@@ -53,14 +54,6 @@ data class SecurityQuestionScreenInfo(
 
 fun SecurityQuestionUiState.getScreenInfo(): SecurityQuestionScreenInfo =
     SecurityQuestionScreenInfo(mode = mode, stage = stage, question = question)
-
-data class SecurityQuestionLockout(
-    val isLocked: Boolean,
-    val remainingSeconds: Int,
-)
-
-fun SecurityQuestionUiState.getLockout(): SecurityQuestionLockout =
-    SecurityQuestionLockout(isLocked = isLocked, remainingSeconds = lockoutRemainingSeconds)
 
 sealed class SecurityQuestionUiEvent {
     data class VerifyFailed(

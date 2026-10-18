@@ -14,8 +14,8 @@ import com.example.voicelock.domain.usecase.face.GetFaceSettingsUseCase
 import com.example.voicelock.domain.usecase.face.InitFaceEngineUseCase
 import com.example.voicelock.domain.usecase.face.SetFaceUnlockEnabledUseCase
 import com.example.voicelock.domain.usecase.face.VerifyOwnerFaceUseCase
-import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
+import com.example.voicelock.domain.usecase.lock.GetProtectionStatusUseCase
 import com.example.voicelock.domain.usecase.lock.LockDeviceUseCase
 import com.example.voicelock.domain.usecase.quicklock.GetFloatingLockEnabledUseCase
 import com.example.voicelock.domain.usecase.quicklock.SetFloatingLockEnabledUseCase
@@ -28,7 +28,6 @@ import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
 import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestionUseCase
 import com.example.voicelock.domain.usecase.securityquestion.SetSecurityQuestionUseCase
 import com.example.voicelock.domain.usecase.securityquestion.VerifySecurityAnswerUseCase
-import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
 import com.example.voicelock.domain.usecase.voice.DetectSpeechUseCase
 import com.example.voicelock.domain.usecase.voice.DownloadSpeechLanguageUseCase
 import com.example.voicelock.domain.usecase.voice.EnrollOwnerVoiceUseCase
@@ -47,16 +46,9 @@ import com.example.voicelock.domain.usecase.voice.WarmUpVoiceModelUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
-val homeUseCaseModule = module {
-    factoryOf(::GetHomeStatusUseCase)
-}
-
-val settingsUseCaseModule = module {
-    factoryOf(::GetSettingsUseCase)
-}
-
 val lockUseCaseModule = module {
     factoryOf(::GetLockoutStateUseCase)
+    factoryOf(::GetProtectionStatusUseCase)
     factoryOf(::LockDeviceUseCase)
     factoryOf(::GetFloatingLockEnabledUseCase)
     factoryOf(::SetFloatingLockEnabledUseCase)
@@ -123,8 +115,6 @@ val biometricUseCaseModule = module {
 
 val useCaseModule = module {
     includes(
-        homeUseCaseModule,
-        settingsUseCaseModule,
         lockUseCaseModule,
         pinLockUseCaseModule,
         patternLockUseCaseModule,

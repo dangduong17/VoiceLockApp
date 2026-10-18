@@ -1,10 +1,6 @@
 package com.example.voicelock.feature.voice.auth
 
 import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Bundle
-import android.view.View
-import androidx.core.content.ContextCompat
 import com.example.voicelock.R
 import com.example.voicelock.base.launchMain
 import com.example.voicelock.data.model.lock.DeviceLockResult
@@ -18,17 +14,17 @@ import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.canStart
 import com.example.voicelock.data.model.voice.isAutoListen
 import com.example.voicelock.data.model.voice.isBusy
-import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.Constant
 import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showMessage
 import com.example.voicelock.util.showPermissionDeniedMessage
 import kotlinx.coroutines.delay
-
-fun TwoStageAuthFragment.initView() {
-    // Basic setup if any
-}
+import androidx.core.view.isVisible
+import com.example.voicelock.util.isPermissionGranted
+import com.example.voicelock.util.navigateToVoiceEnrollment
+import com.example.voicelock.util.setEnabledWithAlpha
+import com.example.voicelock.util.setTextColorRes
 
 fun TwoStageAuthFragment.backEvent() {
     navigator.navigateUp()
@@ -49,17 +45,17 @@ private fun TwoStageAuthFragment.modeEvent(checkedId: Int) {
 fun TwoStageAuthFragment.actionEvent() {
     if (viewModel.uiState.value.stage == AuthStage.NOT_ENROLLED) {
         // Enroll the phrase this screen checks: the unlock passphrase or the F1 lock command.
-        val bundle = Bundle().apply { putString(BundleKey.KEY_VOICE_MODE, viewModel.uiState.value.mode.name) }
-        navigator.navigateTo(R.id.action_twoStageAuthFragment_to_enrollmentFragment, bundle)
+        navigator.navigateToVoiceEnrollment(
+            actionId = R.id.action_twoStageAuthFragment_to_enrollmentFragment,
+            mode = viewModel.uiState.value.mode,
+        )
     } else {
         startEvent()
     }
 }
 
 fun TwoStageAuthFragment.startEvent() {
-    val isGranted =
-        ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-    if (isGranted) {
+    if (requireContext().isPermissionGranted(Manifest.permission.RECORD_AUDIO)) {
         viewModel.startAuthentication()
     } else {
         micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -83,12 +79,11 @@ fun TwoStageAuthFragment.onScreenStarted() {
 fun TwoStageAuthFragment.updateStage(stageInfo: AuthStageInfo) = with(binding) {
     val stage = stageInfo.stage
     tvAuthStage.text = getStageText(stageInfo)
-    tvAuthStage.setTextColor(ContextCompat.getColor(requireContext(), getStageColorRes(stage)))
+    tvAuthStage.setTextColorRes(getStageColorRes(stage))
 
     val isBusy = stage.isBusy()
-    progressAuth.visibility = if (isBusy) View.VISIBLE else View.GONE
-    btnAuthAction.isEnabled = !isBusy
-    btnAuthAction.alpha = if (isBusy) 0.5f else 1f
+    progressAuth.isVisible = isBusy
+    btnAuthAction.setEnabledWithAlpha(!isBusy)
     btnAuthAction.text = getString(getActionTextRes(stageInfo))
     btnModeLock.isEnabled = !isBusy
     btnModeUnlock.isEnabled = !isBusy
@@ -143,13 +138,13 @@ private fun getFailureMessageRes(failure: AuthFailure): Int =
     }
 
 fun TwoStageAuthFragment.updateHeardText(heardText: String?) {
-    binding.tvRecognizedText.visibility = if (heardText == null) View.GONE else View.VISIBLE
+    binding.tvRecognizedText.isVisible = heardText != null
     binding.tvRecognizedText.text =
         if (heardText.isNullOrEmpty()) getString(R.string.voice_auth_recognized_nothing) else getString(R.string.voice_auth_recognized, heardText)
 }
 
 fun TwoStageAuthFragment.updateScores(scores: VoiceScores?) {
-    binding.tvScores.visibility = if (scores == null) View.GONE else View.VISIBLE
+    binding.tvScores.isVisible = scores != null
     scores?.let {
         binding.tvScores.text = getString(R.string.voice_auth_scores, it.speakerSimilarity, it.phraseSimilarity, it.phraseThreshold)
     }
@@ -164,8 +159,8 @@ fun TwoStageAuthFragment.updateMode(mode: VoiceVerificationMode) {
  * lock command always locks. The volume-key tip only applies to the lock overlay.
  */
 fun TwoStageAuthFragment.updateScreenKind(kind: AuthScreenKind) = with(binding) {
-    toggleMode.visibility = if (kind == AuthScreenKind.TEST) View.VISIBLE else View.GONE
-    tvVolumeKeyHint.visibility = if (kind == AuthScreenKind.APP_UNLOCK) View.VISIBLE else View.GONE
+    toggleMode.isVisible = kind == AuthScreenKind.TEST
+    tvVolumeKeyHint.isVisible = kind == AuthScreenKind.APP_UNLOCK
     tvAuthTitle.setText(if (kind == AuthScreenKind.LOCK_COMMAND) R.string.voice_lock_command_title else R.string.voice_auth_title)
 }
 

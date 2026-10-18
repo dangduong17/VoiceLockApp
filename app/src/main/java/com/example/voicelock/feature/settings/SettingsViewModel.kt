@@ -2,28 +2,34 @@ package com.example.voicelock.feature.settings
 
 import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
-import com.example.voicelock.data.model.patternlock.PatternLockMode
-import com.example.voicelock.data.model.pinlock.PinLockMode
-import com.example.voicelock.data.model.voice.VoiceVerificationMode
-import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
-import com.example.voicelock.data.model.settings.SettingsUiEvent
-import com.example.voicelock.data.model.settings.SettingsUiState
-import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricType
-import com.example.voicelock.data.model.biometric.getAvailability
 import com.example.voicelock.data.model.biometric.isActive
 import com.example.voicelock.data.model.biometric.withPreference
 import com.example.voicelock.data.model.face.isFaceUnlockActive
+import com.example.voicelock.data.model.lock.LockMethodUiEvent
+import com.example.voicelock.data.model.lock.getBiometricRowEvent
+import com.example.voicelock.data.model.lock.getEnableBiometricEvent
+import com.example.voicelock.data.model.lock.getFaceEnrollmentEvent
+import com.example.voicelock.data.model.lock.getFaceRowEvent
+import com.example.voicelock.data.model.lock.getPatternLockEvent
+import com.example.voicelock.data.model.lock.getPinLockEvent
+import com.example.voicelock.data.model.lock.getSecurityQuestionEvent
+import com.example.voicelock.data.model.lock.getVoiceLockEnrollmentEvent
+import com.example.voicelock.data.model.lock.getVoiceUnlockEnrollmentEvent
+import com.example.voicelock.data.model.lock.getVoiceUnlockRowEvent
+import com.example.voicelock.data.model.settings.SettingsUiEvent
+import com.example.voicelock.data.model.settings.SettingsUiState
+import com.example.voicelock.data.model.settings.toSettingsUiState
 import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
 import com.example.voicelock.domain.usecase.face.SetFaceUnlockEnabledUseCase
+import com.example.voicelock.domain.usecase.lock.GetProtectionStatusUseCase
 import com.example.voicelock.domain.usecase.quicklock.SetFloatingLockEnabledUseCase
-import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
 import com.example.voicelock.util.handleApiCall
 
 class SettingsViewModel(
-    private val getSettingsUseCase: GetSettingsUseCase,
+    private val getProtectionStatusUseCase: GetProtectionStatusUseCase,
     private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
     private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
     private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
@@ -33,22 +39,17 @@ class SettingsViewModel(
 
     fun initData() {
         handleApiCall(
-            apiCall = { getSettingsUseCase() },
-            onSuccess = { state -> setState { state } },
-            onError = { throwable ->
-                launchIO {
-                    setEvent(SettingsUiEvent.ShowLoadError(throwable.message))
-                }
-            },
+            apiCall = { getProtectionStatusUseCase() },
+            onSuccess = { status -> setState { status.toSettingsUiState() } },
+            onError = { launchIO { setEvent(SettingsUiEvent.ShowLoadError) } },
         )
     }
 
-    /** Same rule as HomeViewModel: turning a voice switch on before enrolling opens enrollment. */
     fun toggleVoiceUnlock(isEnabled: Boolean) {
         val state = getCurrentState()
         if (isEnabled == state.isVoiceUnlockEnabled) return
-        if (!state.isVoiceEnrolled) {
-            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)) }
+        state.getVoiceUnlockEnrollmentEvent()?.let { event ->
+            sendLockMethodEvent(event)
             return
         }
         setState { copy(isVoiceUnlockEnabled = isEnabled) }
@@ -58,79 +59,53 @@ class SettingsViewModel(
     fun toggleVoiceLock(isEnabled: Boolean) {
         val state = getCurrentState()
         if (isEnabled == state.isVoiceLockEnabled) return
-        if (!state.isVoiceLockCommandEnrolled) {
-            // F1: the lock command is its own recording, separate from the unlock passphrase.
-            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
+        state.getVoiceLockEnrollmentEvent()?.let { event ->
+            sendLockMethodEvent(event)
             return
         }
         setState { copy(isVoiceLockEnabled = isEnabled) }
         handleApiCall(
             apiCall = { setVoiceLockEnabledUseCase(isEnabled) },
-            onSuccess = { if (isEnabled) launchIO { setEvent(SettingsUiEvent.OfferVoiceLockTile) } },
+            onSuccess = { if (isEnabled) sendLockMethodEvent(LockMethodUiEvent.OfferVoiceLockTile) },
         )
     }
 
-    /** F1: tapping the voice lock row records (or re-records) the lock command. */
-    fun onVoiceLockRowClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
-    }
-
     fun onVoiceUnlockRowClicked() {
-        val event =
-            if (getCurrentState().isVoiceEnrolled) SettingsUiEvent.NavigateToVoiceTest else SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)
-        launchIO { setEvent(event) }
+        sendLockMethodEvent(getCurrentState().getVoiceUnlockRowEvent())
     }
 
-    /** Same rule as voice: turning face unlock on before enrolling opens face enrollment. */
     fun toggleFaceUnlock(isEnabled: Boolean) {
-        val face = getCurrentState().faceSettings
-        if (isEnabled == face.isFaceUnlockActive()) return
-        if (!face.isEnrolled) {
-            launchIO { setEvent(SettingsUiEvent.NavigateToFaceEnrollment) }
+        val state = getCurrentState()
+        if (isEnabled == state.faceSettings.isFaceUnlockActive()) return
+        state.getFaceEnrollmentEvent()?.let { event ->
+            sendLockMethodEvent(event)
             return
         }
         setState { copy(faceSettings = faceSettings.copy(isUnlockPreferenceOn = isEnabled)) }
         handleApiCall(apiCall = { setFaceUnlockEnabledUseCase(isEnabled) })
     }
 
-    /** Enrolled: test screen (re-enroll / delete live there); otherwise enrollment. */
     fun onFaceUnlockRowClicked() {
-        val event =
-            if (getCurrentState().faceSettings.isEnrolled) SettingsUiEvent.NavigateToFaceTest else SettingsUiEvent.NavigateToFaceEnrollment
-        launchIO { setEvent(event) }
+        sendLockMethodEvent(getCurrentState().getFaceRowEvent())
     }
 
-    /**
-     * Turning the fingerprint on is confirmed with the system prompt first ([onBiometricConfirmed]);
-     * without an enrolled biometric it opens the Android enrollment screen instead.
-     */
+    /** Turning off saves right away; turning on goes through [getEnableBiometricEvent] first. */
     fun toggleBiometric(
         type: BiometricType,
         isEnabled: Boolean,
     ) {
         val settings = getCurrentState().biometricSettings ?: return
         if (isEnabled == settings.isActive(type)) return
-        if (!isEnabled) {
+        if (isEnabled) {
+            sendLockMethodEvent(settings.getEnableBiometricEvent(type))
+        } else {
             saveBiometric(type = type, isEnabled = false)
-            return
         }
-        val event =
-            when (val availability = settings.getAvailability(type)) {
-                BiometricAvailability.AVAILABLE -> SettingsUiEvent.ConfirmBiometric(type)
-                BiometricAvailability.NOT_ENROLLED -> SettingsUiEvent.OpenBiometricEnrollment(type)
-                BiometricAvailability.NO_HARDWARE, BiometricAvailability.UNAVAILABLE ->
-                    SettingsUiEvent.ShowBiometricUnavailable(type, availability)
-            }
-        launchIO { setEvent(event) }
     }
 
-    /** Once on, tapping the row just tests the prompt; otherwise it starts turning it on. */
     fun onBiometricRowClicked(type: BiometricType) {
-        if (getCurrentState().biometricSettings?.isActive(type) == true) {
-            launchIO { setEvent(SettingsUiEvent.TestBiometric(type)) }
-        } else {
-            toggleBiometric(type = type, isEnabled = true)
-        }
+        val settings = getCurrentState().biometricSettings ?: return
+        sendLockMethodEvent(settings.getBiometricRowEvent(type))
     }
 
     fun onBiometricConfirmed(type: BiometricType) {
@@ -145,47 +120,16 @@ class SettingsViewModel(
         handleApiCall(apiCall = { setBiometricEnabledUseCase(type = type, isEnabled = isEnabled) })
     }
 
-    fun onHomeTabClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToHome) }
-    }
-
-    fun onVoiceCommandsClicked() {
-        // "Voice commands & samples" = (re-)record the voice password.
-        launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)) }
-    }
-
-    fun onPermissionsClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToPermissions) }
-    }
-
     fun onPinClicked() {
-        val state = getCurrentState()
-        val mode = if (state.isPinSet) PinLockMode.CHANGE else PinLockMode.SETUP
-        launchIO { setEvent(SettingsUiEvent.NavigateToPinLock(mode = mode, pinLength = state.pinLength)) }
+        sendLockMethodEvent(getCurrentState().getPinLockEvent())
     }
 
     fun onPatternClicked() {
-        val state = getCurrentState()
-        val mode = if (state.isPatternSet) PatternLockMode.CHANGE else PatternLockMode.SETUP
-        launchIO { setEvent(SettingsUiEvent.NavigateToPatternLock(mode)) }
+        sendLockMethodEvent(getCurrentState().getPatternLockEvent())
     }
 
     fun onQuestionsClicked() {
-        // Changing an existing question first asks it (CHANGE mode), like changing the PIN.
-        val mode = if (getCurrentState().isSecurityQuestionSet) SecurityQuestionMode.CHANGE else SecurityQuestionMode.SETUP
-        launchIO { setEvent(SettingsUiEvent.NavigateToSecurityQuestion(mode)) }
-    }
-
-    fun onThemeLanguageClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToThemeLanguage) }
-    }
-
-    fun onHelpFeedbackClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToHelpFeedback) }
-    }
-
-    fun onAboutClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToAbout) }
+        sendLockMethodEvent(getCurrentState().getSecurityQuestionEvent())
     }
 
     /** [canDrawOverlays] comes from the screen (a system permission, checked where the Context is). */
@@ -208,7 +152,7 @@ class SettingsViewModel(
         )
     }
 
-    fun onAppLockClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToAppLock) }
+    private fun sendLockMethodEvent(event: LockMethodUiEvent) {
+        launchIO { setEvent(SettingsUiEvent.LockMethod(event)) }
     }
 }

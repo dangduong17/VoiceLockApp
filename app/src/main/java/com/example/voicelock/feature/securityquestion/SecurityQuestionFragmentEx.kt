@@ -1,21 +1,21 @@
 package com.example.voicelock.feature.securityquestion
 
-import android.os.Bundle
-import android.view.View
 import android.widget.ArrayAdapter
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.example.voicelock.R
 import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionInputError
-import com.example.voicelock.data.model.securityquestion.SecurityQuestionLockout
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionScreenInfo
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionStage
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionUiEvent
-import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.MessageType
+import com.example.voicelock.util.navigateToPinLock
+import com.example.voicelock.util.setEnabledWithAlpha
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showMessage
+import com.example.voicelock.util.updateLockoutMessage
 
 fun SecurityQuestionFragment.initView() {
     val presets = resources.getStringArray(R.array.security_question_presets).toList()
@@ -69,7 +69,7 @@ private fun SecurityQuestionFragment.getSelectedQuestion(): String =
     }
 
 private fun SecurityQuestionFragment.updateCustomQuestionVisibility() {
-    binding.tilCustomQuestion.visibility = if (isCustomQuestionSelected()) View.VISIBLE else View.GONE
+    binding.tilCustomQuestion.isVisible = isCustomQuestionSelected()
 }
 
 fun SecurityQuestionFragment.updateScreen(info: SecurityQuestionScreenInfo) = with(binding) {
@@ -95,8 +95,8 @@ fun SecurityQuestionFragment.updateScreen(info: SecurityQuestionScreenInfo) = wi
             SecurityQuestionStage.LOADING -> R.string.common_loading
         },
     )
-    layoutVerify.visibility = if (stage == SecurityQuestionStage.VERIFY) View.VISIBLE else View.GONE
-    layoutSetup.visibility = if (stage == SecurityQuestionStage.SETUP) View.VISIBLE else View.GONE
+    layoutVerify.isVisible = stage == SecurityQuestionStage.VERIFY
+    layoutSetup.isVisible = stage == SecurityQuestionStage.SETUP
     tvStoredQuestion.text = info.question
     btnQuestionAction.setText(
         when (stage) {
@@ -118,15 +118,13 @@ fun SecurityQuestionFragment.updateInputError(error: SecurityQuestionInputError)
         if (error == SecurityQuestionInputError.ANSWER_MISMATCH) getString(R.string.security_question_error_mismatch) else null
 }
 
-fun SecurityQuestionFragment.updateLockout(lockout: SecurityQuestionLockout) {
-    binding.tvQuestionLockout.visibility = if (lockout.isLocked) View.VISIBLE else View.GONE
-    if (lockout.isLocked) binding.tvQuestionLockout.text = getString(R.string.lockout_message, lockout.remainingSeconds)
+fun SecurityQuestionFragment.updateLockout(remainingSeconds: Int) {
+    binding.tvQuestionLockout.updateLockoutMessage(remainingSeconds)
 }
 
 fun SecurityQuestionFragment.updateInputEnabled(isEnabled: Boolean) = with(binding) {
     listOf(tilAnswer, tilQuestion, tilCustomQuestion, tilNewAnswer, tilConfirmAnswer).forEach { it.isEnabled = isEnabled }
-    btnQuestionAction.isEnabled = isEnabled
-    btnQuestionAction.alpha = if (isEnabled) 1f else 0.5f
+    btnQuestionAction.setEnabledWithAlpha(isEnabled)
 }
 
 fun SecurityQuestionFragment.handleUiEvent(event: SecurityQuestionUiEvent) {
@@ -149,6 +147,5 @@ fun SecurityQuestionFragment.handleUiEvent(event: SecurityQuestionUiEvent) {
 }
 
 private fun SecurityQuestionFragment.navigateToPinSetup() {
-    val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, PinLockMode.SETUP.name) }
-    navigator.navigateTo(R.id.action_securityQuestionFragment_to_pinLockFragment, bundle)
+    navigator.navigateToPinLock(actionId = R.id.action_securityQuestionFragment_to_pinLockFragment, mode = PinLockMode.SETUP)
 }

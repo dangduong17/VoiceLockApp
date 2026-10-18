@@ -1,45 +1,28 @@
 package com.example.voicelock.feature.pinlock
 
-import android.os.Bundle
-import android.view.View
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import com.example.voicelock.R
+import com.example.voicelock.data.model.pinlock.PinLengthToggleInfo
+import com.example.voicelock.data.model.pinlock.PinLockDotsInfo
+import com.example.voicelock.data.model.pinlock.PinLockHeaderInfo
 import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.pinlock.PinLockStage
 import com.example.voicelock.data.model.pinlock.PinLockUiEvent
-import com.example.voicelock.data.model.pinlock.PinLockUiState
-import com.example.voicelock.data.model.pinlock.canResetWithSecurityQuestion
-import com.example.voicelock.data.model.pinlock.canToggleLength
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
-import com.example.voicelock.util.BundleKey
-import com.example.voicelock.data.model.pinlock.isKeypadEnabled
 import com.example.voicelock.util.MessageType
+import com.example.voicelock.util.navigateToSecurityQuestion
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.shakeError
 import com.example.voicelock.util.showMessage
-
-fun PinLockFragment.initView() {
-    // Basic setup if any
-}
+import com.example.voicelock.util.updateLockoutMessage
 
 fun PinLockFragment.backEvent() {
     navigator.navigateUp()
 }
 
 fun PinLockFragment.settingEvent() {
-    val digitButtons =
-        listOf(
-            binding.btn0 to 0,
-            binding.btn1 to 1,
-            binding.btn2 to 2,
-            binding.btn3 to 3,
-            binding.btn4 to 4,
-            binding.btn5 to 5,
-            binding.btn6 to 6,
-            binding.btn7 to 7,
-            binding.btn8 to 8,
-            binding.btn9 to 9,
-        )
-    digitButtons.forEach { (button, digit) ->
+    getDigitButtons().forEachIndexed { digit, button ->
         button.setPreventDoubleClick { viewModel.onDigitPressed(digit) }
     }
 
@@ -54,65 +37,62 @@ fun PinLockFragment.settingEvent() {
     binding.tvForgotPin.setPreventDoubleClick { forgotPinEvent() }
 }
 
+/** Keypad buttons in digit order, so a button's index is the digit it types. */
+private fun PinLockFragment.getDigitButtons() =
+    with(binding) { listOf(btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9) }
+
 /** Answer the security question instead of the forgotten PIN, then set a new one. */
 fun PinLockFragment.forgotPinEvent() {
-    val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, SecurityQuestionMode.RESET_PIN.name) }
-    navigator.navigateTo(R.id.action_pinLockFragment_to_securityQuestionFragment, bundle)
+    navigator.navigateToSecurityQuestion(
+        actionId = R.id.action_pinLockFragment_to_securityQuestionFragment,
+        mode = SecurityQuestionMode.RESET_PIN,
+    )
 }
 
-fun PinLockFragment.updateUiState(state: PinLockUiState) {
-    val (titleRes, subtitleText) =
-        when (state.stage) {
+fun PinLockFragment.updateHeader(info: PinLockHeaderInfo) {
+    val (title, subtitle) =
+        when (info.stage) {
             PinLockStage.VERIFY ->
-                if (state.mode == PinLockMode.UNLOCK) {
+                if (info.mode == PinLockMode.UNLOCK) {
                     getString(R.string.pin_title_unlock) to getString(R.string.pin_subtitle_unlock)
                 } else {
                     getString(R.string.pin_title_verify) to getString(R.string.pin_subtitle_verify)
                 }
-            PinLockStage.ENTER -> getString(R.string.pin_title_enter) to getString(R.string.pin_subtitle_enter, state.pinLength)
+            PinLockStage.ENTER -> getString(R.string.pin_title_enter) to getString(R.string.pin_subtitle_enter, info.pinLength)
             PinLockStage.CONFIRM -> getString(R.string.pin_title_confirm) to getString(R.string.pin_subtitle_confirm)
         }
-    binding.tvPinScreenTitle.text = titleRes
-    binding.tvPinScreenSubtitle.text = subtitleText
-
-    val canShowToggle = state.canToggleLength() && state.enteredDigits == 0
-    binding.tvToggleLength.visibility = if (canShowToggle) View.VISIBLE else View.INVISIBLE
-    binding.tvToggleLength.text =
-        if (state.pinLength == 4) getString(R.string.pin_toggle_use_6) else getString(R.string.pin_toggle_use_4)
-
-    updateDots(state)
-
-    binding.tvForgotPin.visibility = if (state.canResetWithSecurityQuestion()) View.VISIBLE else View.GONE
-
-    binding.tvLockoutMessage.visibility = if (state.isLocked) View.VISIBLE else View.GONE
-    if (state.isLocked) {
-        binding.tvLockoutMessage.text = getString(R.string.lockout_message, state.lockoutRemainingSeconds)
-    }
-
-    val keypadButtons =
-        listOf(
-            binding.btn0, binding.btn1, binding.btn2, binding.btn3, binding.btn4,
-            binding.btn5, binding.btn6, binding.btn7, binding.btn8, binding.btn9, binding.btnDelete,
-        )
-    keypadButtons.forEach { it.isEnabled = state.isKeypadEnabled() }
+    binding.tvPinScreenTitle.text = title
+    binding.tvPinScreenSubtitle.text = subtitle
 }
 
-private fun PinLockFragment.updateDots(state: PinLockUiState) {
-    val dots = listOf(binding.dot1, binding.dot2, binding.dot3, binding.dot4, binding.dot5, binding.dot6)
+fun PinLockFragment.updateLengthToggle(info: PinLengthToggleInfo) {
+    binding.tvToggleLength.isInvisible = !info.isVisible
+    binding.tvToggleLength.text = getString(R.string.pin_toggle_use_length, info.toggledLength)
+}
+
+fun PinLockFragment.updateForgotPin(isVisible: Boolean) {
+    binding.tvForgotPin.isVisible = isVisible
+}
+
+fun PinLockFragment.updateLockout(remainingSeconds: Int) {
+    binding.tvLockoutMessage.updateLockoutMessage(remainingSeconds)
+}
+
+fun PinLockFragment.updateKeypadEnabled(isEnabled: Boolean) {
+    (getDigitButtons() + binding.btnDelete).forEach { it.isEnabled = isEnabled }
+}
+
+fun PinLockFragment.updateDots(info: PinLockDotsInfo) {
+    val dots = with(binding) { listOf(dot1, dot2, dot3, dot4, dot5, dot6) }
     dots.forEachIndexed { index, dot ->
-        when {
-            index >= state.pinLength -> dot.visibility = View.GONE
-            else -> {
-                dot.visibility = View.VISIBLE
-                dot.setBackgroundResource(
-                    when {
-                        state.isError -> R.drawable.dot_error
-                        index < state.enteredDigits -> R.drawable.dot_filled
-                        else -> R.drawable.dot_empty
-                    },
-                )
-            }
-        }
+        dot.isVisible = index < info.pinLength
+        dot.setBackgroundResource(
+            when {
+                info.isError -> R.drawable.dot_error
+                index < info.enteredDigits -> R.drawable.dot_filled
+                else -> R.drawable.dot_empty
+            },
+        )
     }
 }
 

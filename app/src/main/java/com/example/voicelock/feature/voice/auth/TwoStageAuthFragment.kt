@@ -31,7 +31,6 @@ class TwoStageAuthFragment : BaseFragment<FragmentTwoStageAuthBinding, TwoStageA
     var hasAutoStarted = false
 
     override fun init(view: View, savedInstanceState: Bundle?) {
-        initView()
         settingEvent()
         onSystemBack { backEvent() }
         viewModel.initData(

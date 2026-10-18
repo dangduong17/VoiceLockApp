@@ -6,7 +6,7 @@ import com.example.voicelock.data.model.biometric.BiometricAuthStage
 import com.example.voicelock.data.model.biometric.BiometricAuthUiEvent
 import com.example.voicelock.data.model.biometric.BiometricAuthUiState
 import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
-import kotlinx.coroutines.flow.first
+import com.example.voicelock.util.getDataOrNull
 
 /**
  * Lock-overlay step for system biometrics (fingerprint / face via BiometricPrompt). The prompt is
@@ -42,7 +42,7 @@ class BiometricAuthViewModel(
     fun onAuthenticationSucceeded() {
         launchIO {
             // Same session bookkeeping as a PIN/pattern unlock, so the monitor lets the app through.
-            targetPackageName?.let { markAppUnlockedUseCase(it).first() }
+            markAppUnlockedUseCase(targetPackageName).getDataOrNull()
             setState { copy(stage = BiometricAuthStage.SUCCESS, errorMessage = null) }
             setEvent(BiometricAuthUiEvent.Authenticated(isAppUnlock = targetPackageName != null))
         }

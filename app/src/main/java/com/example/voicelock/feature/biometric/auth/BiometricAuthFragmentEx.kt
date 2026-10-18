@@ -1,7 +1,5 @@
 package com.example.voicelock.feature.biometric.auth
 
-import android.view.View
-import androidx.core.content.ContextCompat
 import com.example.voicelock.R
 import com.example.voicelock.data.model.biometric.BiometricAuthStage
 import com.example.voicelock.data.model.biometric.BiometricAuthStatusInfo
@@ -9,10 +7,9 @@ import com.example.voicelock.data.model.biometric.BiometricAuthUiEvent
 import com.example.voicelock.util.isBiometricCancel
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showBiometricPrompt
-
-fun BiometricAuthFragment.initView() {
-    // Basic setup if any
-}
+import androidx.core.view.isVisible
+import com.example.voicelock.util.setEnabledWithAlpha
+import com.example.voicelock.util.setTextColorRes
 
 fun BiometricAuthFragment.backEvent() {
     navigator.navigateUp()
@@ -39,14 +36,13 @@ fun BiometricAuthFragment.updateStatus(info: BiometricAuthStatusInfo) = with(bin
             },
         )
     val colorRes = if (stage == BiometricAuthStage.FAILED) R.color.error_red else R.color.text_primary
-    tvBiometricAuthStatus.setTextColor(ContextCompat.getColor(requireContext(), colorRes))
+    tvBiometricAuthStatus.setTextColorRes(colorRes)
 
-    tvBiometricAuthError.visibility = if (errorMessage.isNullOrBlank()) View.GONE else View.VISIBLE
+    tvBiometricAuthError.isVisible = !errorMessage.isNullOrBlank()
     tvBiometricAuthError.text = errorMessage.orEmpty()
 
     val isBusy = stage == BiometricAuthStage.PROMPTING || stage == BiometricAuthStage.SUCCESS
-    btnBiometricAuthAction.isEnabled = !isBusy
-    btnBiometricAuthAction.alpha = if (isBusy) 0.5f else 1f
+    btnBiometricAuthAction.setEnabledWithAlpha(!isBusy)
 }
 
 fun BiometricAuthFragment.handleUiEvent(event: BiometricAuthUiEvent) {

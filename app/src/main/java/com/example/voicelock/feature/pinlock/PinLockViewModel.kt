@@ -9,16 +9,18 @@ import com.example.voicelock.data.model.pinlock.PinLockUiEvent
 import com.example.voicelock.data.model.pinlock.PinLockUiState
 import com.example.voicelock.data.model.pinlock.PinVerifyResult
 import com.example.voicelock.data.model.pinlock.canToggleLength
+import com.example.voicelock.data.model.pinlock.getToggledLength
 import com.example.voicelock.data.model.pinlock.isKeypadEnabled
 import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
 import com.example.voicelock.domain.usecase.pinlock.SetPinUseCase
 import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
 import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestionUseCase
+import com.example.voicelock.util.Constant
+import com.example.voicelock.util.countdownFlow
 import com.example.voicelock.util.getDataOrNull
 import com.example.voicelock.util.handleApiCall
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 
 class PinLockViewModel(
     private val setPinUseCase: SetPinUseCase,
@@ -40,7 +42,7 @@ class PinLockViewModel(
     ) {
         val startsAtVerify = mode == PinLockMode.CHANGE || mode == PinLockMode.UNLOCK
         val initialStage = if (startsAtVerify) PinLockStage.VERIFY else PinLockStage.ENTER
-        val length = if (startsAtVerify) knownPinLength else DEFAULT_LENGTH
+        val length = if (startsAtVerify) knownPinLength else Constant.PIN_LENGTH_DEFAULT
         this.targetPackageName = targetPackageName
         currentInput.clear()
         firstPin = ""
@@ -84,7 +86,7 @@ class PinLockViewModel(
     fun onToggleLength() {
         val state = getCurrentState()
         if (!state.canToggleLength() || currentInput.isNotEmpty()) return
-        setState { copy(pinLength = if (state.pinLength == 4) 6 else 4) }
+        setState { copy(pinLength = getToggledLength()) }
     }
 
     private fun processCompletedInput(stage: PinLockStage) {
@@ -131,11 +133,11 @@ class PinLockViewModel(
     private fun onVerifySuccess() {
         val mode = getCurrentState().mode
         if (mode == PinLockMode.UNLOCK) {
-            val packageName = targetPackageName
-            handleApiCall(
-                apiCall = { markAppUnlockedUseCase(packageName.orEmpty()) },
-                onSuccess = { launchIO { setEvent(PinLockUiEvent.Success(mode)) } },
-            )
+            launchIO {
+                // Same session bookkeeping as every unlock method, so the monitor lets the app through.
+                markAppUnlockedUseCase(targetPackageName).getDataOrNull()
+                setEvent(PinLockUiEvent.Success(mode))
+            }
         } else {
             setState { copy(stage = PinLockStage.ENTER, enteredDigits = 0, isError = false) }
         }
@@ -162,25 +164,15 @@ class PinLockViewModel(
     private fun startLockout(remainingSeconds: Int) {
         lockoutJob?.cancel()
         currentInput.clear()
-        setState { copy(isLocked = true, lockoutRemainingSeconds = remainingSeconds, enteredDigits = 0) }
+        setState { copy(enteredDigits = 0) }
         lockoutJob =
             launchIO {
-                var remaining = remainingSeconds
-                while (remaining > 0) {
-                    delay(1000)
-                    remaining--
-                    setState { copy(lockoutRemainingSeconds = remaining) }
-                }
-                setState { copy(isLocked = false, lockoutRemainingSeconds = 0) }
+                countdownFlow(remainingSeconds).collect { remaining -> setState { copy(lockoutRemainingSeconds = remaining) } }
             }
     }
 
     override fun onCleared() {
         lockoutJob?.cancel()
         super.onCleared()
-    }
-
-    companion object {
-        private const val DEFAULT_LENGTH = 6
     }
 }

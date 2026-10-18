@@ -25,6 +25,8 @@ import com.example.voicelock.util.collectFlowOnView
 import com.example.voicelock.util.setPreventDoubleClick
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 
 /**
  * Plain Activity shell (same "outside the BaseFragment mandate" status as MainActivity) that
@@ -87,8 +89,7 @@ class LockOverlayActivity : AppCompatActivity() {
             ?.primaryNavigationFragment
 
     private fun updateUiState(state: LockOverlayUiState) {
-        findViewById<View>(R.id.btnTryAnotherMethod).visibility =
-            if (state.hasFallbackMethod()) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.btnTryAnotherMethod).isVisible = state.hasFallbackMethod()
     }
 
     private fun handleEvent(event: LockOverlayUiEvent) {
@@ -102,47 +103,28 @@ class LockOverlayActivity : AppCompatActivity() {
         method: LockMethod,
         pinLength: Int,
     ) {
+        // Every method unlocks the same target app; the lock screens also need their UNLOCK mode.
+        val args = bundleOf(BundleKey.KEY_LOCK_TARGET_PACKAGE to targetPackageName)
         when (method) {
-            LockMethod.VOICE -> {
-                val args = Bundle().apply { putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName) }
-                showDestination(R.id.twoStageAuthFragment, args)
-            }
+            LockMethod.VOICE -> showDestination(R.id.twoStageAuthFragment, args)
 
-            LockMethod.FACE -> {
-                val args = Bundle().apply { putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName) }
-                showDestination(R.id.faceAuthFragment, args)
-            }
+            LockMethod.FACE -> showDestination(R.id.faceAuthFragment, args)
 
-            LockMethod.BIOMETRIC -> {
-                val args = Bundle().apply { putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName) }
-                showDestination(R.id.biometricAuthFragment, args)
-            }
+            LockMethod.BIOMETRIC -> showDestination(R.id.biometricAuthFragment, args)
 
             LockMethod.PATTERN -> {
-                val args =
-                    Bundle().apply {
-                        putString(BundleKey.KEY_LOCK_MODE, PatternLockMode.UNLOCK.name)
-                        putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName)
-                    }
+                args.putString(BundleKey.KEY_LOCK_MODE, PatternLockMode.UNLOCK.name)
                 showDestination(R.id.patternLockFragment, args)
             }
 
             LockMethod.PIN -> {
-                val args =
-                    Bundle().apply {
-                        putString(BundleKey.KEY_LOCK_MODE, PinLockMode.UNLOCK.name)
-                        putInt(BundleKey.KEY_PIN_LENGTH, pinLength)
-                        putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName)
-                    }
+                args.putString(BundleKey.KEY_LOCK_MODE, PinLockMode.UNLOCK.name)
+                args.putInt(BundleKey.KEY_PIN_LENGTH, pinLength)
                 showDestination(R.id.pinLockFragment, args)
             }
 
             LockMethod.SECURITY_QUESTION -> {
-                val args =
-                    Bundle().apply {
-                        putString(BundleKey.KEY_LOCK_MODE, SecurityQuestionMode.UNLOCK.name)
-                        putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName)
-                    }
+                args.putString(BundleKey.KEY_LOCK_MODE, SecurityQuestionMode.UNLOCK.name)
                 showDestination(R.id.securityQuestionFragment, args)
             }
         }
