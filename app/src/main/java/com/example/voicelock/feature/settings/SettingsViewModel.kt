@@ -33,7 +33,7 @@ class SettingsViewModel(
             onSuccess = { state -> setState { state } },
             onError = { throwable ->
                 launchIO {
-                    setEvent(SettingsUiEvent.ShowToast(throwable.message ?: "An error occurred"))
+                    setEvent(SettingsUiEvent.ShowLoadError(throwable.message))
                 }
             },
         )
@@ -98,7 +98,7 @@ class SettingsViewModel(
         val settings = getCurrentState().biometricSettings
         if (isEnabled == settings.isActive(type)) return
         if (!isEnabled) {
-            saveBiometric(type, isEnabled = false)
+            saveBiometric(type = type, isEnabled = false)
             return
         }
         val event =
@@ -116,20 +116,20 @@ class SettingsViewModel(
         if (getCurrentState().biometricSettings.isActive(type)) {
             launchIO { setEvent(SettingsUiEvent.TestBiometric(type)) }
         } else {
-            toggleBiometric(type, isEnabled = true)
+            toggleBiometric(type = type, isEnabled = true)
         }
     }
 
     fun onBiometricConfirmed(type: BiometricType) {
-        saveBiometric(type, isEnabled = true)
+        saveBiometric(type = type, isEnabled = true)
     }
 
     private fun saveBiometric(
         type: BiometricType,
         isEnabled: Boolean,
     ) {
-        setState { copy(biometricSettings = biometricSettings.withPreference(type, isEnabled)) }
-        handleApiCall(apiCall = { setBiometricEnabledUseCase(type, isEnabled) })
+        setState { copy(biometricSettings = biometricSettings.withPreference(type = type, isEnabled = isEnabled)) }
+        handleApiCall(apiCall = { setBiometricEnabledUseCase(type = type, isEnabled = isEnabled) })
     }
 
     fun onHomeTabClicked() {

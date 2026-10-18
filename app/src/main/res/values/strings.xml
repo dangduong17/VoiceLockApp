@@ -61,7 +61,6 @@
     <string name="nav_voice">Giọng nói</string>
     <string name="nav_settings">Cài đặt</string>
 
-    <string name="pin_set_status">Đã thiết lập</string>
     <string name="pin_not_set_status">Chưa thiết lập</string>
     <string name="pattern_set_status">Đã thiết lập</string>
     <string name="pattern_not_set_status">Chưa thiết lập</string>
@@ -191,16 +190,16 @@
     <string name="biometric_prompt_cancel">Hủy</string>
     <string name="biometric_prompt_enable_title">Bật mở khóa bằng %1$s</string>
     <string name="biometric_prompt_test_title">Kiểm tra %1$s</string>
-    <string name="biometric_prompt_enable_subtitle">Xác minh bằng vân tay hoặc khuôn mặt đã đăng ký trên Android</string>
+    <string name="biometric_prompt_enable_subtitle">Xác minh bằng vân tay đã đăng ký trên Android</string>
     <string name="biometric_prompt_unlock_title">Mở khóa ứng dụng</string>
-    <string name="biometric_prompt_unlock_subtitle">Dùng vân tay hoặc khuôn mặt của bạn</string>
+    <string name="biometric_prompt_unlock_subtitle">Dùng vân tay của bạn</string>
     <string name="biometric_enabled_toast">Đã bật mở khóa bằng %1$s</string>
     <string name="biometric_test_success">Xác thực thành công</string>
     <string name="biometric_enroll_hint">Hãy đăng ký %1$s trong cài đặt Android, rồi quay lại để bật</string>
     <string name="biometric_no_hardware_toast">Thiết bị này không hỗ trợ %1$s cho ứng dụng</string>
     <string name="biometric_unavailable_toast">%1$s tạm thời không dùng được, hãy thử lại sau</string>
-    <string name="biometric_auth_title">Xác thực sinh trắc học</string>
-    <string name="biometric_auth_subtitle">Dùng vân tay hoặc khuôn mặt đã đăng ký trên điện thoại</string>
+    <string name="biometric_auth_title">Xác thực vân tay</string>
+    <string name="biometric_auth_subtitle">Dùng vân tay đã đăng ký trên điện thoại</string>
     <string name="biometric_auth_stage_idle">Chạm nút bên dưới để xác thực</string>
     <string name="biometric_auth_stage_prompting">Đang chờ xác thực…</string>
     <string name="biometric_auth_stage_success">Xác thực thành công</string>
@@ -251,4 +250,15 @@
     <string name="face_auth_re_enroll">Đăng ký lại</string>
     <string name="face_auth_delete">Xóa khuôn mặt</string>
     <string name="face_auth_deleted">Đã xóa dữ liệu khuôn mặt</string>
+
+    <!-- Home / Settings texts (no hardcoded UI text in code) -->
+    <string name="protection_status_disabled">BẢO VỆ ĐANG TẮT</string>
+    <string name="pin_status_set">%1$d chữ số • Đã thiết lập</string>
+    <string name="home_lock_now_toast">Đang tiến hành khóa ngay…</string>
+    <string name="common_error_unexpected">Đã xảy ra lỗi, vui lòng thử lại</string>
+    <string name="coming_soon_security_questions">Câu hỏi bảo mật sẽ có trong bản sau</string>
+    <string name="coming_soon_theme_language">Giao diện và ngôn ngữ sẽ có trong bản sau</string>
+    <string name="coming_soon_help_feedback">Trợ giúp và phản hồi sẽ có trong bản sau</string>
+    <string name="coming_soon_about">Thông tin về VoiceLock sẽ có trong bản sau</string>
+    <string name="pin_delete_description">Xóa số vừa nhập</string>
 </resources>

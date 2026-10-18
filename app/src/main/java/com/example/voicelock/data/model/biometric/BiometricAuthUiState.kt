@@ -18,6 +18,14 @@ data class BiometricAuthUiState(
     val errorMessage: String? = null,
 )
 
+/** Stage and the system error text render together in the status area. */
+data class BiometricAuthStatusInfo(
+    val stage: BiometricAuthStage,
+    val errorMessage: String?,
+)
+
+fun BiometricAuthUiState.getStatusInfo(): BiometricAuthStatusInfo = BiometricAuthStatusInfo(stage = stage, errorMessage = errorMessage)
+
 sealed class BiometricAuthUiEvent {
     data object ShowPrompt : BiometricAuthUiEvent()
 

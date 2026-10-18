@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_screen"
-    android:paddingHorizontal="24dp"
-    android:paddingTop="48dp"
-    android:paddingBottom="24dp">
+    android:paddingHorizontal="@dimen/_24dp"
+    android:paddingTop="@dimen/_48dp"
+    android:paddingBottom="@dimen/_24dp">
 
     <TextView
         android:id="@+id/tvBiometricAuthTitle"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="@string/biometric_auth_title"
         android:textColor="@color/text_primary"
-        android:textSize="22sp"
+        android:textSize="@dimen/_22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,11 +24,11 @@
         android:id="@+id/tvBiometricAuthSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/_8dp"
         android:gravity="center"
         android:text="@string/biometric_auth_subtitle"
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="@dimen/_14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvBiometricAuthTitle" />
@@ -37,28 +37,19 @@
         android:id="@+id/layoutBiometricIcons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="@dimen/_48dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvBiometricAuthSubtitle">
 
         <ImageView
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="@dimen/_96dp"
+            android:layout_height="@dimen/_96dp"
             android:background="@drawable/bg_circle_icon"
             android:importantForAccessibility="no"
-            android:padding="26dp"
+            android:padding="@dimen/_26dp"
             android:src="@drawable/ic_fingerprint" />
-
-        <ImageView
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_marginStart="24dp"
-            android:background="@drawable/bg_circle_icon"
-            android:importantForAccessibility="no"
-            android:padding="26dp"
-            android:src="@drawable/ic_face" />
 
     </LinearLayout>
 
@@ -66,10 +57,10 @@
         android:id="@+id/tvBiometricAuthStatus"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="@dimen/_32dp"
         android:gravity="center"
         android:textColor="@color/text_primary"
-        android:textSize="16sp"
+        android:textSize="@dimen/_16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,10 +70,10 @@
         android:id="@+id/tvBiometricAuthError"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/_8dp"
         android:gravity="center"
         android:textColor="@color/error_red"
-        android:textSize="13sp"
+        android:textSize="@dimen/_13sp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -91,12 +82,12 @@
     <TextView
         android:id="@+id/btnBiometricAuthAction"
         android:layout_width="0dp"
-        android:layout_height="52dp"
+        android:layout_height="@dimen/_52dp"
         android:background="@drawable/bg_blue_button"
         android:gravity="center"
         android:text="@string/biometric_auth_action"
         android:textColor="@color/white"
-        android:textSize="16sp"
+        android:textSize="@dimen/_16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

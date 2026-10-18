@@ -11,5 +11,5 @@ class SetBiometricEnabledUseCase(
     operator fun invoke(
         type: BiometricType,
         isEnabled: Boolean,
-    ): Flow<Result<Unit>> = biometricRepository.setBiometricEnabled(type, isEnabled)
+    ): Flow<Result<Unit>> = biometricRepository.setBiometricEnabled(type = type, isEnabled = isEnabled)
 }

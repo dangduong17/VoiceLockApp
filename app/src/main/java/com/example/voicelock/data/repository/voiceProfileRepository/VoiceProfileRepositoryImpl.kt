@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
 import com.example.voicelock.data.model.voice.VoiceKeywordProfile
-import com.example.voicelock.data.model.voice.VoiceSettings
+import com.example.voicelock.data.model.voice.VoiceSettingsDtoModel
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
 import com.example.voicelock.util.Result
@@ -33,12 +33,12 @@ class VoiceProfileRepositoryImpl(
             .flowOn(Dispatchers.IO)
             .catchAsResult()
 
-    override fun getVoiceSettings(): Flow<Result<VoiceSettings>> =
-        flow<Result<VoiceSettings>> {
+    override fun getVoiceSettings(): Flow<Result<VoiceSettingsDtoModel>> =
+        flow<Result<VoiceSettingsDtoModel>> {
             val preferences = dataStore.data.first()
             emit(
                 Result.Success(
-                    VoiceSettings(
+                    VoiceSettingsDtoModel(
                         isEnrolled = voiceBiometricsManager.isEnrolled(),
                         sampleCount = voiceBiometricsManager.getEnrolledSampleCount(),
                         isUnlockPreferenceOn = preferences[KEY_VOICE_UNLOCK_ENABLED] ?: true,

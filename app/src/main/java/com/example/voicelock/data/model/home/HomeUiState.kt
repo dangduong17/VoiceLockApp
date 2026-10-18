@@ -1,8 +1,9 @@
 package com.example.voicelock.data.model.home
 
-import com.example.voicelock.data.model.biometric.BiometricSettings
-import com.example.voicelock.data.model.face.FaceSettings
+import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
+import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 
+/** Source data only; every text the screen shows is built from it in HomeFragmentEx. */
 data class HomeUiState(
     val isProtectionEnabled: Boolean = true,
     val isVoiceEnrolled: Boolean = false,
@@ -13,8 +14,33 @@ data class HomeUiState(
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
-    val biometricSettings: BiometricSettings = BiometricSettings(),
-    val faceSettings: FaceSettings = FaceSettings(),
-    val pinStatusText: String = "6 chữ số • Đã thiết lập",
-    val patternStatusText: String = "Thiết lập",
+    val biometricSettings: BiometricSettingsDtoModel = BiometricSettingsDtoModel(),
+    val faceSettings: FaceSettingsDtoModel = FaceSettingsDtoModel(),
 )
+
+/** Everything the voice card and the voice rows render, so it always changes together. */
+data class HomeVoiceInfo(
+    val isVoiceEnrolled: Boolean,
+    val voiceSamplesCount: Int,
+    val isBackupPinEnabled: Boolean,
+    val isVoiceUnlockEnabled: Boolean,
+    val isVoiceLockEnabled: Boolean,
+)
+
+fun HomeUiState.getVoiceInfo(): HomeVoiceInfo =
+    HomeVoiceInfo(
+        isVoiceEnrolled = isVoiceEnrolled,
+        voiceSamplesCount = voiceSamplesCount,
+        isBackupPinEnabled = isBackupPinEnabled,
+        isVoiceUnlockEnabled = isVoiceUnlockEnabled,
+        isVoiceLockEnabled = isVoiceLockEnabled,
+    )
+
+/** PIN / pattern rows. */
+data class HomeLockInfo(
+    val isPinSet: Boolean,
+    val pinLength: Int,
+    val isPatternSet: Boolean,
+)
+
+fun HomeUiState.getLockInfo(): HomeLockInfo = HomeLockInfo(isPinSet = isPinSet, pinLength = pinLength, isPatternSet = isPatternSet)

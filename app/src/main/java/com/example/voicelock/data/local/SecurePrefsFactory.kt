@@ -9,6 +9,7 @@ import java.security.KeyStore
 
 private const val SECURE_PREFS_FILE_NAME = "voicelock_secure_prefs"
 private const val ANDROID_KEYSTORE = "AndroidKeyStore"
+private const val TAG = "SecurePrefsFactory"
 
 /**
  * When the encrypted file can no longer be decrypted (typically an Auto Backup restore or a
@@ -19,7 +20,7 @@ fun createSecurePrefs(context: Context): SharedPreferences =
     try {
         openSecurePrefs(context)
     } catch (e: Exception) {
-        Timber.e(e, "Secure prefs unreadable, resetting them")
+        Timber.tag(TAG).e(e, "Secure prefs unreadable, resetting them")
         context.deleteSharedPreferences(SECURE_PREFS_FILE_NAME)
         runCatching {
             KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }.deleteEntry(MasterKey.DEFAULT_MASTER_KEY_ALIAS)

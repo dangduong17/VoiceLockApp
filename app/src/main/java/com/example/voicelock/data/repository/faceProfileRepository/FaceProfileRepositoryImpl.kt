@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.example.voicelock.data.local.face.FaceRecognitionEngine
 import com.example.voicelock.data.model.face.FaceEnrollmentResult
-import com.example.voicelock.data.model.face.FaceSettings
+import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.face.FaceVerifyResult
 import com.example.voicelock.util.Constant
 import com.example.voicelock.util.Result
@@ -31,13 +31,13 @@ class FaceProfileRepositoryImpl(
     private val dataStore: DataStore<Preferences>,
 ) : FaceProfileRepository {
 
-    override fun getFaceSettings(): Flow<Result<FaceSettings>> =
-        flow<Result<FaceSettings>> {
+    override fun getFaceSettings(): Flow<Result<FaceSettingsDtoModel>> =
+        flow<Result<FaceSettingsDtoModel>> {
             val templates = loadTemplates()
             val preferences = dataStore.data.first()
             emit(
                 Result.Success(
-                    FaceSettings(
+                    FaceSettingsDtoModel(
                         isEnrolled = templates.isNotEmpty(),
                         sampleCount = templates.size,
                         isUnlockPreferenceOn = preferences[KEY_FACE_UNLOCK_ENABLED] ?: true,
@@ -61,7 +61,7 @@ class FaceProfileRepositoryImpl(
                 templates.isNotEmpty() &&
                     templates.indices.all { i ->
                         (i + 1 until templates.size).all { j ->
-                            faceRecognitionEngine.similarity(templates[i], templates[j]) >= Constant.FACE_MATCH_THRESHOLD
+                            faceRecognitionEngine.similarity(first = templates[i], second = templates[j]) >= Constant.FACE_MATCH_THRESHOLD
                         }
                     }
             if (!isConsistent) {
@@ -80,7 +80,7 @@ class FaceProfileRepositoryImpl(
                 emit(Result.Success(FaceVerifyResult.NotEnrolled))
                 return@flow
             }
-            val best = enrolled.maxOf { faceRecognitionEngine.similarity(template, it) }
+            val best = enrolled.maxOf { faceRecognitionEngine.similarity(first = template, second = it) }
             val result =
                 if (best >= Constant.FACE_MATCH_THRESHOLD) FaceVerifyResult.Verified(best) else FaceVerifyResult.Rejected(best)
             emit(Result.Success(result))

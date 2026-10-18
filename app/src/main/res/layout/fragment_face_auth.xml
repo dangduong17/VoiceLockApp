@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_screen"
-    android:paddingHorizontal="24dp"
-    android:paddingTop="48dp"
-    android:paddingBottom="24dp">
+    android:paddingHorizontal="@dimen/_24dp"
+    android:paddingTop="@dimen/_48dp"
+    android:paddingBottom="@dimen/_24dp">
 
     <TextView
         android:id="@+id/tvFaceAuthTitle"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="@string/face_auth_title"
         android:textColor="@color/text_primary"
-        android:textSize="22sp"
+        android:textSize="@dimen/_22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,28 +24,28 @@
         android:id="@+id/tvFaceAuthSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/_8dp"
         android:gravity="center"
         android:text="@string/face_auth_subtitle"
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="@dimen/_14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvFaceAuthTitle" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardFacePreview"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
-        android:layout_marginTop="32dp"
+        android:layout_width="@dimen/_240dp"
+        android:layout_height="@dimen/_240dp"
+        android:layout_marginTop="@dimen/_32dp"
         app:cardBackgroundColor="@color/bg_card_dark"
-        app:cardCornerRadius="120dp"
+        app:cardCornerRadius="@dimen/_120dp"
         app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvFaceAuthSubtitle"
         app:strokeColor="@color/primary_blue"
-        app:strokeWidth="3dp">
+        app:strokeWidth="@dimen/_3dp">
 
         <androidx.camera.view.PreviewView
             android:id="@+id/previewFace"
@@ -63,21 +63,21 @@
         android:indeterminate="true"
         android:visibility="gone"
         app:indicatorColor="@color/primary_blue"
-        app:indicatorSize="256dp"
+        app:indicatorSize="@dimen/_256dp"
         app:layout_constraintBottom_toBottomOf="@id/cardFacePreview"
         app:layout_constraintEnd_toEndOf="@id/cardFacePreview"
         app:layout_constraintStart_toStartOf="@id/cardFacePreview"
         app:layout_constraintTop_toTopOf="@id/cardFacePreview"
-        app:trackThickness="3dp" />
+        app:trackThickness="@dimen/_3dp" />
 
     <TextView
         android:id="@+id/tvFaceAuthStatus"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="@dimen/_28dp"
         android:gravity="center"
         android:textColor="@color/text_primary"
-        android:textSize="16sp"
+        android:textSize="@dimen/_16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -87,10 +87,10 @@
         android:id="@+id/tvFaceAuthHint"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/_8dp"
         android:gravity="center"
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="@dimen/_14sp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -100,10 +100,10 @@
         android:id="@+id/tvFaceSimilarity"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/_8dp"
         android:gravity="center"
         android:textColor="@color/text_muted"
-        android:textSize="12sp"
+        android:textSize="@dimen/_12sp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -112,12 +112,12 @@
     <TextView
         android:id="@+id/btnFaceAuthAction"
         android:layout_width="0dp"
-        android:layout_height="52dp"
-        android:layout_marginBottom="8dp"
+        android:layout_height="@dimen/_52dp"
+        android:layout_marginBottom="@dimen/_8dp"
         android:background="@drawable/bg_blue_button"
         android:gravity="center"
         android:textColor="@color/white"
-        android:textSize="16sp"
+        android:textSize="@dimen/_16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/layoutFaceManage"
         app:layout_constraintEnd_toEndOf="parent"
@@ -138,21 +138,21 @@
             android:id="@+id/btnFaceReEnroll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="12dp"
+            android:padding="@dimen/_12dp"
             android:text="@string/face_auth_re_enroll"
             android:textColor="@color/primary_blue"
-            android:textSize="14sp"
+            android:textSize="@dimen/_14sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/btnFaceDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:padding="12dp"
+            android:layout_marginStart="@dimen/_16dp"
+            android:padding="@dimen/_12dp"
             android:text="@string/face_auth_delete"
             android:textColor="@color/error_red"
-            android:textSize="14sp"
+            android:textSize="@dimen/_14sp"
             android:textStyle="bold" />
 
     </LinearLayout>

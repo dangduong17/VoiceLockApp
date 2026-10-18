@@ -1,10 +1,10 @@
 package com.example.voicelock.domain.usecase.settings
 
-import com.example.voicelock.data.model.biometric.BiometricSettings
-import com.example.voicelock.data.model.face.FaceSettings
+import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
+import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.pinlock.PinInfo
 import com.example.voicelock.data.model.settings.SettingsUiState
-import com.example.voicelock.data.model.voice.VoiceSettings
+import com.example.voicelock.data.model.voice.VoiceSettingsDtoModel
 import com.example.voicelock.data.model.voice.isVoiceLockActive
 import com.example.voicelock.data.model.voice.isVoiceUnlockActive
 import com.example.voicelock.domain.usecase.biometric.GetBiometricSettingsUseCase
@@ -31,9 +31,9 @@ class GetSettingsUseCase(
         flow<Result<SettingsUiState>> {
             val pinInfo = getPinInfoUseCase().getDataOrDefault(PinInfo(isPinSet = false, pinLength = 6))
             val isPatternSet = getPatternInfoUseCase().getDataOrDefault(false)
-            val voiceSettings = getVoiceSettingsUseCase().getDataOrDefault(VoiceSettings())
-            val biometricSettings = getBiometricSettingsUseCase().getDataOrDefault(BiometricSettings())
-            val faceSettings = getFaceSettingsUseCase().getDataOrDefault(FaceSettings())
+            val voiceSettings = getVoiceSettingsUseCase().getDataOrDefault(VoiceSettingsDtoModel())
+            val biometricSettings = getBiometricSettingsUseCase().getDataOrDefault(BiometricSettingsDtoModel())
+            val faceSettings = getFaceSettingsUseCase().getDataOrDefault(FaceSettingsDtoModel())
 
             emit(
                 Result.Success(
@@ -47,9 +47,6 @@ class GetSettingsUseCase(
                         isPinSet = pinInfo.isPinSet,
                         pinLength = pinInfo.pinLength,
                         isPatternSet = isPatternSet,
-                        pinStatusText =
-                            if (pinInfo.isPinSet) "${pinInfo.pinLength} chữ số • Đã thiết lập" else "Chưa thiết lập",
-                        patternStatusText = if (isPatternSet) "Đã thiết lập" else "Chưa thiết lập",
                     ),
                 ),
             )

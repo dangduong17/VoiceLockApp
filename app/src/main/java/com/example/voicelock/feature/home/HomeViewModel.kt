@@ -32,7 +32,7 @@ class HomeViewModel(
             },
             onError = { throwable ->
                 launchIO {
-                    setEvent(HomeUiEvent.ShowToast(throwable.message ?: "An error occurred"))
+                    setEvent(HomeUiEvent.ShowLoadError(throwable.message))
                 }
             },
         )
@@ -116,8 +116,8 @@ class HomeViewModel(
     }
 
     fun onBiometricConfirmed(type: BiometricType) {
-        setState { copy(biometricSettings = biometricSettings.withPreference(type, isEnabled = true)) }
-        handleApiCall(apiCall = { setBiometricEnabledUseCase(type, true) })
+        setState { copy(biometricSettings = biometricSettings.withPreference(type = type, isEnabled = true)) }
+        handleApiCall(apiCall = { setBiometricEnabledUseCase(type = type, isEnabled = true) })
     }
 
     fun onQuestionsClicked() {

@@ -7,7 +7,8 @@ import com.example.voicelock.data.model.pinlock.PinLockMode
 
 sealed class HomeUiEvent {
     data object LockNow : HomeUiEvent()
-    data class ShowToast(val message: String) : HomeUiEvent()
+    /** [message] null: the screen shows its generic error text. */
+    data class ShowLoadError(val message: String?) : HomeUiEvent()
     data class NavigateToPinLock(val mode: PinLockMode, val pinLength: Int) : HomeUiEvent()
     data class NavigateToPatternLock(val mode: PatternLockMode) : HomeUiEvent()
     data object NavigateToSecurityQuestions : HomeUiEvent()

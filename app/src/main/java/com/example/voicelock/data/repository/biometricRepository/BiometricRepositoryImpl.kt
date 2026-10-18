@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.example.voicelock.data.model.biometric.BiometricAvailability
-import com.example.voicelock.data.model.biometric.BiometricSettings
+import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.util.Constant
 import com.example.voicelock.util.Result
@@ -28,12 +28,12 @@ class BiometricRepositoryImpl(
     private val dataStore: DataStore<Preferences>,
 ) : BiometricRepository {
 
-    override fun getBiometricSettings(): Flow<Result<BiometricSettings>> =
-        flow<Result<BiometricSettings>> {
+    override fun getBiometricSettings(): Flow<Result<BiometricSettingsDtoModel>> =
+        flow<Result<BiometricSettingsDtoModel>> {
             val preferences = dataStore.data.first()
             emit(
                 Result.Success(
-                    BiometricSettings(
+                    BiometricSettingsDtoModel(
                         fingerprintAvailability = getAvailability(BiometricType.FINGERPRINT),
                         isFingerprintPreferenceOn = preferences[KEY_FINGERPRINT_ENABLED] ?: false,
                     ),

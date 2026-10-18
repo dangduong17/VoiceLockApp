@@ -25,7 +25,7 @@ class FaceRecognitionRepositoryImpl(
         bitmap: Bitmap,
         extractTemplate: Boolean,
     ): Flow<Result<FaceFrameAnalysis>> =
-        flow<Result<FaceFrameAnalysis>> { emit(Result.Success(faceRecognitionEngine.analyze(bitmap, extractTemplate))) }
+        flow<Result<FaceFrameAnalysis>> { emit(Result.Success(faceRecognitionEngine.analyze(bitmap = bitmap, extractTemplate = extractTemplate))) }
             .flowOn(Dispatchers.IO)
             .catchAsResult()
 }

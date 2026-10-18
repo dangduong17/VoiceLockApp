@@ -26,8 +26,16 @@ fun FaceAuthFragment.backEvent() {
 
 fun FaceAuthFragment.settingEvent() {
     binding.btnFaceAuthAction.setPreventDoubleClickScaleView { actionEvent() }
-    binding.btnFaceReEnroll.setPreventDoubleClick { navigator.navigateTo(R.id.action_faceAuthFragment_to_faceEnrollmentFragment) }
-    binding.btnFaceDelete.setPreventDoubleClick { viewModel.deleteProfile() }
+    binding.btnFaceReEnroll.setPreventDoubleClick { reEnrollEvent() }
+    binding.btnFaceDelete.setPreventDoubleClick { deleteEvent() }
+}
+
+fun FaceAuthFragment.reEnrollEvent() {
+    navigator.navigateTo(R.id.action_faceAuthFragment_to_faceEnrollmentFragment)
+}
+
+fun FaceAuthFragment.deleteEvent() {
+    viewModel.deleteProfile()
 }
 
 /** Without a face profile the button opens enrollment; otherwise it asks for the camera or (re)scans. */
