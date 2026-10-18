@@ -2,6 +2,9 @@ package com.example.voicelock.di
 
 import com.example.voicelock.feature.applock.AppLockViewModel
 import com.example.voicelock.feature.applock.LockOverlayViewModel
+import com.example.voicelock.feature.biometric.auth.BiometricAuthViewModel
+import com.example.voicelock.feature.face.auth.FaceAuthViewModel
+import com.example.voicelock.feature.face.enrollment.FaceEnrollmentViewModel
 import com.example.voicelock.feature.home.HomeViewModel
 import com.example.voicelock.feature.patternlock.PatternLockViewModel
 import com.example.voicelock.feature.permissions.PermissionsViewModel
@@ -22,4 +25,7 @@ val viewModelModule = module {
     viewModelOf(::PermissionsViewModel)
     viewModelOf(::EnrollmentViewModel)
     viewModelOf(::TwoStageAuthViewModel)
+    viewModelOf(::BiometricAuthViewModel)
+    viewModelOf(::FaceEnrollmentViewModel)
+    viewModelOf(::FaceAuthViewModel)
 }

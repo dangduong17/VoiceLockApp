@@ -26,6 +26,8 @@ android {
     androidResources {
         // Store the CAM++ model uncompressed so the AssetManager can read it without inflating ~28 MB.
         noCompress += "onnx"
+        // MobileFaceNet is memory-mapped by the TFLite interpreter, which needs it uncompressed.
+        noCompress += "tflite"
     }
 
     buildTypes {
@@ -64,6 +66,18 @@ dependencies {
 
     // Sherpa-ONNX speaker verification (AAR from https://github.com/k2-fsa/sherpa-onnx/releases)
     implementation(files("libs/sherpa-onnx-1.13.8.aar"))
+
+    // System biometrics (fingerprint / face) via BiometricPrompt
+    implementation(libs.androidx.biometric)
+
+    // In-app face unlock: ML Kit face detection (+ eye-open classification for the blink check),
+    // MobileFaceNet embeddings on LiteRT (TFLite) and CameraX frames
+    implementation(libs.mlkit.face.detection)
+    implementation(libs.litert)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

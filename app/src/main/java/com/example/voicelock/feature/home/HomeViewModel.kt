@@ -2,10 +2,16 @@ package com.example.voicelock.feature.home
 
 import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
+import com.example.voicelock.data.model.biometric.BiometricAvailability
+import com.example.voicelock.data.model.biometric.BiometricType
+import com.example.voicelock.data.model.biometric.getAvailability
+import com.example.voicelock.data.model.biometric.isActive
+import com.example.voicelock.data.model.biometric.withPreference
 import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
@@ -15,6 +21,7 @@ class HomeViewModel(
     private val getHomeStatusUseCase: GetHomeStatusUseCase,
     private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
     private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
+    private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
 ) : BaseViewModel<HomeUiState, HomeUiEvent>(HomeUiState()) {
 
     fun initData() {
@@ -80,8 +87,37 @@ class HomeViewModel(
         launchIO { setEvent(HomeUiEvent.NavigateToPatternLock(mode)) }
     }
 
-    fun onFingerprintClicked() {
-        launchIO { setEvent(HomeUiEvent.NavigateToFingerprintSetup) }
+    /** Without a face profile this opens enrollment; otherwise the face test screen (re-enroll / delete). */
+    fun onFaceClicked() {
+        val event =
+            if (getCurrentState().faceSettings.isEnrolled) HomeUiEvent.NavigateToFaceTest else HomeUiEvent.NavigateToFaceEnrollment
+        launchIO { setEvent(event) }
+    }
+
+    /**
+     * Fingerprint row: once on, a tap tests the system prompt; otherwise it turns the
+     * method on (confirmed with the prompt, see [onBiometricConfirmed]) or opens Android's
+     * enrollment screen when nothing is enrolled. Turning it off is done from Settings.
+     */
+    fun onBiometricRowClicked(type: BiometricType) {
+        val settings = getCurrentState().biometricSettings
+        val event =
+            if (settings.isActive(type)) {
+                HomeUiEvent.TestBiometric(type)
+            } else {
+                when (val availability = settings.getAvailability(type)) {
+                    BiometricAvailability.AVAILABLE -> HomeUiEvent.ConfirmBiometric(type)
+                    BiometricAvailability.NOT_ENROLLED -> HomeUiEvent.OpenBiometricEnrollment(type)
+                    BiometricAvailability.NO_HARDWARE, BiometricAvailability.UNAVAILABLE ->
+                        HomeUiEvent.ShowBiometricUnavailable(type, availability)
+                }
+            }
+        launchIO { setEvent(event) }
+    }
+
+    fun onBiometricConfirmed(type: BiometricType) {
+        setState { copy(biometricSettings = biometricSettings.withPreference(type, isEnabled = true)) }
+        handleApiCall(apiCall = { setBiometricEnabledUseCase(type, true) })
     }
 
     fun onQuestionsClicked() {

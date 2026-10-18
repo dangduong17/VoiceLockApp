@@ -2,6 +2,14 @@ package com.example.voicelock.feature.settings
 
 import android.os.Bundle
 import com.example.voicelock.R
+import com.example.voicelock.data.model.biometric.BiometricType
+import com.example.voicelock.data.model.biometric.isActive
+import com.example.voicelock.data.model.face.isFaceUnlockActive
+import com.example.voicelock.feature.biometric.confirmBiometric
+import com.example.voicelock.feature.biometric.getBiometricSubText
+import com.example.voicelock.feature.biometric.showBiometricUnavailable
+import com.example.voicelock.feature.biometric.startBiometricEnrollment
+import com.example.voicelock.feature.biometric.testBiometric
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
 import com.example.voicelock.util.BundleKey
@@ -29,6 +37,18 @@ fun SettingsFragment.settingEvent() {
         viewModel.onVoiceUnlockRowClicked()
     }
 
+    binding.switchFingerprint.setOnCheckedChangeListener { _, isChecked ->
+        viewModel.toggleBiometric(BiometricType.FINGERPRINT, isChecked)
+    }
+
+    binding.switchFaceUnlock.setOnCheckedChangeListener { _, isChecked ->
+        viewModel.toggleFaceUnlock(isChecked)
+    }
+
+    binding.rowFaceUnlock.setPreventDoubleClick {
+        viewModel.onFaceUnlockRowClicked()
+    }
+
     binding.btnVoiceCommands.setPreventDoubleClick {
         viewModel.onVoiceCommandsClicked()
     }
@@ -46,7 +66,7 @@ fun SettingsFragment.settingEvent() {
     }
 
     binding.btnFingerprint.setPreventDoubleClick {
-        viewModel.onFingerprintClicked()
+        viewModel.onBiometricRowClicked(BiometricType.FINGERPRINT)
     }
 
     binding.btnQuestions.setPreventDoubleClick {
@@ -86,6 +106,20 @@ fun SettingsFragment.updateUiState(state: SettingsUiState) {
             getString(R.string.voice_not_enrolled_info)
         }
 
+    val biometric = state.biometricSettings
+    val isFingerprintActive = biometric.isActive(BiometricType.FINGERPRINT)
+    if (binding.switchFingerprint.isChecked != isFingerprintActive) binding.switchFingerprint.isChecked = isFingerprintActive
+    binding.tvFingerprintSub.text = getBiometricSubText(biometric.fingerprintAvailability, isFingerprintActive)
+
+    val face = state.faceSettings
+    if (binding.switchFaceUnlock.isChecked != face.isFaceUnlockActive()) binding.switchFaceUnlock.isChecked = face.isFaceUnlockActive()
+    binding.tvFaceUnlockSub.text =
+        when {
+            !face.isEnrolled -> getString(R.string.face_unlock_sub_not_enrolled)
+            face.isFaceUnlockActive() -> getString(R.string.face_unlock_sub_enrolled, face.sampleCount)
+            else -> getString(R.string.face_unlock_sub_disabled, face.sampleCount)
+        }
+
     binding.tvPinSub.text = state.pinStatusText
     binding.tvPatternSub.text = state.patternStatusText
 }
@@ -95,6 +129,17 @@ private fun SettingsFragment.restoreVoiceSwitches() {
     val state = viewModel.uiState.value
     binding.switchVoiceUnlock.isChecked = state.isVoiceUnlockEnabled
     binding.switchVoiceLock.isChecked = state.isVoiceLockEnabled
+}
+
+/** A biometric switch flipped on is only saved after the prompt succeeds, so it snaps back first. */
+private fun SettingsFragment.restoreBiometricSwitches() {
+    val biometric = viewModel.uiState.value.biometricSettings
+    binding.switchFingerprint.isChecked = biometric.isActive(BiometricType.FINGERPRINT)
+}
+
+/** A face switch flipped on before enrolling snaps back; enrollment turns it on. */
+private fun SettingsFragment.restoreFaceSwitch() {
+    binding.switchFaceUnlock.isChecked = viewModel.uiState.value.faceSettings.isFaceUnlockActive()
 }
 
 fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
@@ -116,6 +161,32 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
             navigator.navigateTo(R.id.action_settingsFragment_to_twoStageAuthFragment)
         }
 
+        is SettingsUiEvent.NavigateToFaceEnrollment -> {
+            restoreFaceSwitch()
+            navigator.navigateTo(R.id.action_settingsFragment_to_faceEnrollmentFragment)
+        }
+
+        is SettingsUiEvent.NavigateToFaceTest -> {
+            navigator.navigateTo(R.id.action_settingsFragment_to_faceAuthFragment)
+        }
+
+        is SettingsUiEvent.ConfirmBiometric -> {
+            restoreBiometricSwitches()
+            confirmBiometric(event.type) { viewModel.onBiometricConfirmed(event.type) }
+        }
+
+        is SettingsUiEvent.TestBiometric -> testBiometric(event.type)
+
+        is SettingsUiEvent.OpenBiometricEnrollment -> {
+            restoreBiometricSwitches()
+            startBiometricEnrollment(event.type)
+        }
+
+        is SettingsUiEvent.ShowBiometricUnavailable -> {
+            restoreBiometricSwitches()
+            showBiometricUnavailable(event.type, event.availability)
+        }
+
         is SettingsUiEvent.NavigateToPermissions -> {
             navigator.navigateTo(R.id.action_settingsFragment_to_permissionsFragment)
         }
@@ -132,10 +203,6 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
         is SettingsUiEvent.NavigateToPatternLock -> {
             val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, event.mode.name) }
             navigator.navigateTo(R.id.action_settingsFragment_to_patternLockFragment, bundle)
-        }
-
-        is SettingsUiEvent.NavigateToFingerprintSetup -> {
-            displayToast("Mở Vân tay")
         }
 
         is SettingsUiEvent.NavigateToSecurityQuestions -> {

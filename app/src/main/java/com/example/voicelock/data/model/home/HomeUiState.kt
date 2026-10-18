@@ -1,5 +1,8 @@
 package com.example.voicelock.data.model.home
 
+import com.example.voicelock.data.model.biometric.BiometricSettings
+import com.example.voicelock.data.model.face.FaceSettings
+
 data class HomeUiState(
     val isProtectionEnabled: Boolean = true,
     val isVoiceEnrolled: Boolean = false,
@@ -10,7 +13,8 @@ data class HomeUiState(
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
+    val biometricSettings: BiometricSettings = BiometricSettings(),
+    val faceSettings: FaceSettings = FaceSettings(),
     val pinStatusText: String = "6 chữ số • Đã thiết lập",
     val patternStatusText: String = "Thiết lập",
-    val fingerprintStatusText: String = "Chưa bật",
 )

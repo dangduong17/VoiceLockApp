@@ -8,6 +8,11 @@ package com.example.voicelock.data.model.lock
  */
 enum class LockMethod {
     VOICE,
+
+    /** The app's own face recognition (camera + MobileFaceNet). */
+    FACE,
+    /** Fingerprint through Android's BiometricPrompt. */
+    BIOMETRIC,
     PATTERN,
     PIN,
 }

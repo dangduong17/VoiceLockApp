@@ -28,6 +28,12 @@
         <action
             android:id="@+id/action_homeFragment_to_twoStageAuthFragment"
             app:destination="@id/twoStageAuthFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_faceEnrollmentFragment"
+            app:destination="@id/faceEnrollmentFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_faceAuthFragment"
+            app:destination="@id/faceAuthFragment" />
     </fragment>
 
     <fragment
@@ -53,6 +59,12 @@
         <action
             android:id="@+id/action_settingsFragment_to_twoStageAuthFragment"
             app:destination="@id/twoStageAuthFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_faceEnrollmentFragment"
+            app:destination="@id/faceEnrollmentFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_faceAuthFragment"
+            app:destination="@id/faceAuthFragment" />
     </fragment>
 
     <fragment
@@ -97,6 +109,22 @@
         <action
             android:id="@+id/action_twoStageAuthFragment_to_enrollmentFragment"
             app:destination="@id/enrollmentFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/faceEnrollmentFragment"
+        android:name="com.example.voicelock.feature.face.enrollment.FaceEnrollmentFragment"
+        android:label="FaceEnrollmentFragment"
+        tools:layout="@layout/fragment_face_enrollment" />
+
+    <fragment
+        android:id="@+id/faceAuthFragment"
+        android:name="com.example.voicelock.feature.face.auth.FaceAuthFragment"
+        android:label="FaceAuthFragment"
+        tools:layout="@layout/fragment_face_auth">
+        <action
+            android:id="@+id/action_faceAuthFragment_to_faceEnrollmentFragment"
+            app:destination="@id/faceEnrollmentFragment" />
     </fragment>
 
 </navigation>

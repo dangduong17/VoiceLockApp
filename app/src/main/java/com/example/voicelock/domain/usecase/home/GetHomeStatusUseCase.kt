@@ -1,10 +1,14 @@
 package com.example.voicelock.domain.usecase.home
 
 import com.example.voicelock.data.model.home.HomeUiState
+import com.example.voicelock.data.model.biometric.BiometricSettings
+import com.example.voicelock.data.model.face.FaceSettings
 import com.example.voicelock.data.model.pinlock.PinInfo
 import com.example.voicelock.data.model.voice.VoiceSettings
 import com.example.voicelock.data.model.voice.isVoiceLockActive
 import com.example.voicelock.data.model.voice.isVoiceUnlockActive
+import com.example.voicelock.domain.usecase.biometric.GetBiometricSettingsUseCase
+import com.example.voicelock.domain.usecase.face.GetFaceSettingsUseCase
 import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
 import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
@@ -20,12 +24,16 @@ class GetHomeStatusUseCase(
     private val getPinInfoUseCase: GetPinInfoUseCase,
     private val getPatternInfoUseCase: GetPatternInfoUseCase,
     private val getVoiceSettingsUseCase: GetVoiceSettingsUseCase,
+    private val getBiometricSettingsUseCase: GetBiometricSettingsUseCase,
+    private val getFaceSettingsUseCase: GetFaceSettingsUseCase,
 ) {
     operator fun invoke(): Flow<Result<HomeUiState>> =
         flow<Result<HomeUiState>> {
             val pinInfo = getPinInfoUseCase().getDataOrDefault(PinInfo(isPinSet = false, pinLength = 6))
             val isPatternSet = getPatternInfoUseCase().getDataOrDefault(false)
             val voiceSettings = getVoiceSettingsUseCase().getDataOrDefault(VoiceSettings())
+            val biometricSettings = getBiometricSettingsUseCase().getDataOrDefault(BiometricSettings())
+            val faceSettings = getFaceSettingsUseCase().getDataOrDefault(FaceSettings())
 
             emit(
                 Result.Success(
@@ -35,6 +43,8 @@ class GetHomeStatusUseCase(
                         isBackupPinEnabled = pinInfo.isPinSet,
                         isVoiceUnlockEnabled = voiceSettings.isVoiceUnlockActive(),
                         isVoiceLockEnabled = voiceSettings.isVoiceLockActive(),
+                        biometricSettings = biometricSettings,
+                        faceSettings = faceSettings,
                         isPinSet = pinInfo.isPinSet,
                         pinLength = pinInfo.pinLength,
                         isPatternSet = isPatternSet,

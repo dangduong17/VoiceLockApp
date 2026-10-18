@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.voicelock.data.local.appLockDataStore
 import com.example.voicelock.data.local.createSecurePrefs
+import com.example.voicelock.data.local.face.FaceRecognitionEngine
 import com.example.voicelock.data.local.voice.AudioRecorderHelper
 import com.example.voicelock.data.local.voice.KeywordAudioRecognizer
 import com.example.voicelock.data.local.voice.VoiceBiometricsManager
@@ -15,6 +16,7 @@ val coreModule = module {
     single<SharedPreferences> { createSecurePrefs(androidContext()) }
     single<DataStore<Preferences>> { androidContext().appLockDataStore }
     single { VoiceBiometricsManager(context = androidContext(), securePrefs = get()) }
+    single { FaceRecognitionEngine(context = androidContext()) }
     factory { AudioRecorderHelper() }
     factory { KeywordAudioRecognizer(androidContext()) }
 }
