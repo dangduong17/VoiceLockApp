@@ -3,6 +3,7 @@ package com.example.voicelock.feature.biometric.auth
 import android.os.Bundle
 import android.view.View
 import com.example.voicelock.base.BaseFragment
+import com.example.voicelock.data.model.biometric.getStatusInfo
 import com.example.voicelock.databinding.FragmentBiometricAuthBinding
 import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.collectFlowOnView
@@ -30,10 +31,7 @@ class BiometricAuthFragment : BaseFragment<FragmentBiometricAuthBinding, Biometr
     }
 
     override fun subscribeObserver(view: View) {
-        viewModel.uiState
-            .map { it.stage to it.errorMessage }
-            .distinctUntilChanged()
-            .collectFlowOnView(viewLifecycleOwner) { (stage, errorMessage) -> updateStage(stage, errorMessage) }
+        viewModel.uiState.map { it.getStatusInfo() }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateStatus(it) }
         viewModel.uiEvent.collectFlowOnView(viewLifecycleOwner) { handleUiEvent(it) }
     }
 }

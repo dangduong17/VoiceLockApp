@@ -82,7 +82,7 @@ class FaceEnrollmentViewModel(
                 SystemClock.elapsedRealtime() - lastSampleAtMs >= Constant.FACE_ENROLLMENT_SAMPLE_INTERVAL_MS
         launchIO(onError = { isAnalyzing.set(false) }) {
             try {
-                analyzeFaceFrameUseCase(bitmap, extractTemplate = isSampleDue).getDataOrNull()?.let { handleAnalysis(it) }
+                analyzeFaceFrameUseCase(bitmap = bitmap, extractTemplate = isSampleDue).getDataOrNull()?.let { handleAnalysis(it) }
             } finally {
                 isAnalyzing.set(false)
             }
@@ -102,7 +102,9 @@ class FaceEnrollmentViewModel(
             when (phase) {
                 FaceEnrollmentPhase.INITIALIZING, FaceEnrollmentPhase.CAMERA_PERMISSION_REQUIRED ->
                     copy(phase = if (isCameraGranted) FaceEnrollmentPhase.CAPTURING else FaceEnrollmentPhase.CAMERA_PERMISSION_REQUIRED)
-                else -> this
+                FaceEnrollmentPhase.ENGINE_ERROR, FaceEnrollmentPhase.CAPTURING, FaceEnrollmentPhase.PROCESSING,
+                FaceEnrollmentPhase.COMPLETED,
+                -> this
             }
         }
     }

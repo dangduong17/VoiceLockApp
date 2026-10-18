@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_screen"
-    android:paddingHorizontal="16dp"
-    android:paddingTop="20dp">
+    android:paddingHorizontal="@dimen/_16dp"
+    android:paddingTop="@dimen/_20dp">
 
     <TextView
         android:id="@+id/tvAppLockTitle"
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="@string/app_lock_title"
         android:textColor="@color/text_primary"
-        android:textSize="22sp"
+        android:textSize="@dimen/_22sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,10 +22,10 @@
         android:id="@+id/tvAppLockSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/_4dp"
         android:text="@string/app_lock_subtitle"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp"
+        android:textSize="@dimen/_13sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvAppLockTitle" />
@@ -34,16 +34,17 @@
         android:id="@+id/btnPermissionWarning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="@dimen/_14dp"
         android:background="@drawable/bg_white_card"
-        android:padding="14dp"
+        android:padding="@dimen/_14dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvAppLockSubtitle">
 
         <ImageView
+            android:importantForAccessibility="no"
             android:id="@+id/ivPermissionWarning"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/_22dp"
+            android:layout_height="@dimen/_22dp"
             android:src="@drawable/ic_shield"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -54,19 +55,20 @@
             android:id="@+id/tvPermissionWarning"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="@dimen/_10dp"
             android:text="@string/app_lock_permission_warning"
             android:textColor="@color/text_primary"
-            android:textSize="13sp"
+            android:textSize="@dimen/_13sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/ivPermissionWarningArrow"
             app:layout_constraintStart_toEndOf="@id/ivPermissionWarning"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
+            android:importantForAccessibility="no"
             android:id="@+id/ivPermissionWarningArrow"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="@dimen/_18dp"
+            android:layout_height="@dimen/_18dp"
             android:src="@drawable/ic_chevron_right"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -78,10 +80,10 @@
         android:id="@+id/rvApps"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="@dimen/_14dp"
         android:background="@drawable/bg_white_card"
         android:clipToPadding="false"
-        android:paddingHorizontal="14dp"
+        android:paddingHorizontal="@dimen/_14dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnPermissionWarning" />

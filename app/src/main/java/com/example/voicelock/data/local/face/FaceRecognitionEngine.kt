@@ -3,6 +3,7 @@ package com.example.voicelock.data.local.face
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import androidx.core.graphics.scale
 import com.example.voicelock.data.model.face.EyeState
 import com.example.voicelock.data.model.face.FaceEngineNotReadyException
 import com.example.voicelock.data.model.face.FaceEngineStatus
@@ -82,7 +83,7 @@ class FaceRecognitionEngine(
                     abs(face.headEulerAngleX) > Constant.FACE_MAX_ANGLE_DEGREES -> FaceFrameAnalysis.NotFrontal
                 else -> {
                     val eyeState = face.getEyeState()
-                    val template = if (extractTemplate && eyeState == EyeState.OPEN) embed(bitmap, box) else null
+                    val template = if (extractTemplate && eyeState == EyeState.OPEN) embed(bitmap = bitmap, box = box) else null
                     FaceFrameAnalysis.Face(eyeState = eyeState, template = template)
                 }
             }
@@ -117,8 +118,8 @@ class FaceRecognitionEngine(
             val current = getOrInitStatus()
             if (current != FaceEngineStatus.READY) throw FaceEngineNotReadyException(current)
             val model = interpreter ?: return null
-            val crop = cropSquare(bitmap, box) ?: return null
-            val input = Bitmap.createScaledBitmap(crop, inputSize, inputSize, true).toInputBuffer()
+            val crop = cropSquare(bitmap = bitmap, box = box) ?: return null
+            val input = crop.scale(width = inputSize, height = inputSize).toInputBuffer()
             val output = Array(1) { FloatArray(embeddingSize) }
             model.run(input, output)
             output[0].normalized()

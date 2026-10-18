@@ -2,8 +2,10 @@ package com.example.voicelock.feature.home
 
 import android.os.Bundle
 import com.example.voicelock.R
+import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.biometric.isActive
+import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.face.isFaceUnlockActive
 import com.example.voicelock.feature.biometric.confirmBiometric
 import com.example.voicelock.feature.biometric.getBiometricActionText
@@ -11,7 +13,8 @@ import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
 import com.example.voicelock.data.model.home.HomeUiEvent
-import com.example.voicelock.data.model.home.HomeUiState
+import com.example.voicelock.data.model.home.HomeLockInfo
+import com.example.voicelock.data.model.home.HomeVoiceInfo
 import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.setPreventDoubleClick
@@ -71,58 +74,69 @@ fun HomeFragment.settingEvent() {
     }
 }
 
-fun HomeFragment.updateUiState(state: HomeUiState) {
-    
-    val lockNowStatusText = if (state.isProtectionEnabled) "BẢO VỆ ĐANG BẬT" else "BẢO VỆ ĐANG TẮT"
-    binding.tvBadgeText.text = lockNowStatusText
+fun HomeFragment.updateProtection(isProtectionEnabled: Boolean) {
+    binding.tvBadgeText.setText(
+        if (isProtectionEnabled) R.string.protection_status_enabled else R.string.protection_status_disabled,
+    )
+}
 
-    binding.tvVoiceReadyTitle.setText(if (state.isVoiceEnrolled) R.string.voice_ready else R.string.voice_not_enrolled)
+fun HomeFragment.updateVoice(info: HomeVoiceInfo) {
+    binding.tvVoiceReadyTitle.setText(if (info.isVoiceEnrolled) R.string.voice_ready else R.string.voice_not_enrolled)
     binding.tvVoiceInfo.text =
-        if (state.isVoiceEnrolled) {
+        if (info.isVoiceEnrolled) {
             getString(
                 R.string.voice_info_enrolled,
-                state.voiceSamplesCount,
-                getString(if (state.isBackupPinEnabled) R.string.voice_info_backup_pin_on else R.string.voice_info_backup_pin_off),
+                info.voiceSamplesCount,
+                getString(if (info.isBackupPinEnabled) R.string.voice_info_backup_pin_on else R.string.voice_info_backup_pin_off),
             )
         } else {
             getString(R.string.voice_not_enrolled_info)
         }
     binding.tvVoiceUnlockSub.setText(
-        if (state.isVoiceEnrolled) R.string.unlock_by_voice_sub else R.string.voice_not_enrolled_info,
+        if (info.isVoiceEnrolled) R.string.unlock_by_voice_sub else R.string.voice_not_enrolled_info,
     )
 
-    if (binding.switchVoiceUnlock.isChecked != state.isVoiceUnlockEnabled) {
-        binding.switchVoiceUnlock.isChecked = state.isVoiceUnlockEnabled
+    if (binding.switchVoiceUnlock.isChecked != info.isVoiceUnlockEnabled) {
+        binding.switchVoiceUnlock.isChecked = info.isVoiceUnlockEnabled
     }
 
-    if (binding.switchVoiceLock.isChecked != state.isVoiceLockEnabled) {
-        binding.switchVoiceLock.isChecked = state.isVoiceLockEnabled
+    if (binding.switchVoiceLock.isChecked != info.isVoiceLockEnabled) {
+        binding.switchVoiceLock.isChecked = info.isVoiceLockEnabled
     }
+}
 
-    binding.tvPinSub.text = state.pinStatusText
-    binding.tvPatternAction.text = state.patternStatusText
-    val biometric = state.biometricSettings
+fun HomeFragment.updateLockMethods(info: HomeLockInfo) {
+    binding.tvPinSub.text =
+        if (info.isPinSet) getString(R.string.pin_status_set, info.pinLength) else getString(R.string.pin_not_set_status)
+    binding.tvPatternAction.setText(if (info.isPatternSet) R.string.pattern_set_status else R.string.setup)
+}
+
+fun HomeFragment.updateFingerprint(biometric: BiometricSettingsDtoModel) {
     binding.tvFingerprintAction.text =
-        getBiometricActionText(biometric.fingerprintAvailability, biometric.isActive(BiometricType.FINGERPRINT))
-    val face = state.faceSettings
-    binding.tvFaceAction.text =
-        getString(
-            when {
-                !face.isEnrolled -> R.string.setup
-                face.isFaceUnlockActive() -> R.string.biometric_action_enabled
-                else -> R.string.face_action_disabled
-            },
+        getBiometricActionText(
+            availability = biometric.fingerprintAvailability,
+            isActive = biometric.isActive(BiometricType.FINGERPRINT),
         )
+}
+
+fun HomeFragment.updateFace(face: FaceSettingsDtoModel) {
+    binding.tvFaceAction.setText(
+        when {
+            !face.isEnrolled -> R.string.setup
+            face.isFaceUnlockActive() -> R.string.biometric_action_enabled
+            else -> R.string.face_action_disabled
+        },
+    )
 }
 
 fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
     when (event) {
         is HomeUiEvent.LockNow -> {
-            displayToast("Đang tiến hành khóa ngay...")
+            displayToast(getString(R.string.home_lock_now_toast))
         }
 
-        is HomeUiEvent.ShowToast -> {
-            displayToast(event.message)
+        is HomeUiEvent.ShowLoadError -> {
+            displayToast(event.message ?: getString(R.string.common_error_unexpected))
         }
 
         is HomeUiEvent.NavigateToPinLock -> {
@@ -140,7 +154,7 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
         }
 
         is HomeUiEvent.NavigateToSecurityQuestions -> {
-            displayToast("Mở cài đặt Câu hỏi bảo mật")
+            displayToast(getString(R.string.coming_soon_security_questions))
         }
 
         is HomeUiEvent.NavigateToAppLock -> {
@@ -164,13 +178,13 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
             navigator.navigateTo(R.id.action_homeFragment_to_faceAuthFragment)
         }
 
-        is HomeUiEvent.ConfirmBiometric -> confirmBiometric(event.type) { viewModel.onBiometricConfirmed(event.type) }
+        is HomeUiEvent.ConfirmBiometric -> confirmBiometric(type = event.type, onConfirmed = { viewModel.onBiometricConfirmed(event.type) })
 
         is HomeUiEvent.TestBiometric -> testBiometric(event.type)
 
         is HomeUiEvent.OpenBiometricEnrollment -> startBiometricEnrollment(event.type)
 
-        is HomeUiEvent.ShowBiometricUnavailable -> showBiometricUnavailable(event.type, event.availability)
+        is HomeUiEvent.ShowBiometricUnavailable -> showBiometricUnavailable(type = event.type, availability = event.availability)
     }
 }
 

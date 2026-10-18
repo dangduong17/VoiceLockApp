@@ -1,21 +1,42 @@
 package com.example.voicelock.data.model.settings
 
-import com.example.voicelock.data.model.biometric.BiometricSettings
-import com.example.voicelock.data.model.face.FaceSettings
+import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
+import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 
+/** Source data only; every text the screen shows is built from it in SettingsFragmentEx. */
 data class SettingsUiState(
     val isVoiceEnrolled: Boolean = false,
     val isVoiceUnlockEnabled: Boolean = false,
     val isVoiceLockEnabled: Boolean = false,
     val voiceSamplesCount: Int = 0,
-    val biometricSettings: BiometricSettings = BiometricSettings(),
-    val faceSettings: FaceSettings = FaceSettings(),
+    val biometricSettings: BiometricSettingsDtoModel = BiometricSettingsDtoModel(),
+    val faceSettings: FaceSettingsDtoModel = FaceSettingsDtoModel(),
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
-    val pinStatusText: String = "6 chữ số • Đã thiết lập",
-    val patternStatusText: String = "Chưa thiết lập",
-    val questionStatusText: String = "Đã lưu • Dùng để khôi phục PIN",
-    val themeLanguageText: String = "Sáng • Tiếng Việt",
-    val appVersionText: String = "Phiên bản 1.0.0 • Quyền riêng tư",
 )
+
+/** Everything the voice rows render, so it always changes together. */
+data class SettingsVoiceInfo(
+    val isVoiceEnrolled: Boolean,
+    val isVoiceUnlockEnabled: Boolean,
+    val isVoiceLockEnabled: Boolean,
+    val voiceSamplesCount: Int,
+)
+
+fun SettingsUiState.getVoiceInfo(): SettingsVoiceInfo =
+    SettingsVoiceInfo(
+        isVoiceEnrolled = isVoiceEnrolled,
+        isVoiceUnlockEnabled = isVoiceUnlockEnabled,
+        isVoiceLockEnabled = isVoiceLockEnabled,
+        voiceSamplesCount = voiceSamplesCount,
+    )
+
+/** PIN / pattern rows. */
+data class SettingsLockInfo(
+    val isPinSet: Boolean,
+    val pinLength: Int,
+    val isPatternSet: Boolean,
+)
+
+fun SettingsUiState.getLockInfo(): SettingsLockInfo = SettingsLockInfo(isPinSet = isPinSet, pinLength = pinLength, isPatternSet = isPatternSet)

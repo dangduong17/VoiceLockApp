@@ -2,8 +2,10 @@ package com.example.voicelock.feature.settings
 
 import android.os.Bundle
 import com.example.voicelock.R
+import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.biometric.isActive
+import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.face.isFaceUnlockActive
 import com.example.voicelock.feature.biometric.confirmBiometric
 import com.example.voicelock.feature.biometric.getBiometricSubText
@@ -11,7 +13,8 @@ import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
 import com.example.voicelock.data.model.settings.SettingsUiEvent
-import com.example.voicelock.data.model.settings.SettingsUiState
+import com.example.voicelock.data.model.settings.SettingsLockInfo
+import com.example.voicelock.data.model.settings.SettingsVoiceInfo
 import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.setPreventDoubleClick
@@ -38,7 +41,7 @@ fun SettingsFragment.settingEvent() {
     }
 
     binding.switchFingerprint.setOnCheckedChangeListener { _, isChecked ->
-        viewModel.toggleBiometric(BiometricType.FINGERPRINT, isChecked)
+        viewModel.toggleBiometric(type = BiometricType.FINGERPRINT, isEnabled = isChecked)
     }
 
     binding.switchFaceUnlock.setOnCheckedChangeListener { _, isChecked ->
@@ -90,28 +93,36 @@ fun SettingsFragment.settingEvent() {
     }
 }
 
-fun SettingsFragment.updateUiState(state: SettingsUiState) {
-    if (binding.switchVoiceUnlock.isChecked != state.isVoiceUnlockEnabled) {
-        binding.switchVoiceUnlock.isChecked = state.isVoiceUnlockEnabled
+fun SettingsFragment.updateVoice(info: SettingsVoiceInfo) {
+    if (binding.switchVoiceUnlock.isChecked != info.isVoiceUnlockEnabled) {
+        binding.switchVoiceUnlock.isChecked = info.isVoiceUnlockEnabled
     }
 
-    if (binding.switchVoiceLock.isChecked != state.isVoiceLockEnabled) {
-        binding.switchVoiceLock.isChecked = state.isVoiceLockEnabled
+    if (binding.switchVoiceLock.isChecked != info.isVoiceLockEnabled) {
+        binding.switchVoiceLock.isChecked = info.isVoiceLockEnabled
     }
 
     binding.tvVoiceUnlockSub.text =
-        if (state.isVoiceEnrolled) {
-            getString(R.string.voice_unlock_settings_sub_enrolled, state.voiceSamplesCount)
+        if (info.isVoiceEnrolled) {
+            getString(R.string.voice_unlock_settings_sub_enrolled, info.voiceSamplesCount)
         } else {
             getString(R.string.voice_not_enrolled_info)
         }
+}
 
-    val biometric = state.biometricSettings
+fun SettingsFragment.updateLockMethods(info: SettingsLockInfo) {
+    binding.tvPinSub.text =
+        if (info.isPinSet) getString(R.string.pin_status_set, info.pinLength) else getString(R.string.pin_not_set_status)
+    binding.tvPatternSub.setText(if (info.isPatternSet) R.string.pattern_set_status else R.string.pattern_not_set_status)
+}
+
+fun SettingsFragment.updateFingerprint(biometric: BiometricSettingsDtoModel) {
     val isFingerprintActive = biometric.isActive(BiometricType.FINGERPRINT)
     if (binding.switchFingerprint.isChecked != isFingerprintActive) binding.switchFingerprint.isChecked = isFingerprintActive
-    binding.tvFingerprintSub.text = getBiometricSubText(biometric.fingerprintAvailability, isFingerprintActive)
+    binding.tvFingerprintSub.text = getBiometricSubText(availability = biometric.fingerprintAvailability, isActive = isFingerprintActive)
+}
 
-    val face = state.faceSettings
+fun SettingsFragment.updateFace(face: FaceSettingsDtoModel) {
     if (binding.switchFaceUnlock.isChecked != face.isFaceUnlockActive()) binding.switchFaceUnlock.isChecked = face.isFaceUnlockActive()
     binding.tvFaceUnlockSub.text =
         when {
@@ -119,9 +130,6 @@ fun SettingsFragment.updateUiState(state: SettingsUiState) {
             face.isFaceUnlockActive() -> getString(R.string.face_unlock_sub_enrolled, face.sampleCount)
             else -> getString(R.string.face_unlock_sub_disabled, face.sampleCount)
         }
-
-    binding.tvPinSub.text = state.pinStatusText
-    binding.tvPatternSub.text = state.patternStatusText
 }
 
 /** A switch flipped on before enrollment snaps back to the saved value. */
@@ -148,8 +156,8 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
             navigator.navigateUp()
         }
 
-        is SettingsUiEvent.ShowToast -> {
-            displayToast(event.message)
+        is SettingsUiEvent.ShowLoadError -> {
+            displayToast(event.message ?: getString(R.string.common_error_unexpected))
         }
 
         is SettingsUiEvent.NavigateToVoiceEnrollment -> {
@@ -172,7 +180,7 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.ConfirmBiometric -> {
             restoreBiometricSwitches()
-            confirmBiometric(event.type) { viewModel.onBiometricConfirmed(event.type) }
+            confirmBiometric(type = event.type, onConfirmed = { viewModel.onBiometricConfirmed(event.type) })
         }
 
         is SettingsUiEvent.TestBiometric -> testBiometric(event.type)
@@ -184,7 +192,7 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.ShowBiometricUnavailable -> {
             restoreBiometricSwitches()
-            showBiometricUnavailable(event.type, event.availability)
+            showBiometricUnavailable(type = event.type, availability = event.availability)
         }
 
         is SettingsUiEvent.NavigateToPermissions -> {
@@ -206,19 +214,19 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
         }
 
         is SettingsUiEvent.NavigateToSecurityQuestions -> {
-            displayToast("Mở Câu hỏi bảo mật")
+            displayToast(getString(R.string.coming_soon_security_questions))
         }
 
         is SettingsUiEvent.NavigateToThemeLanguage -> {
-            displayToast("Mở Giao diện và ngôn ngữ")
+            displayToast(getString(R.string.coming_soon_theme_language))
         }
 
         is SettingsUiEvent.NavigateToHelpFeedback -> {
-            displayToast("Mở Trợ giúp và phản hồi")
+            displayToast(getString(R.string.coming_soon_help_feedback))
         }
 
         is SettingsUiEvent.NavigateToAbout -> {
-            displayToast("Mở Về VoiceLock")
+            displayToast(getString(R.string.coming_soon_about))
         }
 
         is SettingsUiEvent.NavigateToAppLock -> {

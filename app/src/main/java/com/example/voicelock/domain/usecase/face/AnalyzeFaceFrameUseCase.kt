@@ -12,5 +12,5 @@ class AnalyzeFaceFrameUseCase(
     operator fun invoke(
         bitmap: Bitmap,
         extractTemplate: Boolean,
-    ): Flow<Result<FaceFrameAnalysis>> = faceRecognitionRepository.analyzeFrame(bitmap, extractTemplate)
+    ): Flow<Result<FaceFrameAnalysis>> = faceRecognitionRepository.analyzeFrame(bitmap = bitmap, extractTemplate = extractTemplate)
 }

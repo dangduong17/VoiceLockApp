@@ -27,7 +27,11 @@ fun FaceEnrollmentFragment.backEvent() {
 
 fun FaceEnrollmentFragment.settingEvent() {
     binding.btnFaceEnrollAction.setPreventDoubleClickScaleView { actionEvent() }
-    binding.btnFaceEnrollRestart.setPreventDoubleClick { viewModel.restartEnrollment() }
+    binding.btnFaceEnrollRestart.setPreventDoubleClick { restartEvent() }
+}
+
+fun FaceEnrollmentFragment.restartEvent() {
+    viewModel.restartEnrollment()
 }
 
 /** The main button asks for the camera, or closes once enrollment is done (or impossible). */

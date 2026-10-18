@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import com.example.voicelock.R
 import timber.log.Timber
 
+private const val TAG = "BiometricPromptEx"
+
 /**
  * Shows Android's BiometricPrompt (fingerprint / face, whatever the user enrolled). The system
  * handles retries and lockout itself; [onError] receives the final error, including the user
@@ -64,7 +66,7 @@ fun Fragment.openBiometricEnrollment() {
     try {
         startActivity(enrollIntent)
     } catch (e: Exception) {
-        Timber.e(e, "Biometric enrollment screen unavailable")
+        Timber.tag(TAG).e(e, "Biometric enrollment screen unavailable")
         runCatching { startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS)) }
     }
 }

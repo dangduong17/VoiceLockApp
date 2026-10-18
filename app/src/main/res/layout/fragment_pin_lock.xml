@@ -4,15 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_screen"
-    android:paddingHorizontal="24dp"
-    android:paddingTop="48dp">
+    android:paddingHorizontal="@dimen/_24dp"
+    android:paddingTop="@dimen/_48dp">
 
     <TextView
         android:id="@+id/tvPinScreenTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
-        android:textSize="22sp"
+        android:textSize="@dimen/_22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,10 +22,10 @@
         android:id="@+id/tvPinScreenSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/_8dp"
         android:gravity="center"
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="@dimen/_14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvPinScreenTitle" />
@@ -34,10 +34,10 @@
         android:id="@+id/tvToggleLength"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:padding="4dp"
+        android:layout_marginTop="@dimen/_12dp"
+        android:padding="@dimen/_4dp"
         android:textColor="@color/primary_blue"
-        android:textSize="13sp"
+        android:textSize="@dimen/_13sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,7 +47,7 @@
         android:id="@+id/layoutDots"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="@dimen/_28dp"
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,44 +56,44 @@
 
         <View
             android:id="@+id/dot1"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_margin="7dp"
+            android:layout_width="@dimen/_14dp"
+            android:layout_height="@dimen/_14dp"
+            android:layout_margin="@dimen/_7dp"
             android:background="@drawable/dot_empty" />
 
         <View
             android:id="@+id/dot2"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_margin="7dp"
+            android:layout_width="@dimen/_14dp"
+            android:layout_height="@dimen/_14dp"
+            android:layout_margin="@dimen/_7dp"
             android:background="@drawable/dot_empty" />
 
         <View
             android:id="@+id/dot3"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_margin="7dp"
+            android:layout_width="@dimen/_14dp"
+            android:layout_height="@dimen/_14dp"
+            android:layout_margin="@dimen/_7dp"
             android:background="@drawable/dot_empty" />
 
         <View
             android:id="@+id/dot4"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_margin="7dp"
+            android:layout_width="@dimen/_14dp"
+            android:layout_height="@dimen/_14dp"
+            android:layout_margin="@dimen/_7dp"
             android:background="@drawable/dot_empty" />
 
         <View
             android:id="@+id/dot5"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_margin="7dp"
+            android:layout_width="@dimen/_14dp"
+            android:layout_height="@dimen/_14dp"
+            android:layout_margin="@dimen/_7dp"
             android:background="@drawable/dot_empty" />
 
         <View
             android:id="@+id/dot6"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_margin="7dp"
+            android:layout_width="@dimen/_14dp"
+            android:layout_height="@dimen/_14dp"
+            android:layout_margin="@dimen/_7dp"
             android:background="@drawable/dot_empty" />
 
     </LinearLayout>
@@ -102,10 +102,10 @@
         android:id="@+id/tvLockoutMessage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/_16dp"
         android:gravity="center"
         android:textColor="@color/error_red"
-        android:textSize="13sp"
+        android:textSize="@dimen/_13sp"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -116,7 +116,7 @@
         android:id="@+id/gridKeypad"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="@dimen/_24dp"
         android:columnCount="3"
         android:rowCount="4"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -169,9 +169,9 @@
             android:text="9" />
 
         <View
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="6dp" />
+            android:layout_width="@dimen/_72dp"
+            android:layout_height="@dimen/_72dp"
+            android:layout_margin="@dimen/_6dp" />
 
         <TextView
             android:id="@+id/btn0"
@@ -180,11 +180,12 @@
 
         <ImageView
             android:id="@+id/btnDelete"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="6dp"
+            android:contentDescription="@string/pin_delete_description"
+            android:layout_width="@dimen/_72dp"
+            android:layout_height="@dimen/_72dp"
+            android:layout_margin="@dimen/_6dp"
             android:background="@drawable/bg_keypad_button"
-            android:padding="22dp"
+            android:padding="@dimen/_22dp"
             android:src="@drawable/ic_backspace"
             app:tint="@color/text_primary" />
 

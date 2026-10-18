@@ -4,6 +4,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.voicelock.R
 import com.example.voicelock.data.model.biometric.BiometricAuthStage
+import com.example.voicelock.data.model.biometric.BiometricAuthStatusInfo
 import com.example.voicelock.data.model.biometric.BiometricAuthUiEvent
 import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.isBiometricCancel
@@ -19,13 +20,16 @@ fun BiometricAuthFragment.backEvent() {
 }
 
 fun BiometricAuthFragment.settingEvent() {
-    binding.btnBiometricAuthAction.setPreventDoubleClickScaleView { viewModel.requestPrompt() }
+    binding.btnBiometricAuthAction.setPreventDoubleClickScaleView { authEvent() }
 }
 
-fun BiometricAuthFragment.updateStage(
-    stage: BiometricAuthStage,
-    errorMessage: String?,
-) = with(binding) {
+fun BiometricAuthFragment.authEvent() {
+    viewModel.requestPrompt()
+}
+
+fun BiometricAuthFragment.updateStatus(info: BiometricAuthStatusInfo) = with(binding) {
+    val stage = info.stage
+    val errorMessage = info.errorMessage
     tvBiometricAuthStatus.text =
         getString(
             when (stage) {

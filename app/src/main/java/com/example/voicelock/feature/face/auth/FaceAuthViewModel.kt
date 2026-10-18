@@ -10,7 +10,7 @@ import com.example.voicelock.data.model.face.FaceAuthUiState
 import com.example.voicelock.data.model.face.FaceEngineStatus
 import com.example.voicelock.data.model.face.FaceFrameAnalysis
 import com.example.voicelock.data.model.face.FaceHint
-import com.example.voicelock.data.model.face.FaceSettings
+import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.face.FaceVerifyResult
 import com.example.voicelock.data.model.face.canStartScan
 import com.example.voicelock.data.model.face.toHint
@@ -143,7 +143,7 @@ class FaceAuthViewModel(
             if (stage == FaceAuthStage.NOT_ENROLLED || stage == FaceAuthStage.ENGINE_ERROR) copy(stage = FaceAuthStage.INITIALIZING) else this
         }
         launchIO {
-            val settings = getFaceSettingsUseCase().getDataOrDefault(FaceSettings())
+            val settings = getFaceSettingsUseCase().getDataOrDefault(FaceSettingsDtoModel())
             if (!settings.isEnrolled) {
                 setState { copy(stage = FaceAuthStage.NOT_ENROLLED) }
                 return@launchIO
@@ -175,7 +175,7 @@ class FaceAuthViewModel(
 
     private suspend fun analyzeAndVerify(bitmap: Bitmap) {
         // Once matched, only the blink is still needed: skip the embedding to keep frames fast.
-        val analysis = analyzeFaceFrameUseCase(bitmap, extractTemplate = !hasMatched).getDataOrNull() ?: return
+        val analysis = analyzeFaceFrameUseCase(bitmap = bitmap, extractTemplate = !hasMatched).getDataOrNull() ?: return
         blinkTracker.onFrame(analysis)
         if (analysis !is FaceFrameAnalysis.Face) {
             if (analysis == FaceFrameAnalysis.NoFace || analysis == FaceFrameAnalysis.MultipleFaces) hasMatched = false

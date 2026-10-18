@@ -21,4 +21,7 @@
     <color name="divider_line">#E2E8F0</color>
 
     <color name="error_red">#EF4444</color>
+
+    <!-- 50% black scrim behind the loading dialog -->
+    <color name="overlay_dim">#80000000</color>
 </resources>

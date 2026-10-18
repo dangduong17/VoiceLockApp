@@ -2,7 +2,7 @@ package com.example.voicelock.data.repository.voiceProfileRepository
 
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
 import com.example.voicelock.data.model.voice.VoiceKeywordProfile
-import com.example.voicelock.data.model.voice.VoiceSettings
+import com.example.voicelock.data.model.voice.VoiceSettingsDtoModel
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
 import com.example.voicelock.util.Result
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface VoiceProfileRepository {
     fun isVoiceEnrolled(): Flow<Result<Boolean>>
 
-    fun getVoiceSettings(): Flow<Result<VoiceSettings>>
+    fun getVoiceSettings(): Flow<Result<VoiceSettingsDtoModel>>
 
     fun setVoiceUnlockEnabled(isEnabled: Boolean): Flow<Result<Unit>>
 
