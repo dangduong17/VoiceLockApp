@@ -101,7 +101,7 @@ class HomeViewModel(
      * enrollment screen when nothing is enrolled. Turning it off is done from Settings.
      */
     fun onBiometricRowClicked(type: BiometricType) {
-        val settings = getCurrentState().biometricSettings
+        val settings = getCurrentState().biometricSettings ?: return
         val event =
             if (settings.isActive(type)) {
                 HomeUiEvent.TestBiometric(type)
@@ -117,7 +117,7 @@ class HomeViewModel(
     }
 
     fun onBiometricConfirmed(type: BiometricType) {
-        setState { copy(biometricSettings = biometricSettings.withPreference(type = type, isEnabled = true)) }
+        setState { copy(biometricSettings = biometricSettings?.withPreference(type = type, isEnabled = true)) }
         handleApiCall(apiCall = { setBiometricEnabledUseCase(type = type, isEnabled = true) })
     }
 

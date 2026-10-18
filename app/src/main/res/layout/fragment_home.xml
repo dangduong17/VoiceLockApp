@@ -437,6 +437,7 @@
                 <!-- Item 3: Fingerprint -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/btnFingerprint"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -481,6 +482,8 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <View
+                    android:id="@+id/dividerFingerprint"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_1dp"
                     android:layout_marginVertical="@dimen/_12dp"

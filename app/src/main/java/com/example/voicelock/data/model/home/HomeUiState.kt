@@ -15,7 +15,8 @@ data class HomeUiState(
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
     val isSecurityQuestionSet: Boolean = false,
-    val biometricSettings: BiometricSettingsDtoModel = BiometricSettingsDtoModel(),
+    /** Null until loaded, so the fingerprint row is never shown on a device without a sensor (F4). */
+    val biometricSettings: BiometricSettingsDtoModel? = null,
     val faceSettings: FaceSettingsDtoModel = FaceSettingsDtoModel(),
 )
 

@@ -96,7 +96,7 @@ class SettingsViewModel(
         type: BiometricType,
         isEnabled: Boolean,
     ) {
-        val settings = getCurrentState().biometricSettings
+        val settings = getCurrentState().biometricSettings ?: return
         if (isEnabled == settings.isActive(type)) return
         if (!isEnabled) {
             saveBiometric(type = type, isEnabled = false)
@@ -114,7 +114,7 @@ class SettingsViewModel(
 
     /** Once on, tapping the row just tests the prompt; otherwise it starts turning it on. */
     fun onBiometricRowClicked(type: BiometricType) {
-        if (getCurrentState().biometricSettings.isActive(type)) {
+        if (getCurrentState().biometricSettings?.isActive(type) == true) {
             launchIO { setEvent(SettingsUiEvent.TestBiometric(type)) }
         } else {
             toggleBiometric(type = type, isEnabled = true)
@@ -129,7 +129,7 @@ class SettingsViewModel(
         type: BiometricType,
         isEnabled: Boolean,
     ) {
-        setState { copy(biometricSettings = biometricSettings.withPreference(type = type, isEnabled = isEnabled)) }
+        setState { copy(biometricSettings = biometricSettings?.withPreference(type = type, isEnabled = isEnabled)) }
         handleApiCall(apiCall = { setBiometricEnabledUseCase(type = type, isEnabled = isEnabled) })
     }
 

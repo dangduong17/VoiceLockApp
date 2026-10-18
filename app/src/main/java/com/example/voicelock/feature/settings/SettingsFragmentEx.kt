@@ -1,7 +1,9 @@
 package com.example.voicelock.feature.settings
 
 import android.os.Bundle
+import android.view.View
 import com.example.voicelock.R
+import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.biometric.isActive
@@ -118,7 +120,12 @@ fun SettingsFragment.updateLockMethods(info: SettingsLockInfo) {
     binding.tvQuestionSub.setText(if (info.isSecurityQuestionSet) R.string.security_question_sub else R.string.security_question_sub_not_set)
 }
 
-fun SettingsFragment.updateFingerprint(biometric: BiometricSettingsDtoModel) {
+fun SettingsFragment.updateFingerprint(biometric: BiometricSettingsDtoModel?) {
+    if (biometric == null) return
+    // F4: a device without a fingerprint sensor never sees the option.
+    val hasSensor = biometric.fingerprintAvailability != BiometricAvailability.NO_HARDWARE
+    binding.btnFingerprint.visibility = if (hasSensor) View.VISIBLE else View.GONE
+    binding.dividerFingerprint.visibility = if (hasSensor) View.VISIBLE else View.GONE
     val isFingerprintActive = biometric.isActive(BiometricType.FINGERPRINT)
     if (binding.switchFingerprint.isChecked != isFingerprintActive) binding.switchFingerprint.isChecked = isFingerprintActive
     binding.tvFingerprintSub.text = getBiometricSubText(availability = biometric.fingerprintAvailability, isActive = isFingerprintActive)
@@ -143,7 +150,7 @@ private fun SettingsFragment.restoreVoiceSwitches() {
 
 /** A biometric switch flipped on is only saved after the prompt succeeds, so it snaps back first. */
 private fun SettingsFragment.restoreBiometricSwitches() {
-    val biometric = viewModel.uiState.value.biometricSettings
+    val biometric = viewModel.uiState.value.biometricSettings ?: return
     binding.switchFingerprint.isChecked = biometric.isActive(BiometricType.FINGERPRINT)
 }
 

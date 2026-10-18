@@ -1,7 +1,9 @@
 package com.example.voicelock.feature.home
 
 import android.os.Bundle
+import android.view.View
 import com.example.voicelock.R
+import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.biometric.isActive
@@ -112,7 +114,12 @@ fun HomeFragment.updateLockMethods(info: HomeLockInfo) {
     binding.tvPatternAction.setText(if (info.isPatternSet) R.string.pattern_set_status else R.string.setup)
 }
 
-fun HomeFragment.updateFingerprint(biometric: BiometricSettingsDtoModel) {
+fun HomeFragment.updateFingerprint(biometric: BiometricSettingsDtoModel?) {
+    if (biometric == null) return
+    // F4: a device without a fingerprint sensor never sees the option.
+    val hasSensor = biometric.fingerprintAvailability != BiometricAvailability.NO_HARDWARE
+    binding.btnFingerprint.visibility = if (hasSensor) View.VISIBLE else View.GONE
+    binding.dividerFingerprint.visibility = if (hasSensor) View.VISIBLE else View.GONE
     binding.tvFingerprintAction.text =
         getBiometricActionText(
             availability = biometric.fingerprintAvailability,

@@ -9,7 +9,8 @@ data class SettingsUiState(
     val isVoiceUnlockEnabled: Boolean = false,
     val isVoiceLockEnabled: Boolean = false,
     val voiceSamplesCount: Int = 0,
-    val biometricSettings: BiometricSettingsDtoModel = BiometricSettingsDtoModel(),
+    /** Null until loaded, so the fingerprint row is never shown on a device without a sensor (F4). */
+    val biometricSettings: BiometricSettingsDtoModel? = null,
     val faceSettings: FaceSettingsDtoModel = FaceSettingsDtoModel(),
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
