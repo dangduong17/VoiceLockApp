@@ -1,12 +1,14 @@
 package com.example.voicelock.feature.biometric
 
+import android.view.View
 import androidx.fragment.app.Fragment
 import com.example.voicelock.R
 import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricType
-import com.example.voicelock.util.displayToast
+import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.openBiometricEnrollment
 import com.example.voicelock.util.showBiometricPrompt
+import com.example.voicelock.util.showMessage
 
 /** Fingerprint row helpers shared by Home and Settings. */
 private fun Fragment.getBiometricName(type: BiometricType): String =
@@ -45,6 +47,7 @@ fun Fragment.getBiometricActionText(
 /** Turning a biometric on is confirmed once with the system prompt, so it is known to work. */
 fun Fragment.confirmBiometric(
     type: BiometricType,
+    anchorView: View?,
     onConfirmed: () -> Unit,
 ) {
     showBiometricPrompt(
@@ -52,29 +55,42 @@ fun Fragment.confirmBiometric(
         subtitle = getString(R.string.biometric_prompt_enable_subtitle),
         onSuccess = {
             onConfirmed()
-            displayToast(getString(R.string.biometric_enabled_toast, getBiometricName(type)))
+            showMessage(
+                message = getString(R.string.biometric_enabled_toast, getBiometricName(type)),
+                type = MessageType.SUCCESS,
+                anchorView = anchorView,
+            )
         },
     )
 }
 
-fun Fragment.testBiometric(type: BiometricType) {
+fun Fragment.testBiometric(
+    type: BiometricType,
+    anchorView: View?,
+) {
     showBiometricPrompt(
         title = getString(R.string.biometric_prompt_test_title, getBiometricName(type)),
         subtitle = getString(R.string.biometric_prompt_enable_subtitle),
-        onSuccess = { displayToast(getString(R.string.biometric_test_success)) },
+        onSuccess = {
+            showMessage(message = getString(R.string.biometric_test_success), type = MessageType.SUCCESS, anchorView = anchorView)
+        },
     )
 }
 
-fun Fragment.startBiometricEnrollment(type: BiometricType) {
-    displayToast(getString(R.string.biometric_enroll_hint, getBiometricName(type)))
+fun Fragment.startBiometricEnrollment(
+    type: BiometricType,
+    anchorView: View?,
+) {
+    showMessage(message = getString(R.string.biometric_enroll_hint, getBiometricName(type)), anchorView = anchorView)
     openBiometricEnrollment()
 }
 
 fun Fragment.showBiometricUnavailable(
     type: BiometricType,
     availability: BiometricAvailability,
+    anchorView: View?,
 ) {
     val messageRes =
         if (availability == BiometricAvailability.NO_HARDWARE) R.string.biometric_no_hardware_toast else R.string.biometric_unavailable_toast
-    displayToast(getString(messageRes, getBiometricName(type)))
+    showMessage(message = getString(messageRes, getBiometricName(type)), type = MessageType.ERROR, anchorView = anchorView)
 }

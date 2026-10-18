@@ -7,7 +7,8 @@ import com.example.voicelock.data.model.patternlock.PatternLockStage
 import com.example.voicelock.data.model.patternlock.PatternLockUiEvent
 import com.example.voicelock.data.model.patternlock.PatternLockUiState
 import com.example.voicelock.data.model.patternlock.isInputEnabled
-import com.example.voicelock.util.displayToast
+import com.example.voicelock.util.MessageType
+import com.example.voicelock.util.showMessage
 import com.example.voicelock.widget.PatternLockView
 
 fun PatternLockFragment.initView() {
@@ -58,26 +59,26 @@ fun PatternLockFragment.updateUiState(state: PatternLockUiState) {
 fun PatternLockFragment.handleUiEvent(event: PatternLockUiEvent) {
     when (event) {
         is PatternLockUiEvent.VerifyFailed -> {
-            displayToast(getString(R.string.pattern_wrong_remaining, event.remainingAttempts))
+            showMessage(message = getString(R.string.pattern_wrong_remaining, event.remainingAttempts), type = MessageType.ERROR)
             binding.patternLockView.showError()
         }
 
         is PatternLockUiEvent.ConfirmMismatch -> {
-            displayToast(getString(R.string.pattern_mismatch))
+            showMessage(message = getString(R.string.pattern_mismatch), type = MessageType.ERROR)
             binding.patternLockView.showError()
         }
 
         is PatternLockUiEvent.TooShort -> {
-            displayToast(getString(R.string.pattern_too_short))
+            showMessage(message = getString(R.string.pattern_too_short), type = MessageType.ERROR)
             binding.patternLockView.clear()
         }
 
         is PatternLockUiEvent.Success -> {
             if (event.mode == PatternLockMode.UNLOCK) {
-                displayToast(getString(R.string.pattern_unlock_success))
+                // The unlocked app coming to the front is the feedback; the overlay just closes.
                 requireActivity().finish()
             } else {
-                displayToast(getString(R.string.pattern_set_success))
+                showMessage(message = getString(R.string.pattern_set_success), type = MessageType.SUCCESS)
                 navigator.navigateUp()
             }
         }

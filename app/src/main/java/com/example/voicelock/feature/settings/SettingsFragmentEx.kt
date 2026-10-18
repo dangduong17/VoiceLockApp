@@ -7,17 +7,18 @@ import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.biometric.isActive
 import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.face.isFaceUnlockActive
+import com.example.voicelock.data.model.settings.SettingsLockInfo
+import com.example.voicelock.data.model.settings.SettingsUiEvent
+import com.example.voicelock.data.model.settings.SettingsVoiceInfo
 import com.example.voicelock.feature.biometric.confirmBiometric
 import com.example.voicelock.feature.biometric.getBiometricSubText
 import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
-import com.example.voicelock.data.model.settings.SettingsUiEvent
-import com.example.voicelock.data.model.settings.SettingsLockInfo
-import com.example.voicelock.data.model.settings.SettingsVoiceInfo
 import com.example.voicelock.util.BundleKey
-import com.example.voicelock.util.displayToast
+import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
+import com.example.voicelock.util.showMessage
 
 fun SettingsFragment.initView() {
     // Basic setup if any
@@ -157,7 +158,11 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
         }
 
         is SettingsUiEvent.ShowLoadError -> {
-            displayToast(event.message ?: getString(R.string.common_error_unexpected))
+            showMessage(
+                message = event.message ?: getString(R.string.common_error_unexpected),
+                type = MessageType.ERROR,
+                anchorView = binding.layoutBottomNav,
+            )
         }
 
         is SettingsUiEvent.NavigateToVoiceEnrollment -> {
@@ -180,19 +185,27 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.ConfirmBiometric -> {
             restoreBiometricSwitches()
-            confirmBiometric(type = event.type, onConfirmed = { viewModel.onBiometricConfirmed(event.type) })
+            confirmBiometric(
+                type = event.type,
+                anchorView = binding.layoutBottomNav,
+                onConfirmed = { viewModel.onBiometricConfirmed(event.type) },
+            )
         }
 
-        is SettingsUiEvent.TestBiometric -> testBiometric(event.type)
+        is SettingsUiEvent.TestBiometric -> testBiometric(type = event.type, anchorView = binding.layoutBottomNav)
 
         is SettingsUiEvent.OpenBiometricEnrollment -> {
             restoreBiometricSwitches()
-            startBiometricEnrollment(event.type)
+            startBiometricEnrollment(type = event.type, anchorView = binding.layoutBottomNav)
         }
 
         is SettingsUiEvent.ShowBiometricUnavailable -> {
             restoreBiometricSwitches()
-            showBiometricUnavailable(type = event.type, availability = event.availability)
+            showBiometricUnavailable(
+                type = event.type,
+                availability = event.availability,
+                anchorView = binding.layoutBottomNav,
+            )
         }
 
         is SettingsUiEvent.NavigateToPermissions -> {
@@ -214,19 +227,19 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
         }
 
         is SettingsUiEvent.NavigateToSecurityQuestions -> {
-            displayToast(getString(R.string.coming_soon_security_questions))
+            showMessage(message = getString(R.string.coming_soon_security_questions), anchorView = binding.layoutBottomNav)
         }
 
         is SettingsUiEvent.NavigateToThemeLanguage -> {
-            displayToast(getString(R.string.coming_soon_theme_language))
+            showMessage(message = getString(R.string.coming_soon_theme_language), anchorView = binding.layoutBottomNav)
         }
 
         is SettingsUiEvent.NavigateToHelpFeedback -> {
-            displayToast(getString(R.string.coming_soon_help_feedback))
+            showMessage(message = getString(R.string.coming_soon_help_feedback), anchorView = binding.layoutBottomNav)
         }
 
         is SettingsUiEvent.NavigateToAbout -> {
-            displayToast(getString(R.string.coming_soon_about))
+            showMessage(message = getString(R.string.coming_soon_about), anchorView = binding.layoutBottomNav)
         }
 
         is SettingsUiEvent.NavigateToAppLock -> {

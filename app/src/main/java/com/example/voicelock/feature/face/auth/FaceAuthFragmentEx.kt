@@ -9,12 +9,14 @@ import com.example.voicelock.data.model.face.FaceAuthStage
 import com.example.voicelock.data.model.face.FaceAuthStatusInfo
 import com.example.voicelock.data.model.face.FaceAuthUiEvent
 import com.example.voicelock.feature.face.camera.FaceCameraController
-import com.example.voicelock.feature.face.getFaceHintText
 import com.example.voicelock.feature.face.getFaceEngineErrorText
+import com.example.voicelock.feature.face.getFaceHintText
 import com.example.voicelock.util.Constant
-import com.example.voicelock.util.displayToast
+import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
+import com.example.voicelock.util.showMessage
+import com.example.voicelock.util.showPermissionDeniedMessage
 
 fun FaceAuthFragment.initView() {
     // Basic setup if any
@@ -67,7 +69,7 @@ fun FaceAuthFragment.onCameraPermissionResult(isGranted: Boolean) {
     if (isGranted) {
         startCamera()
     } else {
-        displayToast(getString(R.string.face_camera_permission_denied))
+        showPermissionDeniedMessage(getString(R.string.face_camera_permission_denied))
     }
 }
 
@@ -149,10 +151,8 @@ fun FaceAuthFragment.updateAppUnlock(isAppUnlock: Boolean) {
 fun FaceAuthFragment.handleUiEvent(event: FaceAuthUiEvent) {
     when (event) {
         is FaceAuthUiEvent.Authenticated ->
-            if (event.isAppUnlock) {
-                displayToast(getString(R.string.face_auth_stage_success))
-                requireActivity().finish()
-            }
-        FaceAuthUiEvent.ProfileDeleted -> displayToast(getString(R.string.face_auth_deleted))
+            // The unlocked app coming to the front is the feedback; the overlay just closes.
+            if (event.isAppUnlock) requireActivity().finish()
+        FaceAuthUiEvent.ProfileDeleted -> showMessage(message = getString(R.string.face_auth_deleted), type = MessageType.SUCCESS)
     }
 }

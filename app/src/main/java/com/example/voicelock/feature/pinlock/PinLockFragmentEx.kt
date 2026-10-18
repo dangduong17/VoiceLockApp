@@ -8,9 +8,10 @@ import com.example.voicelock.data.model.pinlock.PinLockUiEvent
 import com.example.voicelock.data.model.pinlock.PinLockUiState
 import com.example.voicelock.data.model.pinlock.canToggleLength
 import com.example.voicelock.data.model.pinlock.isKeypadEnabled
-import com.example.voicelock.util.displayToast
+import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.shakeError
+import com.example.voicelock.util.showMessage
 
 fun PinLockFragment.initView() {
     // Basic setup if any
@@ -104,21 +105,21 @@ private fun PinLockFragment.updateDots(state: PinLockUiState) {
 fun PinLockFragment.handleUiEvent(event: PinLockUiEvent) {
     when (event) {
         is PinLockUiEvent.VerifyFailed -> {
-            displayToast(getString(R.string.pin_wrong_remaining, event.remainingAttempts))
+            showMessage(message = getString(R.string.pin_wrong_remaining, event.remainingAttempts), type = MessageType.ERROR)
             binding.layoutDots.shakeError()
         }
 
         is PinLockUiEvent.ConfirmMismatch -> {
-            displayToast(getString(R.string.pin_mismatch))
+            showMessage(message = getString(R.string.pin_mismatch), type = MessageType.ERROR)
             binding.layoutDots.shakeError()
         }
 
         is PinLockUiEvent.Success -> {
             if (event.mode == PinLockMode.UNLOCK) {
-                displayToast(getString(R.string.pin_unlock_success))
+                // The unlocked app coming to the front is the feedback; the overlay just closes.
                 requireActivity().finish()
             } else {
-                displayToast(getString(R.string.pin_set_success))
+                showMessage(message = getString(R.string.pin_set_success), type = MessageType.SUCCESS)
                 navigator.navigateUp()
             }
         }

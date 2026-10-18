@@ -24,4 +24,9 @@
 
     <!-- 50% black scrim behind the loading dialog -->
     <color name="overlay_dim">#80000000</color>
+    <!-- In-app messages (MessageType) -->
+    <color name="message_info_bg">#FF1E293B</color>
+    <color name="message_success_bg">#FF15803D</color>
+    <color name="message_error_bg">#FFDC2626</color>
+    <color name="message_action">#FFBAE6FD</color>
 </resources>
