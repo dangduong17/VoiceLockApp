@@ -13,6 +13,9 @@ object Constant {
 
     const val VOICE_ENROLLMENT_SAMPLES = 3
 
+    /** F1: how long "apps locked" stays on the lock command screen before it closes. */
+    const val VOICE_LOCK_CLOSE_DELAY_MS = 1_500L
+
     /** Minimum length of a security answer after normalization (see normalizeForComparison). */
     const val SECURITY_ANSWER_MIN_LENGTH = 2
 

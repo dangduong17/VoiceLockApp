@@ -9,8 +9,12 @@ data class VoiceSettingsDtoModel(
     val sampleCount: Int = 0,
     val isUnlockPreferenceOn: Boolean = true,
     val isLockPreferenceOn: Boolean = false,
+    /** F1: a separate lock command (its own 3 samples) has been enrolled. */
+    val isLockCommandEnrolled: Boolean = false,
+    /** How the lock command was transcribed at enrollment, shown in Home / Settings. */
+    val lockCommandPhrase: String = "",
 )
 
 fun VoiceSettingsDtoModel.isVoiceUnlockActive(): Boolean = isEnrolled && isUnlockPreferenceOn
 
-fun VoiceSettingsDtoModel.isVoiceLockActive(): Boolean = isEnrolled && isLockPreferenceOn
+fun VoiceSettingsDtoModel.isVoiceLockActive(): Boolean = isLockCommandEnrolled && isLockPreferenceOn

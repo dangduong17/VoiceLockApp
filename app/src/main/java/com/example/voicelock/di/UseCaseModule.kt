@@ -16,6 +16,7 @@ import com.example.voicelock.domain.usecase.face.SetFaceUnlockEnabledUseCase
 import com.example.voicelock.domain.usecase.face.VerifyOwnerFaceUseCase
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
+import com.example.voicelock.domain.usecase.lock.LockDeviceUseCase
 import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
 import com.example.voicelock.domain.usecase.patternlock.SetPatternUseCase
 import com.example.voicelock.domain.usecase.patternlock.VerifyPatternUseCase
@@ -54,6 +55,7 @@ val settingsUseCaseModule = module {
 
 val lockUseCaseModule = module {
     factoryOf(::GetLockoutStateUseCase)
+    factoryOf(::LockDeviceUseCase)
 }
 
 val pinLockUseCaseModule = module {

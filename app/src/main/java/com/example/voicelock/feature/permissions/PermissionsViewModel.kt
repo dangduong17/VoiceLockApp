@@ -8,7 +8,14 @@ class PermissionsViewModel : BaseViewModel<PermissionsUiState, Nothing>(Permissi
     fun updatePermissionState(
         isUsageAccessGranted: Boolean,
         isOverlayPermissionGranted: Boolean,
+        isDeviceAdminActive: Boolean,
     ) {
-        setState { copy(isUsageAccessGranted = isUsageAccessGranted, isOverlayPermissionGranted = isOverlayPermissionGranted) }
+        setState {
+            copy(
+                isUsageAccessGranted = isUsageAccessGranted,
+                isOverlayPermissionGranted = isOverlayPermissionGranted,
+                isDeviceAdminActive = isDeviceAdminActive,
+            )
+        }
     }
 }

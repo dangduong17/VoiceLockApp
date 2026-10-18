@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F1: long-press the launcher icon -> "Khóa bằng giọng nói". -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_lock"
+        android:shortcutId="voice_lock_command"
+        android:shortcutLongLabel="@string/voice_lock_shortcut_long"
+        android:shortcutShortLabel="@string/lock_by_voice">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.example.voicelock.feature.voicecommand.VoiceCommandActivity"
+            android:targetPackage="com.example.voicelock" />
+    </shortcut>
+</shortcuts>

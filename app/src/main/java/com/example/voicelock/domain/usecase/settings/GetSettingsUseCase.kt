@@ -45,6 +45,8 @@ class GetSettingsUseCase(
                         isVoiceEnrolled = voiceSettings.isEnrolled,
                         isVoiceUnlockEnabled = voiceSettings.isVoiceUnlockActive(),
                         isVoiceLockEnabled = voiceSettings.isVoiceLockActive(),
+                        isVoiceLockCommandEnrolled = voiceSettings.isLockCommandEnrolled,
+                        voiceLockPhrase = voiceSettings.lockCommandPhrase,
                         voiceSamplesCount = voiceSettings.sampleCount,
                         biometricSettings = biometricSettings,
                         faceSettings = faceSettings,

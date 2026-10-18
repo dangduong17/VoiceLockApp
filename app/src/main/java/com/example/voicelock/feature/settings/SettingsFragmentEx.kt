@@ -18,6 +18,7 @@ import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
 import com.example.voicelock.util.BundleKey
+import com.example.voicelock.util.offerVoiceLockTile
 import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.showMessage
@@ -37,6 +38,10 @@ fun SettingsFragment.settingEvent() {
 
     binding.switchVoiceLock.setOnCheckedChangeListener { _, isChecked ->
         viewModel.toggleVoiceLock(isChecked)
+    }
+
+    binding.rowVoiceLock.setPreventDoubleClick {
+        viewModel.onVoiceLockRowClicked()
     }
 
     binding.rowVoiceUnlock.setPreventDoubleClick {
@@ -104,6 +109,13 @@ fun SettingsFragment.updateVoice(info: SettingsVoiceInfo) {
     if (binding.switchVoiceLock.isChecked != info.isVoiceLockEnabled) {
         binding.switchVoiceLock.isChecked = info.isVoiceLockEnabled
     }
+
+    binding.tvVoiceLockSub.text =
+        if (info.isVoiceLockCommandEnrolled) {
+            getString(R.string.voice_lock_sub_enrolled, info.voiceLockPhrase)
+        } else {
+            getString(R.string.voice_lock_sub_not_enrolled)
+        }
 
     binding.tvVoiceUnlockSub.text =
         if (info.isVoiceEnrolled) {
@@ -175,8 +187,11 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.NavigateToVoiceEnrollment -> {
             restoreVoiceSwitches()
-            navigator.navigateTo(R.id.action_settingsFragment_to_enrollmentFragment)
+            val bundle = Bundle().apply { putString(BundleKey.KEY_VOICE_MODE, event.mode.name) }
+            navigator.navigateTo(R.id.action_settingsFragment_to_enrollmentFragment, bundle)
         }
+
+        is SettingsUiEvent.OfferVoiceLockTile -> offerVoiceLockTile()
 
         is SettingsUiEvent.NavigateToVoiceTest -> {
             navigator.navigateTo(R.id.action_settingsFragment_to_twoStageAuthFragment)

@@ -14,7 +14,9 @@ import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
 import com.example.voicelock.data.model.voice.canStart
 import com.example.voicelock.data.model.voice.getTexts
+import com.example.voicelock.data.model.lock.DeviceLockResult
 import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
+import com.example.voicelock.domain.usecase.lock.LockDeviceUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceKeywordProfileUseCase
 import com.example.voicelock.domain.usecase.voice.IsSpeechToTextAvailableUseCase
 import com.example.voicelock.domain.usecase.voice.IsVoiceEnrolledUseCase
@@ -55,23 +57,32 @@ class TwoStageAuthViewModel(
     private val matchVoiceKeywordUseCase: MatchVoiceKeywordUseCase,
     private val verifyOwnerVoiceUseCase: VerifyOwnerVoiceUseCase,
     private val markAppUnlockedUseCase: MarkAppUnlockedUseCase,
+    private val lockDeviceUseCase: LockDeviceUseCase,
 ) : BaseViewModel<TwoStageAuthUiState, TwoStageAuthUiEvent>(TwoStageAuthUiState()) {
 
     private var authJob: Job? = null
     private var targetPackageName: String? = null
 
-    /** [targetPackageName] is set when unlocking a locked app from the lock overlay. */
-    fun initData(targetPackageName: String?) {
+    /**
+     * [targetPackageName] is set when unlocking a locked app from the lock overlay; [isLockCommand]
+     * when opened as the F1 voice lock command (LOCK phrase, locks the phone on success).
+     */
+    fun initData(
+        targetPackageName: String?,
+        isLockCommand: Boolean = false,
+    ) {
         this.targetPackageName = targetPackageName?.takeIf { it.isNotBlank() }
-        if (this.targetPackageName != null) {
-            setState { copy(isAppUnlock = true, mode = VoiceVerificationMode.UNLOCK) }
+        when {
+            isLockCommand -> setState { copy(isLockCommand = true, mode = VoiceVerificationMode.LOCK) }
+            this.targetPackageName != null -> setState { copy(isAppUnlock = true, mode = VoiceVerificationMode.UNLOCK) }
         }
         checkEnrollment()
     }
 
     fun checkEnrollment() {
         launchIO {
-            val isEnrolled = isVoiceEnrolledUseCase().getDataOrDefault(false)
+            // UNLOCK and LOCK have separate voice profiles (passphrase / lock command).
+            val isEnrolled = isVoiceEnrolledUseCase(getCurrentState().mode).getDataOrDefault(false)
             setState { copy(stage = if (isEnrolled) AuthStage.IDLE else AuthStage.NOT_ENROLLED) }
             if (isEnrolled) warmUpVoiceModelUseCase().first()
         }
@@ -79,7 +90,9 @@ class TwoStageAuthViewModel(
 
     fun setMode(mode: VoiceVerificationMode) {
         val state = getCurrentState()
-        if (state.canStart() && !state.isAppUnlock) setState { copy(mode = mode) }
+        if (!state.canStart() || state.isAppUnlock || state.isLockCommand || state.mode == mode) return
+        setState { copy(mode = mode) }
+        checkEnrollment()
     }
 
     /** The caller must hold RECORD_AUDIO (the screen checks it before calling). */
@@ -98,7 +111,7 @@ class TwoStageAuthViewModel(
                 setState { copy(stage = AuthStage.VERIFYING) }
 
                 val mode = getCurrentState().mode
-                val keywordProfile = getVoiceKeywordProfileUseCase().getDataOrNull() ?: legacyKeywordProfile()
+                val keywordProfile = getVoiceKeywordProfileUseCase(mode).getDataOrNull() ?: legacyKeywordProfile(mode)
                 val isSpeechToTextAvailable = isSpeechToTextAvailableUseCase().getDataOrDefault(false)
                 // Decided up front from enrollment, never from a runtime failure: if the phrase was
                 // transcribed at enrollment, Stage 1 must pass now (a recognizer error rejects).
@@ -148,8 +161,12 @@ class TwoStageAuthViewModel(
      * Profiles enrolled before the phrase was transcribed: system language + the built-in
      * "Unlock" / "Mở khóa" keywords. Re-enrolling records the owner's own phrase and language.
      */
-    private fun legacyKeywordProfile() =
-        VoiceKeywordProfile(languageTag = Locale.getDefault().toLanguageTag(), transcripts = Constant.VOICE_UNLOCK_KEYWORDS)
+    private fun legacyKeywordProfile(mode: VoiceVerificationMode) =
+        VoiceKeywordProfile(
+            languageTag = Locale.getDefault().toLanguageTag(),
+            // The built-in words are unlock words; a lock command profile always has its own transcript.
+            transcripts = if (mode == VoiceVerificationMode.UNLOCK) Constant.VOICE_UNLOCK_KEYWORDS else emptyList(),
+        )
 
     private suspend fun recognizeKeyword(
         samples: FloatArray,
@@ -187,6 +204,12 @@ class TwoStageAuthViewModel(
 
     private suspend fun handleVerifyResult(result: VoiceVerifyResult) {
         when (result) {
+            is VoiceVerifyResult.Verified if getCurrentState().isLockCommand -> {
+                setState { copy(stage = AuthStage.SUCCESS, scores = result.scores) }
+                val lockResult = lockDeviceUseCase().getDataOrDefault(DeviceLockResult.APPS_LOCKED)
+                setEvent(TwoStageAuthUiEvent.DeviceLocked(lockResult))
+            }
+
             is VoiceVerifyResult.Verified -> {
                 // Same session bookkeeping as a PIN/pattern unlock, so the monitor lets the app through.
                 targetPackageName?.let { markAppUnlockedUseCase(it).first() }

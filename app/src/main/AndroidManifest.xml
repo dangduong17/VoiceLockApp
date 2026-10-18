@@ -47,7 +47,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- F1: long-press the icon -> "Khóa bằng giọng nói" -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
+
+        <!-- F1 voice lock command; exported for the launcher shortcut (it only locks, after owner verification). -->
+        <activity
+            android:name=".feature.voicecommand.VoiceCommandActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:theme="@style/Theme.VoiceLock" />
 
         <activity
             android:name=".feature.applock.LockOverlayActivity"
@@ -66,6 +79,36 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="app_lock_monitoring" />
+        </service>
+
+        <!-- F1: device admin with the force-lock policy only (DevicePolicyManager.lockNow()) -->
+        <receiver
+            android:name=".service.VoiceLockDeviceAdminReceiver"
+            android:description="@string/permission_device_admin_explanation"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- F1: Quick Settings tile "Khóa bằng giọng nói" -->
+        <service
+            android:name=".service.VoiceLockTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_lock"
+            android:label="@string/lock_by_voice"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="false" />
         </service>
 
         <!-- F0: rebuild the app lock after a reboot / app update (system broadcasts reach non-exported receivers). -->

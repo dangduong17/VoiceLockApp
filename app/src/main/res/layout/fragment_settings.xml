@@ -169,6 +169,7 @@
 
                 <!-- Item 2: Lock by Voice -->
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/rowVoiceLock"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -199,6 +200,7 @@
                         app:layout_constraintTop_toTopOf="@id/ivWaveCircle" />
 
                     <TextView
+                        android:id="@+id/tvVoiceLockSub"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_12dp"

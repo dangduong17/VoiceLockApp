@@ -26,9 +26,14 @@ enum class EnrollmentError {
     RECORDING_FAILED,
     PROCESSING_FAILED,
     MODEL_MISSING,
+
+    /** F1: the lock command sounds like the unlock passphrase. */
+    SAME_AS_UNLOCK,
 }
 
 data class EnrollmentUiState(
+    /** UNLOCK: the voice passphrase; LOCK: the F1 lock command. */
+    val mode: VoiceVerificationMode = VoiceVerificationMode.UNLOCK,
     val phase: EnrollmentPhase = EnrollmentPhase.IDLE,
     val recordedCount: Int = 0,
     val requiredCount: Int = Constant.VOICE_ENROLLMENT_SAMPLES,
@@ -49,6 +54,7 @@ fun EnrollmentUiState.canRecord(): Boolean = phase == EnrollmentPhase.IDLE
 
 /** Everything the progress area renders, so it always changes together. */
 data class EnrollmentProgress(
+    val mode: VoiceVerificationMode,
     val phase: EnrollmentPhase,
     val recordedCount: Int,
     val requiredCount: Int,
@@ -59,6 +65,7 @@ data class EnrollmentProgress(
 
 fun EnrollmentUiState.getProgress(): EnrollmentProgress =
     EnrollmentProgress(
+        mode = mode,
         phase = phase,
         recordedCount = recordedCount,
         requiredCount = requiredCount,

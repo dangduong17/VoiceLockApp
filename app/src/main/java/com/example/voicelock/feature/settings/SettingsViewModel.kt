@@ -4,6 +4,7 @@ import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
@@ -45,7 +46,7 @@ class SettingsViewModel(
         val state = getCurrentState()
         if (isEnabled == state.isVoiceUnlockEnabled) return
         if (!state.isVoiceEnrolled) {
-            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment) }
+            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)) }
             return
         }
         setState { copy(isVoiceUnlockEnabled = isEnabled) }
@@ -55,17 +56,26 @@ class SettingsViewModel(
     fun toggleVoiceLock(isEnabled: Boolean) {
         val state = getCurrentState()
         if (isEnabled == state.isVoiceLockEnabled) return
-        if (!state.isVoiceEnrolled) {
-            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment) }
+        if (!state.isVoiceLockCommandEnrolled) {
+            // F1: the lock command is its own recording, separate from the unlock passphrase.
+            launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
             return
         }
         setState { copy(isVoiceLockEnabled = isEnabled) }
-        handleApiCall(apiCall = { setVoiceLockEnabledUseCase(isEnabled) })
+        handleApiCall(
+            apiCall = { setVoiceLockEnabledUseCase(isEnabled) },
+            onSuccess = { if (isEnabled) launchIO { setEvent(SettingsUiEvent.OfferVoiceLockTile) } },
+        )
+    }
+
+    /** F1: tapping the voice lock row records (or re-records) the lock command. */
+    fun onVoiceLockRowClicked() {
+        launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
     }
 
     fun onVoiceUnlockRowClicked() {
         val event =
-            if (getCurrentState().isVoiceEnrolled) SettingsUiEvent.NavigateToVoiceTest else SettingsUiEvent.NavigateToVoiceEnrollment
+            if (getCurrentState().isVoiceEnrolled) SettingsUiEvent.NavigateToVoiceTest else SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)
         launchIO { setEvent(event) }
     }
 
@@ -139,7 +149,7 @@ class SettingsViewModel(
 
     fun onVoiceCommandsClicked() {
         // "Voice commands & samples" = (re-)record the voice password.
-        launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment) }
+        launchIO { setEvent(SettingsUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)) }
     }
 
     fun onPermissionsClicked() {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.voicelock.base.BaseFragment
+import com.example.voicelock.data.model.voice.getScreenKind
 import com.example.voicelock.data.model.voice.getStageInfo
 import com.example.voicelock.databinding.FragmentTwoStageAuthBinding
 import com.example.voicelock.util.BundleKey
@@ -33,7 +34,10 @@ class TwoStageAuthFragment : BaseFragment<FragmentTwoStageAuthBinding, TwoStageA
         initView()
         settingEvent()
         onSystemBack { backEvent() }
-        viewModel.initData(targetPackageName = arguments?.getString(BundleKey.KEY_LOCK_TARGET_PACKAGE))
+        viewModel.initData(
+            targetPackageName = arguments?.getString(BundleKey.KEY_LOCK_TARGET_PACKAGE),
+            isLockCommand = arguments?.getBoolean(BundleKey.KEY_VOICE_LOCK_COMMAND) == true,
+        )
     }
 
     override fun onStart() {
@@ -51,7 +55,7 @@ class TwoStageAuthFragment : BaseFragment<FragmentTwoStageAuthBinding, TwoStageA
         viewModel.uiState.map { it.heardText }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateHeardText(it) }
         viewModel.uiState.map { it.scores }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateScores(it) }
         viewModel.uiState.map { it.mode }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateMode(it) }
-        viewModel.uiState.map { it.isAppUnlock }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateAppUnlock(it) }
+        viewModel.uiState.map { it.getScreenKind() }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateScreenKind(it) }
         viewModel.uiEvent.collectFlowOnView(viewLifecycleOwner) { handleUiEvent(it) }
     }
 }

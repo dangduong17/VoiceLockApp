@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import com.example.voicelock.R
 import com.example.voicelock.data.model.biometric.BiometricAvailability
+import com.example.voicelock.data.model.lock.DeviceLockResult
 import com.example.voicelock.data.model.biometric.BiometricSettingsDtoModel
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.biometric.isActive
@@ -18,6 +19,7 @@ import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
 import com.example.voicelock.util.BundleKey
+import com.example.voicelock.util.offerVoiceLockTile
 import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
@@ -42,6 +44,10 @@ fun HomeFragment.settingEvent() {
 
     binding.switchVoiceLock.setOnCheckedChangeListener { _, isChecked ->
         viewModel.toggleVoiceLock(isChecked)
+    }
+
+    binding.rowVoiceLock.setPreventDoubleClick {
+        viewModel.onVoiceLockRowClicked()
     }
 
     binding.rowVoiceUnlock.setPreventDoubleClick {
@@ -106,6 +112,13 @@ fun HomeFragment.updateVoice(info: HomeVoiceInfo) {
     if (binding.switchVoiceLock.isChecked != info.isVoiceLockEnabled) {
         binding.switchVoiceLock.isChecked = info.isVoiceLockEnabled
     }
+
+    binding.tvVoiceLockSub.text =
+        if (info.isVoiceLockCommandEnrolled) {
+            getString(R.string.voice_lock_sub_enrolled, info.voiceLockPhrase)
+        } else {
+            getString(R.string.voice_lock_sub_not_enrolled)
+        }
 }
 
 fun HomeFragment.updateLockMethods(info: HomeLockInfo) {
@@ -139,9 +152,11 @@ fun HomeFragment.updateFace(face: FaceSettingsDtoModel) {
 
 fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
     when (event) {
-        is HomeUiEvent.LockNow -> {
-            showMessage(message = getString(R.string.home_lock_now_toast), anchorView = binding.layoutBottomNav)
-        }
+        is HomeUiEvent.LockNowDone ->
+            // With the device admin the screen is already off; otherwise say that only the apps were locked.
+            if (event.result == DeviceLockResult.APPS_LOCKED) {
+                showMessage(message = getString(R.string.voice_lock_apps_locked), type = MessageType.SUCCESS, anchorView = binding.layoutBottomNav)
+            }
 
         is HomeUiEvent.ShowLoadError -> {
             showMessage(
@@ -176,8 +191,11 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
 
         is HomeUiEvent.NavigateToVoiceEnrollment -> {
             restoreVoiceSwitches()
-            navigator.navigateTo(R.id.action_homeFragment_to_enrollmentFragment)
+            val bundle = Bundle().apply { putString(BundleKey.KEY_VOICE_MODE, event.mode.name) }
+            navigator.navigateTo(R.id.action_homeFragment_to_enrollmentFragment, bundle)
         }
+
+        is HomeUiEvent.OfferVoiceLockTile -> offerVoiceLockTile()
 
         is HomeUiEvent.NavigateToVoiceTest -> {
             navigator.navigateTo(R.id.action_homeFragment_to_twoStageAuthFragment)

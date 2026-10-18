@@ -28,8 +28,8 @@ class VoiceProfileRepositoryImpl(
     private val dataStore: DataStore<Preferences>,
 ) : VoiceProfileRepository {
 
-    override fun isVoiceEnrolled(): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> { emit(Result.Success(voiceBiometricsManager.isEnrolled())) }
+    override fun isVoiceEnrolled(mode: VoiceVerificationMode): Flow<Result<Boolean>> =
+        flow<Result<Boolean>> { emit(Result.Success(voiceBiometricsManager.isEnrolled(mode))) }
             .flowOn(Dispatchers.IO)
             .catchAsResult()
 
@@ -43,6 +43,9 @@ class VoiceProfileRepositoryImpl(
                         sampleCount = voiceBiometricsManager.getEnrolledSampleCount(),
                         isUnlockPreferenceOn = preferences[KEY_VOICE_UNLOCK_ENABLED] ?: true,
                         isLockPreferenceOn = preferences[KEY_VOICE_LOCK_ENABLED] ?: false,
+                        isLockCommandEnrolled = voiceBiometricsManager.isEnrolled(VoiceVerificationMode.LOCK),
+                        lockCommandPhrase =
+                            voiceBiometricsManager.getKeywordProfile(VoiceVerificationMode.LOCK)?.transcripts?.firstOrNull().orEmpty(),
                     ),
                 ),
             )
@@ -70,17 +73,18 @@ class VoiceProfileRepositoryImpl(
         }.flowOn(Dispatchers.IO)
             .catchAsResult()
 
-    override fun getKeywordProfile(): Flow<Result<VoiceKeywordProfile?>> =
-        flow<Result<VoiceKeywordProfile?>> { emit(Result.Success(voiceBiometricsManager.getKeywordProfile())) }
+    override fun getKeywordProfile(mode: VoiceVerificationMode): Flow<Result<VoiceKeywordProfile?>> =
+        flow<Result<VoiceKeywordProfile?>> { emit(Result.Success(voiceBiometricsManager.getKeywordProfile(mode))) }
             .flowOn(Dispatchers.IO)
             .catchAsResult()
 
     override fun enrollOwnerVoice(
         recordings: List<FloatArray>,
         keywordProfile: VoiceKeywordProfile,
+        mode: VoiceVerificationMode,
     ): Flow<Result<VoiceEnrollmentResult>> =
         flow<Result<VoiceEnrollmentResult>> {
-            emit(Result.Success(voiceBiometricsManager.enrollOwnerVoice(recordings, keywordProfile)))
+            emit(Result.Success(voiceBiometricsManager.enrollOwnerVoice(recordings = recordings, keywordProfile = keywordProfile, mode = mode)))
         }
             .flowOn(Dispatchers.IO)
             .catchAsResult()
