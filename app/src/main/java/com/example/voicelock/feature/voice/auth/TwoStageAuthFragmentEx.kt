@@ -13,8 +13,8 @@ import com.example.voicelock.data.model.voice.VoiceScores
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.canStart
 import com.example.voicelock.data.model.voice.isBusy
-import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.setPreventDoubleClickScaleView
+import com.example.voicelock.util.showPermissionDeniedMessage
 
 fun TwoStageAuthFragment.initView() {
     // Basic setup if any
@@ -58,7 +58,7 @@ fun TwoStageAuthFragment.onMicPermissionResult(isGranted: Boolean) {
     if (isGranted) {
         viewModel.startAuthentication()
     } else {
-        displayToast(getString(R.string.voice_mic_permission_denied))
+        showPermissionDeniedMessage(getString(R.string.voice_mic_permission_denied))
     }
 }
 
@@ -151,9 +151,7 @@ fun TwoStageAuthFragment.updateAppUnlock(isAppUnlock: Boolean) {
 fun TwoStageAuthFragment.handleUiEvent(event: TwoStageAuthUiEvent) {
     when (event) {
         is TwoStageAuthUiEvent.Authenticated ->
-            if (event.isAppUnlock) {
-                displayToast(getString(R.string.voice_auth_stage_success))
-                requireActivity().finish()
-            }
+            // The unlocked app coming to the front is the feedback; the overlay just closes.
+            if (event.isAppUnlock) requireActivity().finish()
     }
 }

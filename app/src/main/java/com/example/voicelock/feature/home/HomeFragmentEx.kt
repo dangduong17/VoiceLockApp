@@ -7,18 +7,19 @@ import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.biometric.isActive
 import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.face.isFaceUnlockActive
+import com.example.voicelock.data.model.home.HomeLockInfo
+import com.example.voicelock.data.model.home.HomeUiEvent
+import com.example.voicelock.data.model.home.HomeVoiceInfo
 import com.example.voicelock.feature.biometric.confirmBiometric
 import com.example.voicelock.feature.biometric.getBiometricActionText
 import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
-import com.example.voicelock.data.model.home.HomeUiEvent
-import com.example.voicelock.data.model.home.HomeLockInfo
-import com.example.voicelock.data.model.home.HomeVoiceInfo
 import com.example.voicelock.util.BundleKey
-import com.example.voicelock.util.displayToast
+import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
+import com.example.voicelock.util.showMessage
 
 fun HomeFragment.initView() {
     // Basic setup if any
@@ -132,11 +133,15 @@ fun HomeFragment.updateFace(face: FaceSettingsDtoModel) {
 fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
     when (event) {
         is HomeUiEvent.LockNow -> {
-            displayToast(getString(R.string.home_lock_now_toast))
+            showMessage(message = getString(R.string.home_lock_now_toast), anchorView = binding.layoutBottomNav)
         }
 
         is HomeUiEvent.ShowLoadError -> {
-            displayToast(event.message ?: getString(R.string.common_error_unexpected))
+            showMessage(
+                message = event.message ?: getString(R.string.common_error_unexpected),
+                type = MessageType.ERROR,
+                anchorView = binding.layoutBottomNav,
+            )
         }
 
         is HomeUiEvent.NavigateToPinLock -> {
@@ -154,7 +159,7 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
         }
 
         is HomeUiEvent.NavigateToSecurityQuestions -> {
-            displayToast(getString(R.string.coming_soon_security_questions))
+            showMessage(message = getString(R.string.coming_soon_security_questions), anchorView = binding.layoutBottomNav)
         }
 
         is HomeUiEvent.NavigateToAppLock -> {
@@ -178,13 +183,21 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
             navigator.navigateTo(R.id.action_homeFragment_to_faceAuthFragment)
         }
 
-        is HomeUiEvent.ConfirmBiometric -> confirmBiometric(type = event.type, onConfirmed = { viewModel.onBiometricConfirmed(event.type) })
+        is HomeUiEvent.ConfirmBiometric -> confirmBiometric(
+                type = event.type,
+                anchorView = binding.layoutBottomNav,
+                onConfirmed = { viewModel.onBiometricConfirmed(event.type) },
+            )
 
-        is HomeUiEvent.TestBiometric -> testBiometric(event.type)
+        is HomeUiEvent.TestBiometric -> testBiometric(type = event.type, anchorView = binding.layoutBottomNav)
 
-        is HomeUiEvent.OpenBiometricEnrollment -> startBiometricEnrollment(event.type)
+        is HomeUiEvent.OpenBiometricEnrollment -> startBiometricEnrollment(type = event.type, anchorView = binding.layoutBottomNav)
 
-        is HomeUiEvent.ShowBiometricUnavailable -> showBiometricUnavailable(type = event.type, availability = event.availability)
+        is HomeUiEvent.ShowBiometricUnavailable -> showBiometricUnavailable(
+                type = event.type,
+                availability = event.availability,
+                anchorView = binding.layoutBottomNav,
+            )
     }
 }
 

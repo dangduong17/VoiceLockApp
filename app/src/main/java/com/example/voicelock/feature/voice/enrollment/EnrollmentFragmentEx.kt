@@ -9,9 +9,9 @@ import com.example.voicelock.data.model.voice.EnrollmentError
 import com.example.voicelock.data.model.voice.EnrollmentErrorInfo
 import com.example.voicelock.data.model.voice.EnrollmentPhase
 import com.example.voicelock.data.model.voice.EnrollmentProgress
-import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
+import com.example.voicelock.util.showPermissionDeniedMessage
 import java.util.Locale
 
 fun EnrollmentFragment.initView() {
@@ -54,7 +54,7 @@ fun EnrollmentFragment.onMicPermissionResult(isGranted: Boolean) {
     if (isGranted) {
         viewModel.recordNextSample()
     } else {
-        displayToast(getString(R.string.voice_mic_permission_denied))
+        showPermissionDeniedMessage(getString(R.string.voice_mic_permission_denied))
     }
 }
 

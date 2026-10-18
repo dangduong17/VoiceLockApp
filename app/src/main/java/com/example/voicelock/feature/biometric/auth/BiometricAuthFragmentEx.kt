@@ -6,7 +6,6 @@ import com.example.voicelock.R
 import com.example.voicelock.data.model.biometric.BiometricAuthStage
 import com.example.voicelock.data.model.biometric.BiometricAuthStatusInfo
 import com.example.voicelock.data.model.biometric.BiometricAuthUiEvent
-import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.isBiometricCancel
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showBiometricPrompt
@@ -63,9 +62,7 @@ fun BiometricAuthFragment.handleUiEvent(event: BiometricAuthUiEvent) {
             )
 
         is BiometricAuthUiEvent.Authenticated ->
-            if (event.isAppUnlock) {
-                displayToast(getString(R.string.biometric_auth_stage_success))
-                requireActivity().finish()
-            }
+            // The unlocked app coming to the front is the feedback; the overlay just closes.
+            if (event.isAppUnlock) requireActivity().finish()
     }
 }

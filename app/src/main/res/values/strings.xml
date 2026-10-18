@@ -92,11 +92,9 @@
 
     <string name="pin_title_unlock">Nhập mã PIN để mở khóa</string>
     <string name="pin_subtitle_unlock">Xác minh để tiếp tục</string>
-    <string name="pin_unlock_success">Mở khóa thành công</string>
 
     <string name="pattern_title_unlock">Vẽ hình để mở khóa</string>
     <string name="pattern_subtitle_unlock">Xác minh để tiếp tục</string>
-    <string name="pattern_unlock_success">Mở khóa thành công</string>
 
     <string name="app_lock_title">Khóa ứng dụng</string>
     <string name="app_lock_subtitle">Chọn ứng dụng cần bảo vệ bằng mã PIN hoặc hình vẽ.</string>
@@ -261,4 +259,5 @@
     <string name="coming_soon_help_feedback">Trợ giúp và phản hồi sẽ có trong bản sau</string>
     <string name="coming_soon_about">Thông tin về VoiceLock sẽ có trong bản sau</string>
     <string name="pin_delete_description">Xóa số vừa nhập</string>
+    <string name="message_action_open_settings">Mở cài đặt</string>
 </resources>

@@ -10,12 +10,12 @@ import com.example.voicelock.data.model.face.FaceEnrollmentMessage
 import com.example.voicelock.data.model.face.FaceEnrollmentPhase
 import com.example.voicelock.data.model.face.FaceEnrollmentProgress
 import com.example.voicelock.feature.face.camera.FaceCameraController
-import com.example.voicelock.feature.face.getFaceHintText
 import com.example.voicelock.feature.face.getFaceEngineErrorText
+import com.example.voicelock.feature.face.getFaceHintText
 import com.example.voicelock.util.Constant
-import com.example.voicelock.util.displayToast
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
+import com.example.voicelock.util.showPermissionDeniedMessage
 
 fun FaceEnrollmentFragment.initView() {
     binding.tvFaceEnrollSubtitle.text = getString(R.string.face_enroll_subtitle, Constant.FACE_ENROLLMENT_SAMPLES)
@@ -59,7 +59,7 @@ fun FaceEnrollmentFragment.onCameraPermissionResult(isGranted: Boolean) {
     if (isGranted) {
         startCamera()
     } else {
-        displayToast(getString(R.string.face_camera_permission_denied))
+        showPermissionDeniedMessage(getString(R.string.face_camera_permission_denied))
     }
 }
 
