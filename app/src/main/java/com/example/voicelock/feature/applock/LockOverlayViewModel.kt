@@ -73,6 +73,15 @@ class LockOverlayViewModel(
         }
     }
 
+    /** A volume key pressed while another method is shown: switch to voice, which starts listening by itself. */
+    fun switchToVoiceMethod() {
+        val state = getCurrentState()
+        val voiceIndex = state.availableMethods.indexOf(LockMethod.VOICE)
+        if (voiceIndex < 0 || voiceIndex == state.currentMethodIndex) return
+        setState { copy(currentMethodIndex = voiceIndex) }
+        launchIO { setEvent(LockOverlayUiEvent.ShowMethod(method = LockMethod.VOICE, pinLength = state.pinLength)) }
+    }
+
     fun onTryAnotherMethod() {
         val state = getCurrentState()
         if (state.availableMethods.size <= 1) return

@@ -297,4 +297,5 @@
     <!-- F0: rebuild the app lock after a reboot -->
     <string name="permission_autostart_title">Tự khởi động</string>
     <string name="permission_autostart_sub">Xiaomi: cho phép để khóa ứng dụng tự bật lại sau khi khởi động lại máy</string>
+    <string name="voice_volume_key_hint">Mẹo: bấm nút tăng hoặc giảm âm lượng để nói</string>
 </resources>

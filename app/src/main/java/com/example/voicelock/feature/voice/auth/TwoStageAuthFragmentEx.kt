@@ -146,6 +146,13 @@ fun TwoStageAuthFragment.updateMode(mode: VoiceVerificationMode) {
 /** The Lock/Unlock threshold toggle is only for the test screen; the lock overlay always unlocks. */
 fun TwoStageAuthFragment.updateAppUnlock(isAppUnlock: Boolean) {
     binding.toggleMode.visibility = if (isAppUnlock) View.GONE else View.VISIBLE
+    binding.tvVolumeKeyHint.visibility = if (isAppUnlock) View.VISIBLE else View.GONE
+}
+
+/** Volume up / down on the lock overlay (F0): same as tapping start / retry; ignored while busy. */
+fun TwoStageAuthFragment.volumeKeyEvent() {
+    val state = viewModel.uiState.value
+    if (state.isAppUnlock && state.canStart()) startEvent()
 }
 
 fun TwoStageAuthFragment.handleUiEvent(event: TwoStageAuthUiEvent) {

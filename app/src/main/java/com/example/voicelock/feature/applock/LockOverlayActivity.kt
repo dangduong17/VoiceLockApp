@@ -1,9 +1,11 @@
 package com.example.voicelock.feature.applock
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
@@ -11,14 +13,18 @@ import com.example.voicelock.R
 import com.example.voicelock.data.model.applock.LockOverlayUiEvent
 import com.example.voicelock.data.model.applock.LockOverlayUiState
 import com.example.voicelock.data.model.applock.hasFallbackMethod
+import com.example.voicelock.data.model.applock.isVoiceAvailable
 import com.example.voicelock.data.model.lock.LockMethod
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
+import com.example.voicelock.feature.voice.auth.TwoStageAuthFragment
+import com.example.voicelock.feature.voice.auth.volumeKeyEvent
 import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.collectFlowOnView
 import com.example.voicelock.util.setPreventDoubleClick
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 /**
  * Plain Activity shell (same "outside the BaseFragment mandate" status as MainActivity) that
@@ -52,6 +58,33 @@ class LockOverlayActivity : AppCompatActivity() {
         viewModel.uiEvent.collectFlowOnView(this) { event -> handleEvent(event) }
         viewModel.decideVerificationMethod()
     }
+
+    /**
+     * F0: on the lock screen either volume key starts voice verification instead of tapping the mic.
+     * While voice unlock is configured the keys never change the volume here (holding them neither).
+     */
+    override fun onKeyDown(
+        keyCode: Int,
+        event: KeyEvent,
+    ): Boolean {
+        if (keyCode !in VOLUME_KEYS || !viewModel.uiState.value.isVoiceAvailable()) {
+            return super.onKeyDown(keyCode, event)
+        }
+        if (event.repeatCount == 0) volumeKeyEvent()
+        return true
+    }
+
+    private fun volumeKeyEvent() {
+        val currentScreen = getCurrentScreen()
+        Timber.tag(TAG).d("Volume key on lock screen, current screen=%s", currentScreen?.javaClass?.simpleName)
+        val voiceScreen = currentScreen as? TwoStageAuthFragment
+        if (voiceScreen != null) voiceScreen.volumeKeyEvent() else viewModel.switchToVoiceMethod()
+    }
+
+    private fun getCurrentScreen(): Fragment? =
+        (supportFragmentManager.findFragmentById(R.id.navHostOverlay) as? NavHostFragment)
+            ?.childFragmentManager
+            ?.primaryNavigationFragment
 
     private fun updateUiState(state: LockOverlayUiState) {
         findViewById<View>(R.id.btnTryAnotherMethod).visibility =
@@ -144,5 +177,10 @@ class LockOverlayActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD,
         )
+    }
+
+    private companion object {
+        const val TAG = "LockOverlayActivity"
+        val VOLUME_KEYS = setOf(KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN)
     }
 }
