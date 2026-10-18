@@ -1,6 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.VoiceLock" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Every screen is drawn on bg_screen; the window paints it once, so layouts do not repeat it (overdraw). -->
+        <item name="android:windowBackground">@color/bg_screen</item>
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
