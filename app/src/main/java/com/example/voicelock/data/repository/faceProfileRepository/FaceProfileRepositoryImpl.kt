@@ -12,6 +12,7 @@ import com.example.voicelock.data.model.face.FaceSettingsDtoModel
 import com.example.voicelock.data.model.face.FaceVerifyResult
 import com.example.voicelock.util.Constant
 import com.example.voicelock.util.Result
+import com.example.voicelock.util.resultFlow
 import com.example.voicelock.util.catchAsResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import androidx.core.content.edit
 
 /**
  * The owner's face embeddings (never images) live in encrypted prefs; the on/off switch lives
@@ -48,11 +50,10 @@ class FaceProfileRepositoryImpl(
             .catchAsResult()
 
     override fun setFaceUnlockEnabled(isEnabled: Boolean): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             dataStore.edit { preferences -> preferences[KEY_FACE_UNLOCK_ENABLED] = isEnabled }
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     /** Every pair of samples must match each other, so a profile never mixes two people. */
     override fun enrollOwnerFace(templates: List<FloatArray>): Flow<Result<FaceEnrollmentResult>> =
@@ -88,11 +89,11 @@ class FaceProfileRepositoryImpl(
             .catchAsResult()
 
     override fun deleteFaceProfile(): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
-            securePrefs.edit().remove(KEY_FACE_TEMPLATES).commit()
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow {
+            // Written synchronously: the caller reports success only once the profile is really gone.
+            securePrefs.edit(commit = true) { remove(KEY_FACE_TEMPLATES) }
+            Unit
+        }
 
     private fun loadTemplates(): List<FloatArray> =
         securePrefs.getString(KEY_FACE_TEMPLATES, null)
@@ -102,7 +103,7 @@ class FaceProfileRepositoryImpl(
             .orEmpty()
 
     private fun saveTemplates(templates: List<FloatArray>) {
-        securePrefs.edit().putString(KEY_FACE_TEMPLATES, templates.joinToString(TEMPLATE_SEPARATOR) { encode(it) }).commit()
+        securePrefs.edit(commit = true) { putString(KEY_FACE_TEMPLATES, templates.joinToString(TEMPLATE_SEPARATOR) { encode(it) }) }
     }
 
     private fun encode(template: FloatArray): String {

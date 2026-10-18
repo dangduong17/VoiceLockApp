@@ -1,11 +1,9 @@
 package com.example.voicelock.domain.usecase.voice
 
 import com.example.voicelock.util.Result
-import com.example.voicelock.util.catchAsResult
+import com.example.voicelock.util.resultFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import java.text.Normalizer
 import java.util.Locale
 import kotlin.math.max
@@ -26,15 +24,14 @@ class MatchVoiceKeywordUseCase {
         candidates: List<String>,
         expectedPhrases: List<String>,
     ): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> {
+        resultFlow(Dispatchers.Default) {
             val expected = expectedPhrases.map(::normalize).filter { it.isNotEmpty() }
             val isMatch =
                 candidates.map(::normalize).filter { it.isNotEmpty() }.any { candidate ->
                     expected.any { phrase -> isPhraseMatch(candidate, phrase) }
                 }
-            emit(Result.Success(isMatch))
-        }.flowOn(Dispatchers.Default)
-            .catchAsResult()
+            isMatch
+        }
 
     private fun isPhraseMatch(
         candidate: String,

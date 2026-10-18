@@ -10,6 +10,7 @@ import com.example.voicelock.data.model.voice.VoiceSettingsDtoModel
 import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.VoiceVerifyResult
 import com.example.voicelock.util.Result
+import com.example.voicelock.util.resultFlow
 import com.example.voicelock.util.catchAsResult
 import com.example.voicelock.data.local.voice.VoiceBiometricsManager
 import kotlinx.coroutines.Dispatchers
@@ -29,9 +30,7 @@ class VoiceProfileRepositoryImpl(
 ) : VoiceProfileRepository {
 
     override fun isVoiceEnrolled(mode: VoiceVerificationMode): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> { emit(Result.Success(voiceBiometricsManager.isEnrolled(mode))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { voiceBiometricsManager.isEnrolled(mode) }
 
     override fun getVoiceSettings(): Flow<Result<VoiceSettingsDtoModel>> =
         flow<Result<VoiceSettingsDtoModel>> {
@@ -60,43 +59,35 @@ class VoiceProfileRepositoryImpl(
         key: Preferences.Key<Boolean>,
         value: Boolean,
     ): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             dataStore.edit { preferences -> preferences[key] = value }
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     override fun warmUpModel(): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             voiceBiometricsManager.warmUp()
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     override fun getKeywordProfile(mode: VoiceVerificationMode): Flow<Result<VoiceKeywordProfile?>> =
-        flow<Result<VoiceKeywordProfile?>> { emit(Result.Success(voiceBiometricsManager.getKeywordProfile(mode))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { voiceBiometricsManager.getKeywordProfile(mode) }
 
     override fun enrollOwnerVoice(
         recordings: List<FloatArray>,
         keywordProfile: VoiceKeywordProfile,
         mode: VoiceVerificationMode,
     ): Flow<Result<VoiceEnrollmentResult>> =
-        flow<Result<VoiceEnrollmentResult>> {
-            emit(Result.Success(voiceBiometricsManager.enrollOwnerVoice(recordings = recordings, keywordProfile = keywordProfile, mode = mode)))
+        resultFlow {
+            voiceBiometricsManager.enrollOwnerVoice(recordings = recordings, keywordProfile = keywordProfile, mode = mode)
         }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
 
     override fun verifyOwnerVoice(
         samples: FloatArray,
         mode: VoiceVerificationMode,
         isKeywordChecked: Boolean,
     ): Flow<Result<VoiceVerifyResult>> =
-        flow<Result<VoiceVerifyResult>> { emit(Result.Success(voiceBiometricsManager.verify(samples, mode, isKeywordChecked))) }
-            .flowOn(Dispatchers.IO)
-            .catchAsResult()
+        resultFlow { voiceBiometricsManager.verify(samples, mode, isKeywordChecked) }
 
     companion object {
         private val KEY_VOICE_UNLOCK_ENABLED = booleanPreferencesKey("voice_unlock_enabled")

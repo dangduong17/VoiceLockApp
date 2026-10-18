@@ -3,10 +3,13 @@ package com.example.voicelock.util
 import androidx.biometric.BiometricManager
 
 object Constant {
-    const val DEFAULT_PAGE_SIZE = 20
-
     const val LOCK_MAX_ATTEMPTS = 5
     const val LOCK_LOCKOUT_DURATION_SECONDS = 30
+    const val LOCKOUT_TICK_MS = 1_000L
+
+    /** PIN length offered first; setup can switch to [PIN_LENGTH_SHORT]. */
+    const val PIN_LENGTH_DEFAULT = 6
+    const val PIN_LENGTH_SHORT = 4
 
     const val APP_LOCK_SESSION_TTL_MS = 10_000L
     const val APP_LOCK_POLL_INTERVAL_MS = 500L
@@ -17,7 +20,6 @@ object Constant {
     const val FLOATING_LOCK_TAP_COUNT = 3
     const val FLOATING_LOCK_TAP_WINDOW_MS = 1_500L
     const val FLOATING_LOCK_IDLE_DIM_MS = 3_000L
-
 
     /** F1: how long "apps locked" stays on the lock command screen before it closes. */
     const val VOICE_LOCK_CLOSE_DELAY_MS = 1_500L

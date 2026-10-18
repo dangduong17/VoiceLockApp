@@ -6,12 +6,9 @@ import androidx.core.content.edit
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionDtoModel
 import com.example.voicelock.util.HashUtils
 import com.example.voicelock.util.Result
-import com.example.voicelock.util.catchAsResult
+import com.example.voicelock.util.resultFlow
 import com.example.voicelock.util.normalizeForComparison
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import java.security.MessageDigest
 
 /**
@@ -24,18 +21,17 @@ class SecurityQuestionRepositoryImpl(
 ) : SecurityQuestionRepository {
 
     override fun getSecurityQuestion(): Flow<Result<SecurityQuestionDtoModel?>> =
-        flow<Result<SecurityQuestionDtoModel?>> {
+        resultFlow {
             val question = securePrefs.getString(KEY_QUESTION, null)
             val isSet = question != null && securePrefs.contains(KEY_ANSWER_HASH)
-            emit(Result.Success(if (isSet) SecurityQuestionDtoModel(question = question!!) else null))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            if (isSet) SecurityQuestionDtoModel(question = question!!) else null
+        }
 
     override fun saveSecurityQuestion(
         question: String,
         answer: String,
     ): Flow<Result<Unit>> =
-        flow<Result<Unit>> {
+        resultFlow {
             val salt = HashUtils.generateSalt()
             val hash = HashUtils.hash(value = answer.normalizeForComparison(), salt = salt)
             securePrefs.edit {
@@ -43,12 +39,11 @@ class SecurityQuestionRepositoryImpl(
                 putString(KEY_ANSWER_SALT, salt)
                 putString(KEY_ANSWER_HASH, hash)
             }
-            emit(Result.Success(Unit))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            Unit
+        }
 
     override fun verifyAnswerHash(answer: String): Flow<Result<Boolean>> =
-        flow<Result<Boolean>> {
+        resultFlow {
             val salt = securePrefs.getString(KEY_ANSWER_SALT, null)
             val storedHash = securePrefs.getString(KEY_ANSWER_HASH, null)
             val isMatch =
@@ -58,9 +53,8 @@ class SecurityQuestionRepositoryImpl(
                         Base64.decode(HashUtils.hash(value = answer.normalizeForComparison(), salt = salt), Base64.NO_WRAP),
                         Base64.decode(storedHash, Base64.NO_WRAP),
                     )
-            emit(Result.Success(isMatch))
-        }.flowOn(Dispatchers.IO)
-            .catchAsResult()
+            isMatch
+        }
 
     companion object {
         private const val KEY_QUESTION = "security_question"
