@@ -93,8 +93,10 @@ class FloatingLockService : Service() {
             ).apply {
                 gravity = Gravity.TOP or Gravity.START
                 x = prefs.getInt(KEY_X, 0)
-                y = prefs.getInt(KEY_Y, resources.displayMetrics.heightPixels / 3)
+                y = prefs.getInt(KEY_Y, (resources.displayMetrics.heightPixels * INITIAL_Y_SCREEN_FRACTION).roundToInt())
             }
+        // ButtonTouchListener forwards taps to performClick (see the click listener below).
+        @SuppressLint("ClickableViewAccessibility")
         val view =
             ImageView(this).apply {
                 setImageResource(R.drawable.ic_lock)
@@ -103,6 +105,8 @@ class FloatingLockService : Service() {
                 setPadding(padding, padding, padding, padding)
                 contentDescription = getString(R.string.floating_lock_description)
                 elevation = resources.getDimension(R.dimen._6dp)
+                // Taps go through performClick, so TalkBack can trigger the button too.
+                setOnClickListener { onTap() }
                 setOnTouchListener(ButtonTouchListener())
             }
         windowManager.addView(view, params)
@@ -144,7 +148,7 @@ class FloatingLockService : Service() {
                         windowManager.updateViewLayout(view, params)
                     }
                 }
-                MotionEvent.ACTION_UP -> if (isDragging) snapToEdge() else onTap()
+                MotionEvent.ACTION_UP -> if (isDragging) snapToEdge() else view.performClick()
                 MotionEvent.ACTION_CANCEL -> if (isDragging) snapToEdge()
             }
             return true
@@ -229,6 +233,9 @@ class FloatingLockService : Service() {
         private const val CHANNEL_ID = "floating_lock_channel"
         private const val NOTIFICATION_ID = 1002
         private const val PREFS_NAME = "floating_lock_button"
+
+        /** First placement: a third of the way down the screen, on the start edge. */
+        private const val INITIAL_Y_SCREEN_FRACTION = 1f / 3
         private const val KEY_X = "x"
         private const val KEY_Y = "y"
         private const val TAP_SCALE = 0.85f
