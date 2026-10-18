@@ -11,6 +11,9 @@ data class LockOverlayUiState(
 
 fun LockOverlayUiState.currentMethod(): LockMethod? = availableMethods.getOrNull(currentMethodIndex)
 
+/** Voice unlock is configured, so the volume keys mean "listen now" on this lock screen (F0). */
+fun LockOverlayUiState.isVoiceAvailable(): Boolean = LockMethod.VOICE in availableMethods
+
 /**
  * Whether a different, already-configured method (e.g. the backup PIN while Pattern is shown)
  * exists for the user to fall back to on the lock screen.
