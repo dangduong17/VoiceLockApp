@@ -162,12 +162,14 @@ class LockRepositoryImpl(
         when (type) {
             LockType.PIN -> KEY_PIN_FAILED_ATTEMPTS
             LockType.PATTERN -> KEY_PATTERN_FAILED_ATTEMPTS
+            LockType.SECURITY_QUESTION -> KEY_QUESTION_FAILED_ATTEMPTS
         }
 
     private fun lockedUntilKey(type: LockType): String =
         when (type) {
             LockType.PIN -> KEY_PIN_LOCKED_UNTIL
             LockType.PATTERN -> KEY_PATTERN_LOCKED_UNTIL
+            LockType.SECURITY_QUESTION -> KEY_QUESTION_LOCKED_UNTIL
         }
 
     companion object {
@@ -181,6 +183,9 @@ class LockRepositoryImpl(
         private const val KEY_PATTERN_SALT = "pattern_salt"
         private const val KEY_PATTERN_FAILED_ATTEMPTS = "pattern_failed_attempts"
         private const val KEY_PATTERN_LOCKED_UNTIL = "pattern_locked_until"
+
+        private const val KEY_QUESTION_FAILED_ATTEMPTS = "security_question_failed_attempts"
+        private const val KEY_QUESTION_LOCKED_UNTIL = "security_question_locked_until"
 
         private const val DEFAULT_PIN_LENGTH = 6
         private const val LOCKOUT_DURATION_MS = Constant.LOCK_LOCKOUT_DURATION_SECONDS * 1000L

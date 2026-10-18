@@ -4,6 +4,7 @@ import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
 import com.example.voicelock.data.model.biometric.BiometricAvailability
@@ -158,7 +159,9 @@ class SettingsViewModel(
     }
 
     fun onQuestionsClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToSecurityQuestions) }
+        // Changing an existing question first asks it (CHANGE mode), like changing the PIN.
+        val mode = if (getCurrentState().isSecurityQuestionSet) SecurityQuestionMode.CHANGE else SecurityQuestionMode.SETUP
+        launchIO { setEvent(SettingsUiEvent.NavigateToSecurityQuestion(mode)) }
     }
 
     fun onThemeLanguageClicked() {

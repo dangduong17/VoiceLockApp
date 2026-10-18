@@ -670,11 +670,12 @@
                         app:layout_constraintTop_toTopOf="@id/ivQuestionCircle" />
 
                     <TextView
+                        android:id="@+id/tvQuestionSub"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_12dp"
                         android:layout_marginTop="@dimen/_2dp"
-                        android:text="@string/security_question_sub"
+                        android:text="@string/security_question_sub_not_set"
                         android:textColor="@color/text_secondary"
                         android:textSize="@dimen/_12sp"
                         app:layout_constraintEnd_toStartOf="@id/ivQuestionArrow"

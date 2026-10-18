@@ -22,6 +22,9 @@ import com.example.voicelock.domain.usecase.patternlock.VerifyPatternUseCase
 import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
 import com.example.voicelock.domain.usecase.pinlock.SetPinUseCase
 import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
+import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestionUseCase
+import com.example.voicelock.domain.usecase.securityquestion.SetSecurityQuestionUseCase
+import com.example.voicelock.domain.usecase.securityquestion.VerifySecurityAnswerUseCase
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
 import com.example.voicelock.domain.usecase.voice.DetectSpeechUseCase
 import com.example.voicelock.domain.usecase.voice.DownloadSpeechLanguageUseCase
@@ -101,6 +104,12 @@ val faceUseCaseModule = module {
     factoryOf(::DeleteFaceProfileUseCase)
 }
 
+val securityQuestionUseCaseModule = module {
+    factoryOf(::GetSecurityQuestionUseCase)
+    factoryOf(::SetSecurityQuestionUseCase)
+    factoryOf(::VerifySecurityAnswerUseCase)
+}
+
 val biometricUseCaseModule = module {
     factoryOf(::GetBiometricSettingsUseCase)
     factoryOf(::SetBiometricEnabledUseCase)
@@ -117,5 +126,6 @@ val useCaseModule = module {
         voiceUseCaseModule,
         faceUseCaseModule,
         biometricUseCaseModule,
+        securityQuestionUseCaseModule,
     )
 }

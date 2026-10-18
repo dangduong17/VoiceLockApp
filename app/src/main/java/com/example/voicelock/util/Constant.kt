@@ -13,6 +13,9 @@ object Constant {
 
     const val VOICE_ENROLLMENT_SAMPLES = 3
 
+    /** Minimum length of a security answer after normalization (see normalizeForComparison). */
+    const val SECURITY_ANSWER_MIN_LENGTH = 2
+
     /** Stage-1 phrases for voice profiles enrolled before the owner's own phrase was transcribed. */
     val VOICE_UNLOCK_KEYWORDS = listOf("unlock", "mở khóa")
 

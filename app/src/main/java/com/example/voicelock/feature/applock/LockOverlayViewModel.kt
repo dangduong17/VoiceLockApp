@@ -16,8 +16,10 @@ import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
 import com.example.voicelock.data.model.voice.VoiceSettingsDtoModel
 import com.example.voicelock.data.model.voice.isVoiceUnlockActive
 import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
+import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestionUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
 import com.example.voicelock.util.getDataOrDefault
+import com.example.voicelock.util.getDataOrNull
 
 /**
  * Voice is the primary lock method (when enrolled and switched on), then the app's face
@@ -32,12 +34,14 @@ class LockOverlayViewModel(
     private val getVoiceSettingsUseCase: GetVoiceSettingsUseCase,
     private val getBiometricSettingsUseCase: GetBiometricSettingsUseCase,
     private val getFaceSettingsUseCase: GetFaceSettingsUseCase,
+    private val getSecurityQuestionUseCase: GetSecurityQuestionUseCase,
 ) : BaseViewModel<LockOverlayUiState, LockOverlayUiEvent>(LockOverlayUiState()) {
 
     fun decideVerificationMethod() {
         launchIO {
             val pinInfo = getPinInfoUseCase().getDataOrDefault(PinInfo(isPinSet = false, pinLength = 6))
             val isPatternSet = getPatternInfoUseCase().getDataOrDefault(false)
+            val isSecurityQuestionSet = getSecurityQuestionUseCase().getDataOrNull() != null
             val isVoiceActive = getVoiceSettingsUseCase().getDataOrDefault(VoiceSettingsDtoModel()).isVoiceUnlockActive()
             val isFaceActive = getFaceSettingsUseCase().getDataOrDefault(FaceSettingsDtoModel()).isFaceUnlockActive()
             val isBiometricActive = getBiometricSettingsUseCase().getDataOrDefault(BiometricSettingsDtoModel()).isBiometricUnlockActive()
@@ -48,6 +52,7 @@ class LockOverlayViewModel(
                     isBiometricActive = isBiometricActive,
                     isPatternSet = isPatternSet,
                     isPinSet = pinInfo.isPinSet,
+                    isSecurityQuestionSet = isSecurityQuestionSet,
                 )
 
             setState {
@@ -84,6 +89,7 @@ class LockOverlayViewModel(
         isBiometricActive: Boolean,
         isPatternSet: Boolean,
         isPinSet: Boolean,
+        isSecurityQuestionSet: Boolean,
     ): List<LockMethod> =
         buildList {
             if (isVoiceActive) add(LockMethod.VOICE)
@@ -91,5 +97,6 @@ class LockOverlayViewModel(
             if (isBiometricActive) add(LockMethod.BIOMETRIC)
             if (isPatternSet) add(LockMethod.PATTERN)
             if (isPinSet) add(LockMethod.PIN)
+            if (isSecurityQuestionSet) add(LockMethod.SECURITY_QUESTION)
         }
 }

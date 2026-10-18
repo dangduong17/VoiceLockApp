@@ -115,6 +115,7 @@ fun SettingsFragment.updateLockMethods(info: SettingsLockInfo) {
     binding.tvPinSub.text =
         if (info.isPinSet) getString(R.string.pin_status_set, info.pinLength) else getString(R.string.pin_not_set_status)
     binding.tvPatternSub.setText(if (info.isPatternSet) R.string.pattern_set_status else R.string.pattern_not_set_status)
+    binding.tvQuestionSub.setText(if (info.isSecurityQuestionSet) R.string.security_question_sub else R.string.security_question_sub_not_set)
 }
 
 fun SettingsFragment.updateFingerprint(biometric: BiometricSettingsDtoModel) {
@@ -226,8 +227,9 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
             navigator.navigateTo(R.id.action_settingsFragment_to_patternLockFragment, bundle)
         }
 
-        is SettingsUiEvent.NavigateToSecurityQuestions -> {
-            showMessage(message = getString(R.string.coming_soon_security_questions), anchorView = binding.layoutBottomNav)
+        is SettingsUiEvent.NavigateToSecurityQuestion -> {
+            val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, event.mode.name) }
+            navigator.navigateTo(R.id.action_settingsFragment_to_securityQuestionFragment, bundle)
         }
 
         is SettingsUiEvent.NavigateToThemeLanguage -> {

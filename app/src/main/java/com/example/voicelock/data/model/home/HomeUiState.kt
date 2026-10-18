@@ -14,6 +14,7 @@ data class HomeUiState(
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
+    val isSecurityQuestionSet: Boolean = false,
     val biometricSettings: BiometricSettingsDtoModel = BiometricSettingsDtoModel(),
     val faceSettings: FaceSettingsDtoModel = FaceSettingsDtoModel(),
 )
@@ -41,6 +42,7 @@ data class HomeLockInfo(
     val isPinSet: Boolean,
     val pinLength: Int,
     val isPatternSet: Boolean,
+    val isSecurityQuestionSet: Boolean,
 )
 
-fun HomeUiState.getLockInfo(): HomeLockInfo = HomeLockInfo(isPinSet = isPinSet, pinLength = pinLength, isPatternSet = isPatternSet)
+fun HomeUiState.getLockInfo(): HomeLockInfo = HomeLockInfo(isPinSet = isPinSet, pinLength = pinLength, isPatternSet = isPatternSet, isSecurityQuestionSet = isSecurityQuestionSet)

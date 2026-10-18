@@ -158,8 +158,9 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
             navigator.navigateTo(R.id.action_homeFragment_to_patternLockFragment, bundle)
         }
 
-        is HomeUiEvent.NavigateToSecurityQuestions -> {
-            showMessage(message = getString(R.string.coming_soon_security_questions), anchorView = binding.layoutBottomNav)
+        is HomeUiEvent.NavigateToSecurityQuestion -> {
+            val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, event.mode.name) }
+            navigator.navigateTo(R.id.action_homeFragment_to_securityQuestionFragment, bundle)
         }
 
         is HomeUiEvent.NavigateToAppLock -> {

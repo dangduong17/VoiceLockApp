@@ -11,6 +11,7 @@ import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
@@ -121,7 +122,9 @@ class HomeViewModel(
     }
 
     fun onQuestionsClicked() {
-        launchIO { setEvent(HomeUiEvent.NavigateToSecurityQuestions) }
+        // Changing an existing question first asks it (CHANGE mode), like changing the PIN.
+        val mode = if (getCurrentState().isSecurityQuestionSet) SecurityQuestionMode.CHANGE else SecurityQuestionMode.SETUP
+        launchIO { setEvent(HomeUiEvent.NavigateToSecurityQuestion(mode)) }
     }
 
     fun onAppLockClicked() {
