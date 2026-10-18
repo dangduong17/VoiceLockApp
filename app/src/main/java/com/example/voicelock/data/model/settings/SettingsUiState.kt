@@ -19,6 +19,7 @@ data class SettingsUiState(
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
     val isSecurityQuestionSet: Boolean = false,
+    val isFloatingLockEnabled: Boolean = false,
 )
 
 /** Everything the voice rows render, so it always changes together. */

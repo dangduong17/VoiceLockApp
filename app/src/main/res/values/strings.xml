@@ -315,4 +315,11 @@
     <string name="permission_device_admin_title">Quản trị thiết bị</string>
     <string name="permission_device_admin_sub">Để khóa màn hình bằng giọng nói hoặc nút Khóa ngay</string>
     <string name="permission_device_admin_explanation">VoiceLock chỉ dùng quyền này để khóa màn hình khi bạn nói câu lệnh khóa hoặc bấm Khóa ngay. Ứng dụng không xóa dữ liệu hay đổi mật khẩu. Hãy tắt quyền này trước khi gỡ VoiceLock.</string>
+    <!-- Quick lock: floating button + home-screen widget -->
+    <string name="floating_lock_title">Nút khóa giọng nói nổi</string>
+    <string name="floating_lock_sub">Chạm nhanh 3 lần để nói câu lệnh khóa • Kéo để di chuyển</string>
+    <string name="floating_lock_needs_overlay">Cần quyền Hiển thị trên ứng dụng khác để bật nút khóa giọng nói nổi</string>
+    <string name="floating_lock_description">Nút khóa giọng nói VoiceLock, chạm nhanh 3 lần để nói câu lệnh khóa</string>
+    <string name="floating_lock_notification_text">Chạm nhanh 3 lần vào nút nổi để nói câu lệnh khóa</string>
+    <string name="widget_lock_description">Chạm rồi nói câu lệnh để khóa máy</string>
 </resources>

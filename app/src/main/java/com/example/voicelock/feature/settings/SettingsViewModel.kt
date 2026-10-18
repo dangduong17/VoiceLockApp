@@ -16,6 +16,7 @@ import com.example.voicelock.data.model.biometric.withPreference
 import com.example.voicelock.data.model.face.isFaceUnlockActive
 import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
 import com.example.voicelock.domain.usecase.face.SetFaceUnlockEnabledUseCase
+import com.example.voicelock.domain.usecase.quicklock.SetFloatingLockEnabledUseCase
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
@@ -27,6 +28,7 @@ class SettingsViewModel(
     private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
     private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
     private val setFaceUnlockEnabledUseCase: SetFaceUnlockEnabledUseCase,
+    private val setFloatingLockEnabledUseCase: SetFloatingLockEnabledUseCase,
 ) : BaseViewModel<SettingsUiState, SettingsUiEvent>(SettingsUiState()) {
 
     fun initData() {
@@ -184,6 +186,26 @@ class SettingsViewModel(
 
     fun onAboutClicked() {
         launchIO { setEvent(SettingsUiEvent.NavigateToAbout) }
+    }
+
+    /** [canDrawOverlays] comes from the screen (a system permission, checked where the Context is). */
+    fun toggleFloatingLock(
+        isEnabled: Boolean,
+        canDrawOverlays: Boolean,
+    ) {
+        if (isEnabled == getCurrentState().isFloatingLockEnabled) return
+        if (isEnabled && !canDrawOverlays) {
+            launchIO {
+                setEvent(SettingsUiEvent.ShowFloatingLockNeedsOverlay)
+                setEvent(SettingsUiEvent.NavigateToPermissions)
+            }
+            return
+        }
+        setState { copy(isFloatingLockEnabled = isEnabled) }
+        handleApiCall(
+            apiCall = { setFloatingLockEnabledUseCase(isEnabled) },
+            onSuccess = { launchIO { setEvent(SettingsUiEvent.SyncFloatingLock(isEnabled)) } },
+        )
     }
 
     fun onAppLockClicked() {

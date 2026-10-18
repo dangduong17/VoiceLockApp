@@ -19,6 +19,10 @@ sealed class SettingsUiEvent {
     data object NavigateToHelpFeedback : SettingsUiEvent()
     data object NavigateToAbout : SettingsUiEvent()
     data object NavigateToAppLock : SettingsUiEvent()
+    /** Start / stop the floating lock button service to match the saved switch. */
+    data class SyncFloatingLock(val isEnabled: Boolean) : SettingsUiEvent()
+    /** The floating button needs "Display over other apps" first. */
+    data object ShowFloatingLockNeedsOverlay : SettingsUiEvent()
     /** [mode] UNLOCK: the voice passphrase; LOCK: the F1 lock command. */
     data class NavigateToVoiceEnrollment(val mode: VoiceVerificationMode) : SettingsUiEvent()
     /** F1: voice lock was just turned on; Android 13+ can offer to add the Quick Settings tile. */

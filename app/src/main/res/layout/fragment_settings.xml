@@ -749,6 +749,70 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_1dp"
+                    android:layout_marginVertical="@dimen/_12dp"
+                    android:background="@color/divider_line" />
+
+                <!-- Item 7: Floating lock button -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/rowFloatingLock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/ivFloatingLockCircle"
+                        android:layout_width="@dimen/_40dp"
+                        android:layout_height="@dimen/_40dp"
+                        android:background="@drawable/bg_circle_icon"
+                        android:importantForAccessibility="no"
+                        android:padding="@dimen/_8dp"
+                        android:src="@drawable/ic_lock"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/primary_blue" />
+
+                    <TextView
+                        android:id="@+id/tvFloatingLockTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_12dp"
+                        android:layout_marginEnd="@dimen/_12dp"
+                        android:text="@string/floating_lock_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/_15sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@id/switchFloatingLock"
+                        app:layout_constraintStart_toEndOf="@id/ivFloatingLockCircle"
+                        app:layout_constraintTop_toTopOf="@id/ivFloatingLockCircle" />
+
+                    <TextView
+                        android:id="@+id/tvFloatingLockSub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_12dp"
+                        android:layout_marginTop="@dimen/_2dp"
+                        android:layout_marginEnd="@dimen/_12dp"
+                        android:text="@string/floating_lock_sub"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/_12sp"
+                        app:layout_constraintEnd_toStartOf="@id/switchFloatingLock"
+                        app:layout_constraintStart_toEndOf="@id/ivFloatingLockCircle"
+                        app:layout_constraintTop_toBottomOf="@id/tvFloatingLockTitle" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchFloatingLock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
             </LinearLayout>
 
             <!-- Notice Footnote 2 -->

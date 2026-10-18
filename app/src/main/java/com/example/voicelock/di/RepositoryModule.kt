@@ -16,6 +16,8 @@ import com.example.voicelock.data.repository.installedAppsRepository.InstalledAp
 import com.example.voicelock.data.repository.installedAppsRepository.InstalledAppsRepositoryImpl
 import com.example.voicelock.data.repository.lockRepository.LockRepository
 import com.example.voicelock.data.repository.lockRepository.LockRepositoryImpl
+import com.example.voicelock.data.repository.quickLockRepository.QuickLockRepository
+import com.example.voicelock.data.repository.quickLockRepository.QuickLockRepositoryImpl
 import com.example.voicelock.data.repository.securityQuestionRepository.SecurityQuestionRepository
 import com.example.voicelock.data.repository.securityQuestionRepository.SecurityQuestionRepositoryImpl
 import com.example.voicelock.data.repository.speechToTextRepository.SpeechToTextRepository
@@ -39,6 +41,7 @@ val repositoryModule = module {
     singleOf(::BiometricRepositoryImpl) bind BiometricRepository::class
     singleOf(::SecurityQuestionRepositoryImpl) bind SecurityQuestionRepository::class
     single<DeviceLockRepository> { DeviceLockRepositoryImpl(context = androidContext()) }
+    singleOf(::QuickLockRepositoryImpl) bind QuickLockRepository::class
     singleOf(::FaceRecognitionRepositoryImpl) bind FaceRecognitionRepository::class
     singleOf(::FaceProfileRepositoryImpl) bind FaceProfileRepository::class
     single<InstalledAppsRepository> { InstalledAppsRepositoryImpl(context = androidContext()) }

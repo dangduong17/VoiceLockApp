@@ -17,7 +17,9 @@ import com.example.voicelock.feature.biometric.getBiometricSubText
 import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
+import com.example.voicelock.service.FloatingLockService
 import com.example.voicelock.util.BundleKey
+import com.example.voicelock.util.hasOverlayPermission
 import com.example.voicelock.util.offerVoiceLockTile
 import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
@@ -99,6 +101,14 @@ fun SettingsFragment.settingEvent() {
     binding.btnAppLock.setPreventDoubleClick {
         viewModel.onAppLockClicked()
     }
+
+    binding.switchFloatingLock.setOnCheckedChangeListener { _, isChecked ->
+        viewModel.toggleFloatingLock(isEnabled = isChecked, canDrawOverlays = requireContext().hasOverlayPermission())
+    }
+}
+
+fun SettingsFragment.updateFloatingLock(isEnabled: Boolean) {
+    if (binding.switchFloatingLock.isChecked != isEnabled) binding.switchFloatingLock.isChecked = isEnabled
 }
 
 fun SettingsFragment.updateVoice(info: SettingsVoiceInfo) {
@@ -264,6 +274,14 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.NavigateToAbout -> {
             showMessage(message = getString(R.string.coming_soon_about), anchorView = binding.layoutBottomNav)
+        }
+
+        is SettingsUiEvent.SyncFloatingLock ->
+            if (event.isEnabled) FloatingLockService.start(requireContext()) else FloatingLockService.stop(requireContext())
+
+        is SettingsUiEvent.ShowFloatingLockNeedsOverlay -> {
+            binding.switchFloatingLock.isChecked = false
+            showMessage(message = getString(R.string.floating_lock_needs_overlay), anchorView = binding.layoutBottomNav)
         }
 
         is SettingsUiEvent.NavigateToAppLock -> {

@@ -13,6 +13,12 @@ object Constant {
 
     const val VOICE_ENROLLMENT_SAMPLES = 3
 
+    /** Floating voice-lock button: this many taps on it within the window open the voice lock command. */
+    const val FLOATING_LOCK_TAP_COUNT = 3
+    const val FLOATING_LOCK_TAP_WINDOW_MS = 1_500L
+    const val FLOATING_LOCK_IDLE_DIM_MS = 3_000L
+
+
     /** F1: how long "apps locked" stays on the lock command screen before it closes. */
     const val VOICE_LOCK_CLOSE_DELAY_MS = 1_500L
 

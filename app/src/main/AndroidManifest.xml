@@ -96,6 +96,29 @@
             </intent-filter>
         </receiver>
 
+        <!-- F1: floating voice-lock button over other apps (opens the voice lock command) -->
+        <service
+            android:name=".service.FloatingLockService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="floating_lock_button" />
+        </service>
+
+        <!-- F1: home-screen widget "Khóa bằng giọng nói" (opens the voice lock command) -->
+        <receiver
+            android:name=".service.LockWidgetProvider"
+            android:exported="false"
+            android:label="@string/lock_by_voice">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/lock_widget_info" />
+        </receiver>
+
         <!-- F1: Quick Settings tile "Khóa bằng giọng nói" -->
         <service
             android:name=".service.VoiceLockTileService"
