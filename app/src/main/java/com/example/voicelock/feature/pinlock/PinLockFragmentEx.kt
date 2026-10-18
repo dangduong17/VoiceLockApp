@@ -1,12 +1,16 @@
 package com.example.voicelock.feature.pinlock
 
+import android.os.Bundle
 import android.view.View
 import com.example.voicelock.R
 import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.pinlock.PinLockStage
 import com.example.voicelock.data.model.pinlock.PinLockUiEvent
 import com.example.voicelock.data.model.pinlock.PinLockUiState
+import com.example.voicelock.data.model.pinlock.canResetWithSecurityQuestion
 import com.example.voicelock.data.model.pinlock.canToggleLength
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
+import com.example.voicelock.util.BundleKey
 import com.example.voicelock.data.model.pinlock.isKeypadEnabled
 import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
@@ -46,6 +50,14 @@ fun PinLockFragment.settingEvent() {
     binding.tvToggleLength.setPreventDoubleClick {
         viewModel.onToggleLength()
     }
+
+    binding.tvForgotPin.setPreventDoubleClick { forgotPinEvent() }
+}
+
+/** Answer the security question instead of the forgotten PIN, then set a new one. */
+fun PinLockFragment.forgotPinEvent() {
+    val bundle = Bundle().apply { putString(BundleKey.KEY_LOCK_MODE, SecurityQuestionMode.RESET_PIN.name) }
+    navigator.navigateTo(R.id.action_pinLockFragment_to_securityQuestionFragment, bundle)
 }
 
 fun PinLockFragment.updateUiState(state: PinLockUiState) {
@@ -69,6 +81,8 @@ fun PinLockFragment.updateUiState(state: PinLockUiState) {
         if (state.pinLength == 4) getString(R.string.pin_toggle_use_6) else getString(R.string.pin_toggle_use_4)
 
     updateDots(state)
+
+    binding.tvForgotPin.visibility = if (state.canResetWithSecurityQuestion()) View.VISIBLE else View.GONE
 
     binding.tvLockoutMessage.visibility = if (state.isLocked) View.VISIBLE else View.GONE
     if (state.isLocked) {

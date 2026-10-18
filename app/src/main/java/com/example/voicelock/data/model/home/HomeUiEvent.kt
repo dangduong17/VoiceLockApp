@@ -4,6 +4,7 @@ import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 
 sealed class HomeUiEvent {
     data object LockNow : HomeUiEvent()
@@ -11,7 +12,7 @@ sealed class HomeUiEvent {
     data class ShowLoadError(val message: String?) : HomeUiEvent()
     data class NavigateToPinLock(val mode: PinLockMode, val pinLength: Int) : HomeUiEvent()
     data class NavigateToPatternLock(val mode: PatternLockMode) : HomeUiEvent()
-    data object NavigateToSecurityQuestions : HomeUiEvent()
+    data class NavigateToSecurityQuestion(val mode: SecurityQuestionMode) : HomeUiEvent()
     data object NavigateToAppLock : HomeUiEvent()
     data object NavigateToVoiceEnrollment : HomeUiEvent()
     data object NavigateToVoiceTest : HomeUiEvent()

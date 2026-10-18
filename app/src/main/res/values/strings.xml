@@ -40,6 +40,7 @@
 
     <string name="security_question">Câu hỏi bảo mật</string>
     <string name="security_question_sub">Đã lưu • Dùng để khôi phục PIN</string>
+    <string name="security_question_sub_not_set">Chưa thiết lập • Dùng để khôi phục PIN</string>
 
     <string name="android_lock_notice">Lớp khóa VoiceLock không thay thế khóa màn hình Android. Luôn giữ mã khóa thiết bị.</string>
 
@@ -254,10 +255,43 @@
     <string name="pin_status_set">%1$d chữ số • Đã thiết lập</string>
     <string name="home_lock_now_toast">Đang tiến hành khóa ngay…</string>
     <string name="common_error_unexpected">Đã xảy ra lỗi, vui lòng thử lại</string>
-    <string name="coming_soon_security_questions">Câu hỏi bảo mật sẽ có trong bản sau</string>
     <string name="coming_soon_theme_language">Giao diện và ngôn ngữ sẽ có trong bản sau</string>
     <string name="coming_soon_help_feedback">Trợ giúp và phản hồi sẽ có trong bản sau</string>
     <string name="coming_soon_about">Thông tin về VoiceLock sẽ có trong bản sau</string>
     <string name="pin_delete_description">Xóa số vừa nhập</string>
     <string name="message_action_open_settings">Mở cài đặt</string>
+
+    <!-- F5 Security question -->
+    <string-array name="security_question_presets">
+        <item>Tên trường tiểu học đầu tiên của bạn là gì?</item>
+        <item>Tên thú cưng đầu tiên của bạn là gì?</item>
+        <item>Bạn sinh ra ở thành phố nào?</item>
+        <item>Tên người bạn thân nhất thời thơ ấu của bạn là gì?</item>
+        <item>Món ăn bạn thích nhất là gì?</item>
+        <item>Tự đặt câu hỏi…</item>
+    </string-array>
+    <string name="security_question_title_setup">Đặt câu hỏi bảo mật</string>
+    <string name="security_question_title_change">Đặt câu hỏi mới</string>
+    <string name="security_question_title_verify">Câu hỏi bảo mật</string>
+    <string name="security_question_subtitle_setup">Dùng khi bạn quên PIN hoặc không mở khóa được bằng giọng nói. Chọn câu trả lời chỉ bạn biết.</string>
+    <string name="security_question_subtitle_change">Trả lời câu hỏi hiện tại trước khi đặt câu mới</string>
+    <string name="security_question_subtitle_unlock">Trả lời đúng để mở khóa ứng dụng</string>
+    <string name="security_question_subtitle_reset_pin">Trả lời đúng để đặt mã PIN mới</string>
+    <string name="security_question_subtitle_not_set">Bạn chưa đặt câu hỏi bảo mật</string>
+    <string name="security_question_hint_question">Câu hỏi</string>
+    <string name="security_question_hint_custom">Câu hỏi của bạn</string>
+    <string name="security_question_hint_answer">Câu trả lời</string>
+    <string name="security_question_hint_confirm">Nhập lại câu trả lời</string>
+    <string name="security_question_helper_answer">Không phân biệt chữ hoa, chữ thường và dấu</string>
+    <string name="security_question_action_save">Lưu câu hỏi</string>
+    <string name="security_question_action_verify">Xác nhận</string>
+    <string name="security_question_error_question_empty">Hãy nhập câu hỏi</string>
+    <string name="security_question_error_answer_empty">Hãy nhập câu trả lời</string>
+    <string name="security_question_error_answer_short">Câu trả lời cần ít nhất 2 ký tự</string>
+    <string name="security_question_error_mismatch">Hai câu trả lời không giống nhau</string>
+    <string name="security_question_wrong_remaining">Câu trả lời không đúng. Còn %1$d lần thử.</string>
+    <string name="security_question_saved">Đã lưu câu hỏi bảo mật</string>
+    <string name="pin_forgot">Quên PIN?</string>
+    <string name="common_loading">Đang tải…</string>
+    <string name="common_back">Quay lại</string>
 </resources>

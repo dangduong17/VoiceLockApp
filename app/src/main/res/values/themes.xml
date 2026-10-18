@@ -17,4 +17,20 @@
         <item name="android:textSize">26sp</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+    <!--
+        The app always draws light screens (bg_screen), but the theme is DayNight: in dark mode the
+        Material text fields would pick light-on-dark colors. Forms apply this overlay to stay light.
+    -->
+    <style name="ThemeOverlay.VoiceLock.LightForm" parent="">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/text_muted</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorSurfaceContainer">@color/white</item>
+        <item name="colorError">@color/error_red</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_muted</item>
+    </style>
 </resources>

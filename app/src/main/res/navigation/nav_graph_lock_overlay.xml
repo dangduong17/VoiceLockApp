@@ -35,4 +35,10 @@
         android:label="FaceAuthFragment"
         tools:layout="@layout/fragment_face_auth" />
 
+    <fragment
+        android:id="@+id/securityQuestionFragment"
+        android:name="com.example.voicelock.feature.securityquestion.SecurityQuestionFragment"
+        android:label="SecurityQuestionFragment"
+        tools:layout="@layout/fragment_security_question" />
+
 </navigation>

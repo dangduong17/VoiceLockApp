@@ -9,11 +9,13 @@ data class SettingsUiState(
     val isVoiceUnlockEnabled: Boolean = false,
     val isVoiceLockEnabled: Boolean = false,
     val voiceSamplesCount: Int = 0,
-    val biometricSettings: BiometricSettingsDtoModel = BiometricSettingsDtoModel(),
+    /** Null until loaded, so the fingerprint row is never shown on a device without a sensor (F4). */
+    val biometricSettings: BiometricSettingsDtoModel? = null,
     val faceSettings: FaceSettingsDtoModel = FaceSettingsDtoModel(),
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
+    val isSecurityQuestionSet: Boolean = false,
 )
 
 /** Everything the voice rows render, so it always changes together. */
@@ -37,6 +39,7 @@ data class SettingsLockInfo(
     val isPinSet: Boolean,
     val pinLength: Int,
     val isPatternSet: Boolean,
+    val isSecurityQuestionSet: Boolean,
 )
 
-fun SettingsUiState.getLockInfo(): SettingsLockInfo = SettingsLockInfo(isPinSet = isPinSet, pinLength = pinLength, isPatternSet = isPatternSet)
+fun SettingsUiState.getLockInfo(): SettingsLockInfo = SettingsLockInfo(isPinSet = isPinSet, pinLength = pinLength, isPatternSet = isPatternSet, isSecurityQuestionSet = isSecurityQuestionSet)

@@ -12,6 +12,7 @@ import com.example.voicelock.data.model.applock.hasFallbackMethod
 import com.example.voicelock.data.model.lock.LockMethod
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.collectFlowOnView
 import com.example.voicelock.util.setPreventDoubleClick
@@ -98,6 +99,15 @@ class LockOverlayActivity : AppCompatActivity() {
                         putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName)
                     }
                 showDestination(R.id.pinLockFragment, args)
+            }
+
+            LockMethod.SECURITY_QUESTION -> {
+                val args =
+                    Bundle().apply {
+                        putString(BundleKey.KEY_LOCK_MODE, SecurityQuestionMode.UNLOCK.name)
+                        putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName)
+                    }
+                showDestination(R.id.securityQuestionFragment, args)
             }
         }
     }

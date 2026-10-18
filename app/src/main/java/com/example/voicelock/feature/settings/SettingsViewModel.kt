@@ -4,6 +4,7 @@ import com.example.voicelock.base.BaseViewModel
 import com.example.voicelock.base.launchIO
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
 import com.example.voicelock.data.model.biometric.BiometricAvailability
@@ -95,7 +96,7 @@ class SettingsViewModel(
         type: BiometricType,
         isEnabled: Boolean,
     ) {
-        val settings = getCurrentState().biometricSettings
+        val settings = getCurrentState().biometricSettings ?: return
         if (isEnabled == settings.isActive(type)) return
         if (!isEnabled) {
             saveBiometric(type = type, isEnabled = false)
@@ -113,7 +114,7 @@ class SettingsViewModel(
 
     /** Once on, tapping the row just tests the prompt; otherwise it starts turning it on. */
     fun onBiometricRowClicked(type: BiometricType) {
-        if (getCurrentState().biometricSettings.isActive(type)) {
+        if (getCurrentState().biometricSettings?.isActive(type) == true) {
             launchIO { setEvent(SettingsUiEvent.TestBiometric(type)) }
         } else {
             toggleBiometric(type = type, isEnabled = true)
@@ -128,7 +129,7 @@ class SettingsViewModel(
         type: BiometricType,
         isEnabled: Boolean,
     ) {
-        setState { copy(biometricSettings = biometricSettings.withPreference(type = type, isEnabled = isEnabled)) }
+        setState { copy(biometricSettings = biometricSettings?.withPreference(type = type, isEnabled = isEnabled)) }
         handleApiCall(apiCall = { setBiometricEnabledUseCase(type = type, isEnabled = isEnabled) })
     }
 
@@ -158,7 +159,9 @@ class SettingsViewModel(
     }
 
     fun onQuestionsClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToSecurityQuestions) }
+        // Changing an existing question first asks it (CHANGE mode), like changing the PIN.
+        val mode = if (getCurrentState().isSecurityQuestionSet) SecurityQuestionMode.CHANGE else SecurityQuestionMode.SETUP
+        launchIO { setEvent(SettingsUiEvent.NavigateToSecurityQuestion(mode)) }
     }
 
     fun onThemeLanguageClicked() {

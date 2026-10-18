@@ -15,4 +15,7 @@ enum class LockMethod {
     BIOMETRIC,
     PATTERN,
     PIN,
+
+    /** F5: answering the security question replaces voice / PIN. */
+    SECURITY_QUESTION,
 }

@@ -11,10 +11,12 @@ import com.example.voicelock.domain.usecase.biometric.GetBiometricSettingsUseCas
 import com.example.voicelock.domain.usecase.face.GetFaceSettingsUseCase
 import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
 import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
+import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestionUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
 import com.example.voicelock.util.Result
 import com.example.voicelock.util.catchAsResult
 import com.example.voicelock.util.getDataOrDefault
+import com.example.voicelock.util.getDataOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -26,11 +28,13 @@ class GetHomeStatusUseCase(
     private val getVoiceSettingsUseCase: GetVoiceSettingsUseCase,
     private val getBiometricSettingsUseCase: GetBiometricSettingsUseCase,
     private val getFaceSettingsUseCase: GetFaceSettingsUseCase,
+    private val getSecurityQuestionUseCase: GetSecurityQuestionUseCase,
 ) {
     operator fun invoke(): Flow<Result<HomeUiState>> =
         flow<Result<HomeUiState>> {
             val pinInfo = getPinInfoUseCase().getDataOrDefault(PinInfo(isPinSet = false, pinLength = 6))
             val isPatternSet = getPatternInfoUseCase().getDataOrDefault(false)
+            val isSecurityQuestionSet = getSecurityQuestionUseCase().getDataOrNull() != null
             val voiceSettings = getVoiceSettingsUseCase().getDataOrDefault(VoiceSettingsDtoModel())
             val biometricSettings = getBiometricSettingsUseCase().getDataOrDefault(BiometricSettingsDtoModel())
             val faceSettings = getFaceSettingsUseCase().getDataOrDefault(FaceSettingsDtoModel())
@@ -48,6 +52,7 @@ class GetHomeStatusUseCase(
                         isPinSet = pinInfo.isPinSet,
                         pinLength = pinInfo.pinLength,
                         isPatternSet = isPatternSet,
+                        isSecurityQuestionSet = isSecurityQuestionSet,
                     ),
                 ),
             )

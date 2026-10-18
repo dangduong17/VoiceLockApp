@@ -11,6 +11,7 @@ import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
@@ -100,7 +101,7 @@ class HomeViewModel(
      * enrollment screen when nothing is enrolled. Turning it off is done from Settings.
      */
     fun onBiometricRowClicked(type: BiometricType) {
-        val settings = getCurrentState().biometricSettings
+        val settings = getCurrentState().biometricSettings ?: return
         val event =
             if (settings.isActive(type)) {
                 HomeUiEvent.TestBiometric(type)
@@ -116,12 +117,14 @@ class HomeViewModel(
     }
 
     fun onBiometricConfirmed(type: BiometricType) {
-        setState { copy(biometricSettings = biometricSettings.withPreference(type = type, isEnabled = true)) }
+        setState { copy(biometricSettings = biometricSettings?.withPreference(type = type, isEnabled = true)) }
         handleApiCall(apiCall = { setBiometricEnabledUseCase(type = type, isEnabled = true) })
     }
 
     fun onQuestionsClicked() {
-        launchIO { setEvent(HomeUiEvent.NavigateToSecurityQuestions) }
+        // Changing an existing question first asks it (CHANGE mode), like changing the PIN.
+        val mode = if (getCurrentState().isSecurityQuestionSet) SecurityQuestionMode.CHANGE else SecurityQuestionMode.SETUP
+        launchIO { setEvent(HomeUiEvent.NavigateToSecurityQuestion(mode)) }
     }
 
     fun onAppLockClicked() {

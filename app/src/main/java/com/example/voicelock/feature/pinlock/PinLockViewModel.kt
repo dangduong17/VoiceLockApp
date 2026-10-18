@@ -14,6 +14,8 @@ import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
 import com.example.voicelock.domain.usecase.pinlock.SetPinUseCase
 import com.example.voicelock.domain.usecase.pinlock.VerifyPinUseCase
+import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestionUseCase
+import com.example.voicelock.util.getDataOrNull
 import com.example.voicelock.util.handleApiCall
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -23,6 +25,7 @@ class PinLockViewModel(
     private val verifyPinUseCase: VerifyPinUseCase,
     private val getLockoutStateUseCase: GetLockoutStateUseCase,
     private val markAppUnlockedUseCase: MarkAppUnlockedUseCase,
+    private val getSecurityQuestionUseCase: GetSecurityQuestionUseCase,
 ) : BaseViewModel<PinLockUiState, PinLockUiEvent>(PinLockUiState()) {
 
     private val currentInput = StringBuilder()
@@ -52,6 +55,12 @@ class PinLockViewModel(
         }
         if (initialStage == PinLockStage.VERIFY) {
             checkExistingLockout()
+        }
+        if (mode == PinLockMode.CHANGE) {
+            launchIO {
+                val isSecurityQuestionSet = getSecurityQuestionUseCase().getDataOrNull() != null
+                setState { copy(isSecurityQuestionSet = isSecurityQuestionSet) }
+            }
         }
     }
 

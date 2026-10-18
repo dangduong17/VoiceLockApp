@@ -4,6 +4,7 @@ import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 
 sealed class SettingsUiEvent {
     /** [message] null: the screen shows its generic error text. */
@@ -12,7 +13,7 @@ sealed class SettingsUiEvent {
     data object NavigateToPermissions : SettingsUiEvent()
     data class NavigateToPinLock(val mode: PinLockMode, val pinLength: Int) : SettingsUiEvent()
     data class NavigateToPatternLock(val mode: PatternLockMode) : SettingsUiEvent()
-    data object NavigateToSecurityQuestions : SettingsUiEvent()
+    data class NavigateToSecurityQuestion(val mode: SecurityQuestionMode) : SettingsUiEvent()
     data object NavigateToThemeLanguage : SettingsUiEvent()
     data object NavigateToHelpFeedback : SettingsUiEvent()
     data object NavigateToAbout : SettingsUiEvent()
