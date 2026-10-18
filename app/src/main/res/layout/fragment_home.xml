@@ -476,7 +476,58 @@
                     android:layout_marginVertical="12dp"
                     android:background="@color/divider_line" />
 
-                <!-- Item 4: Security Questions -->
+                <!-- Item 4: Face -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/btnFace"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/ivFaceCircle"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_circle_icon"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_face"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvFaceTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="@string/face_unlock_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/ivFaceCircle"
+                        app:layout_constraintEnd_toStartOf="@id/tvFaceAction"
+                        app:layout_constraintStart_toEndOf="@id/ivFaceCircle"
+                        app:layout_constraintTop_toTopOf="@id/ivFaceCircle" />
+
+                    <TextView
+                        android:id="@+id/tvFaceAction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup"
+                        android:textColor="@color/primary_blue"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/divider_line" />
+
+                <!-- Item 5: Security Questions -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/btnQuestions"
                     android:layout_width="match_parent"
@@ -524,7 +575,7 @@
                     android:layout_marginVertical="12dp"
                     android:background="@color/divider_line" />
 
-                <!-- Item 5: App Lock -->
+                <!-- Item 6: App Lock -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/btnAppLock"
                     android:layout_width="match_parent"

@@ -1,16 +1,20 @@
 package com.example.voicelock.data.model.settings
 
+import com.example.voicelock.data.model.biometric.BiometricSettings
+import com.example.voicelock.data.model.face.FaceSettings
+
 data class SettingsUiState(
     val isVoiceEnrolled: Boolean = false,
     val isVoiceUnlockEnabled: Boolean = false,
     val isVoiceLockEnabled: Boolean = false,
     val voiceSamplesCount: Int = 0,
+    val biometricSettings: BiometricSettings = BiometricSettings(),
+    val faceSettings: FaceSettings = FaceSettings(),
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
     val pinStatusText: String = "6 chữ số • Đã thiết lập",
     val patternStatusText: String = "Chưa thiết lập",
-    val fingerprintStatusText: String = "Chưa bật • Xác minh qua Android",
     val questionStatusText: String = "Đã lưu • Dùng để khôi phục PIN",
     val themeLanguageText: String = "Sáng • Tiếng Việt",
     val appVersionText: String = "Phiên bản 1.0.0 • Quyền riêng tư",

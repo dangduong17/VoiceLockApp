@@ -23,4 +23,16 @@
         android:label="TwoStageAuthFragment"
         tools:layout="@layout/fragment_two_stage_auth" />
 
+    <fragment
+        android:id="@+id/biometricAuthFragment"
+        android:name="com.example.voicelock.feature.biometric.auth.BiometricAuthFragment"
+        android:label="BiometricAuthFragment"
+        tools:layout="@layout/fragment_biometric_auth" />
+
+    <fragment
+        android:id="@+id/faceAuthFragment"
+        android:name="com.example.voicelock.feature.face.auth.FaceAuthFragment"
+        android:label="FaceAuthFragment"
+        tools:layout="@layout/fragment_face_auth" />
+
 </navigation>

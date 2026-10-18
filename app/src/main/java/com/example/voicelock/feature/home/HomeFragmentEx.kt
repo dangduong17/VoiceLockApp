@@ -2,6 +2,14 @@ package com.example.voicelock.feature.home
 
 import android.os.Bundle
 import com.example.voicelock.R
+import com.example.voicelock.data.model.biometric.BiometricType
+import com.example.voicelock.data.model.biometric.isActive
+import com.example.voicelock.data.model.face.isFaceUnlockActive
+import com.example.voicelock.feature.biometric.confirmBiometric
+import com.example.voicelock.feature.biometric.getBiometricActionText
+import com.example.voicelock.feature.biometric.showBiometricUnavailable
+import com.example.voicelock.feature.biometric.startBiometricEnrollment
+import com.example.voicelock.feature.biometric.testBiometric
 import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
 import com.example.voicelock.util.BundleKey
@@ -47,7 +55,11 @@ fun HomeFragment.settingEvent() {
     }
 
     binding.btnFingerprint.setPreventDoubleClick {
-        viewModel.onFingerprintClicked()
+        viewModel.onBiometricRowClicked(BiometricType.FINGERPRINT)
+    }
+
+    binding.btnFace.setPreventDoubleClick {
+        viewModel.onFaceClicked()
     }
 
     binding.btnQuestions.setPreventDoubleClick {
@@ -89,7 +101,18 @@ fun HomeFragment.updateUiState(state: HomeUiState) {
 
     binding.tvPinSub.text = state.pinStatusText
     binding.tvPatternAction.text = state.patternStatusText
-    binding.tvFingerprintAction.text = state.fingerprintStatusText
+    val biometric = state.biometricSettings
+    binding.tvFingerprintAction.text =
+        getBiometricActionText(biometric.fingerprintAvailability, biometric.isActive(BiometricType.FINGERPRINT))
+    val face = state.faceSettings
+    binding.tvFaceAction.text =
+        getString(
+            when {
+                !face.isEnrolled -> R.string.setup
+                face.isFaceUnlockActive() -> R.string.biometric_action_enabled
+                else -> R.string.face_action_disabled
+            },
+        )
 }
 
 fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
@@ -116,10 +139,6 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
             navigator.navigateTo(R.id.action_homeFragment_to_patternLockFragment, bundle)
         }
 
-        is HomeUiEvent.NavigateToFingerprintSetup -> {
-            displayToast("Mở cài đặt Vân tay")
-        }
-
         is HomeUiEvent.NavigateToSecurityQuestions -> {
             displayToast("Mở cài đặt Câu hỏi bảo mật")
         }
@@ -136,6 +155,22 @@ fun HomeFragment.handleUiEvent(event: HomeUiEvent) {
         is HomeUiEvent.NavigateToVoiceTest -> {
             navigator.navigateTo(R.id.action_homeFragment_to_twoStageAuthFragment)
         }
+
+        is HomeUiEvent.NavigateToFaceEnrollment -> {
+            navigator.navigateTo(R.id.action_homeFragment_to_faceEnrollmentFragment)
+        }
+
+        is HomeUiEvent.NavigateToFaceTest -> {
+            navigator.navigateTo(R.id.action_homeFragment_to_faceAuthFragment)
+        }
+
+        is HomeUiEvent.ConfirmBiometric -> confirmBiometric(event.type) { viewModel.onBiometricConfirmed(event.type) }
+
+        is HomeUiEvent.TestBiometric -> testBiometric(event.type)
+
+        is HomeUiEvent.OpenBiometricEnrollment -> startBiometricEnrollment(event.type)
+
+        is HomeUiEvent.ShowBiometricUnavailable -> showBiometricUnavailable(event.type, event.availability)
     }
 }
 

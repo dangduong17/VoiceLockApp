@@ -71,6 +71,16 @@ class LockOverlayActivity : AppCompatActivity() {
                 showDestination(R.id.twoStageAuthFragment, args)
             }
 
+            LockMethod.FACE -> {
+                val args = Bundle().apply { putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName) }
+                showDestination(R.id.faceAuthFragment, args)
+            }
+
+            LockMethod.BIOMETRIC -> {
+                val args = Bundle().apply { putString(BundleKey.KEY_LOCK_TARGET_PACKAGE, targetPackageName) }
+                showDestination(R.id.biometricAuthFragment, args)
+            }
+
             LockMethod.PATTERN -> {
                 val args =
                     Bundle().apply {

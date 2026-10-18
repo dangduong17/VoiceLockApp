@@ -521,31 +521,34 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
                         android:text="@string/fingerprint"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
-                        app:layout_constraintEnd_toStartOf="@id/ivFingerprintArrow"
+                        app:layout_constraintEnd_toStartOf="@id/switchFingerprint"
                         app:layout_constraintStart_toEndOf="@id/ivFingerprintCircle"
                         app:layout_constraintTop_toTopOf="@id/ivFingerprintCircle" />
 
                     <TextView
+                        android:id="@+id/tvFingerprintSub"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_marginTop="2dp"
+                        android:layout_marginEnd="12dp"
                         android:text="@string/fingerprint_sub"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
-                        app:layout_constraintEnd_toStartOf="@id/ivFingerprintArrow"
+                        app:layout_constraintEnd_toStartOf="@id/switchFingerprint"
                         app:layout_constraintStart_toEndOf="@id/ivFingerprintCircle"
                         app:layout_constraintTop_toBottomOf="@id/tvFingerprintTitle" />
 
-                    <ImageView
-                        android:id="@+id/ivFingerprintArrow"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchFingerprint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -558,7 +561,69 @@
                     android:layout_marginVertical="12dp"
                     android:background="@color/divider_line" />
 
-                <!-- Item 4: Security Question -->
+                <!-- Item 4: Face -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/rowFaceUnlock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/ivFaceCircle"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_circle_icon"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_face"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvFaceUnlockTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:text="@string/face_unlock_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@id/switchFaceUnlock"
+                        app:layout_constraintStart_toEndOf="@id/ivFaceCircle"
+                        app:layout_constraintTop_toTopOf="@id/ivFaceCircle" />
+
+                    <TextView
+                        android:id="@+id/tvFaceUnlockSub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginEnd="12dp"
+                        android:text="@string/face_unlock_sub_not_enrolled"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toStartOf="@id/switchFaceUnlock"
+                        app:layout_constraintStart_toEndOf="@id/ivFaceCircle"
+                        app:layout_constraintTop_toBottomOf="@id/tvFaceUnlockTitle" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchFaceUnlock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/divider_line" />
+
+                <!-- Item 5: Security Question -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/btnQuestions"
                     android:layout_width="match_parent"
@@ -617,7 +682,7 @@
                     android:layout_marginVertical="12dp"
                     android:background="@color/divider_line" />
 
-                <!-- Item 5: App Lock -->
+                <!-- Item 6: App Lock -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/btnAppLock"
                     android:layout_width="match_parent"

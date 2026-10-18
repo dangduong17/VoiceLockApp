@@ -6,6 +6,14 @@ import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
 import com.example.voicelock.data.model.settings.SettingsUiEvent
 import com.example.voicelock.data.model.settings.SettingsUiState
+import com.example.voicelock.data.model.biometric.BiometricAvailability
+import com.example.voicelock.data.model.biometric.BiometricType
+import com.example.voicelock.data.model.biometric.getAvailability
+import com.example.voicelock.data.model.biometric.isActive
+import com.example.voicelock.data.model.biometric.withPreference
+import com.example.voicelock.data.model.face.isFaceUnlockActive
+import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
+import com.example.voicelock.domain.usecase.face.SetFaceUnlockEnabledUseCase
 import com.example.voicelock.domain.usecase.settings.GetSettingsUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
@@ -15,6 +23,8 @@ class SettingsViewModel(
     private val getSettingsUseCase: GetSettingsUseCase,
     private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
     private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
+    private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
+    private val setFaceUnlockEnabledUseCase: SetFaceUnlockEnabledUseCase,
 ) : BaseViewModel<SettingsUiState, SettingsUiEvent>(SettingsUiState()) {
 
     fun initData() {
@@ -58,6 +68,70 @@ class SettingsViewModel(
         launchIO { setEvent(event) }
     }
 
+    /** Same rule as voice: turning face unlock on before enrolling opens face enrollment. */
+    fun toggleFaceUnlock(isEnabled: Boolean) {
+        val face = getCurrentState().faceSettings
+        if (isEnabled == face.isFaceUnlockActive()) return
+        if (!face.isEnrolled) {
+            launchIO { setEvent(SettingsUiEvent.NavigateToFaceEnrollment) }
+            return
+        }
+        setState { copy(faceSettings = faceSettings.copy(isUnlockPreferenceOn = isEnabled)) }
+        handleApiCall(apiCall = { setFaceUnlockEnabledUseCase(isEnabled) })
+    }
+
+    /** Enrolled: test screen (re-enroll / delete live there); otherwise enrollment. */
+    fun onFaceUnlockRowClicked() {
+        val event =
+            if (getCurrentState().faceSettings.isEnrolled) SettingsUiEvent.NavigateToFaceTest else SettingsUiEvent.NavigateToFaceEnrollment
+        launchIO { setEvent(event) }
+    }
+
+    /**
+     * Turning the fingerprint on is confirmed with the system prompt first ([onBiometricConfirmed]);
+     * without an enrolled biometric it opens the Android enrollment screen instead.
+     */
+    fun toggleBiometric(
+        type: BiometricType,
+        isEnabled: Boolean,
+    ) {
+        val settings = getCurrentState().biometricSettings
+        if (isEnabled == settings.isActive(type)) return
+        if (!isEnabled) {
+            saveBiometric(type, isEnabled = false)
+            return
+        }
+        val event =
+            when (val availability = settings.getAvailability(type)) {
+                BiometricAvailability.AVAILABLE -> SettingsUiEvent.ConfirmBiometric(type)
+                BiometricAvailability.NOT_ENROLLED -> SettingsUiEvent.OpenBiometricEnrollment(type)
+                BiometricAvailability.NO_HARDWARE, BiometricAvailability.UNAVAILABLE ->
+                    SettingsUiEvent.ShowBiometricUnavailable(type, availability)
+            }
+        launchIO { setEvent(event) }
+    }
+
+    /** Once on, tapping the row just tests the prompt; otherwise it starts turning it on. */
+    fun onBiometricRowClicked(type: BiometricType) {
+        if (getCurrentState().biometricSettings.isActive(type)) {
+            launchIO { setEvent(SettingsUiEvent.TestBiometric(type)) }
+        } else {
+            toggleBiometric(type, isEnabled = true)
+        }
+    }
+
+    fun onBiometricConfirmed(type: BiometricType) {
+        saveBiometric(type, isEnabled = true)
+    }
+
+    private fun saveBiometric(
+        type: BiometricType,
+        isEnabled: Boolean,
+    ) {
+        setState { copy(biometricSettings = biometricSettings.withPreference(type, isEnabled)) }
+        handleApiCall(apiCall = { setBiometricEnabledUseCase(type, isEnabled) })
+    }
+
     fun onHomeTabClicked() {
         launchIO { setEvent(SettingsUiEvent.NavigateToHome) }
     }
@@ -81,10 +155,6 @@ class SettingsViewModel(
         val state = getCurrentState()
         val mode = if (state.isPatternSet) PatternLockMode.CHANGE else PatternLockMode.SETUP
         launchIO { setEvent(SettingsUiEvent.NavigateToPatternLock(mode)) }
-    }
-
-    fun onFingerprintClicked() {
-        launchIO { setEvent(SettingsUiEvent.NavigateToFingerprintSetup) }
     }
 
     fun onQuestionsClicked() {

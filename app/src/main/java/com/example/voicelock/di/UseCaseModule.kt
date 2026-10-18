@@ -5,6 +5,15 @@ import com.example.voicelock.domain.usecase.applock.GetLockedPackagesUseCase
 import com.example.voicelock.domain.usecase.applock.IsAppUnlockedUseCase
 import com.example.voicelock.domain.usecase.applock.MarkAppUnlockedUseCase
 import com.example.voicelock.domain.usecase.applock.SetAppLockedUseCase
+import com.example.voicelock.domain.usecase.biometric.GetBiometricSettingsUseCase
+import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
+import com.example.voicelock.domain.usecase.face.AnalyzeFaceFrameUseCase
+import com.example.voicelock.domain.usecase.face.DeleteFaceProfileUseCase
+import com.example.voicelock.domain.usecase.face.EnrollOwnerFaceUseCase
+import com.example.voicelock.domain.usecase.face.GetFaceSettingsUseCase
+import com.example.voicelock.domain.usecase.face.InitFaceEngineUseCase
+import com.example.voicelock.domain.usecase.face.SetFaceUnlockEnabledUseCase
+import com.example.voicelock.domain.usecase.face.VerifyOwnerFaceUseCase
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
 import com.example.voicelock.domain.usecase.lock.GetLockoutStateUseCase
 import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
@@ -82,6 +91,21 @@ val voiceUseCaseModule = module {
     factoryOf(::DetectSpeechUseCase)
 }
 
+val faceUseCaseModule = module {
+    factoryOf(::InitFaceEngineUseCase)
+    factoryOf(::AnalyzeFaceFrameUseCase)
+    factoryOf(::EnrollOwnerFaceUseCase)
+    factoryOf(::VerifyOwnerFaceUseCase)
+    factoryOf(::GetFaceSettingsUseCase)
+    factoryOf(::SetFaceUnlockEnabledUseCase)
+    factoryOf(::DeleteFaceProfileUseCase)
+}
+
+val biometricUseCaseModule = module {
+    factoryOf(::GetBiometricSettingsUseCase)
+    factoryOf(::SetBiometricEnabledUseCase)
+}
+
 val useCaseModule = module {
     includes(
         homeUseCaseModule,
@@ -91,5 +115,7 @@ val useCaseModule = module {
         patternLockUseCaseModule,
         appLockUseCaseModule,
         voiceUseCaseModule,
+        faceUseCaseModule,
+        biometricUseCaseModule,
     )
 }
