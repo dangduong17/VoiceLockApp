@@ -13,7 +13,7 @@
     <string name="unlock_by_voice_settings_sub">Trên lớp khóa • Đã lưu 3 mẫu</string>
 
     <string name="lock_by_voice">Khóa bằng giọng nói</string>
-    <string name="lock_by_voice_sub">Lắng nghe nền đang tắt</string>
+    <string name="lock_by_voice_sub">Chưa đặt câu lệnh khóa • Chạm để đăng ký</string>
 
     <string name="voice_commands_title">Lệnh và mẫu giọng nói</string>
     <string name="voice_commands_sub">Quản lý câu mở khóa và lệnh khóa</string>
@@ -253,7 +253,6 @@
     <!-- Home / Settings texts (no hardcoded UI text in code) -->
     <string name="protection_status_disabled">BẢO VỆ ĐANG TẮT</string>
     <string name="pin_status_set">%1$d chữ số • Đã thiết lập</string>
-    <string name="home_lock_now_toast">Đang tiến hành khóa ngay…</string>
     <string name="common_error_unexpected">Đã xảy ra lỗi, vui lòng thử lại</string>
     <string name="coming_soon_theme_language">Giao diện và ngôn ngữ sẽ có trong bản sau</string>
     <string name="coming_soon_help_feedback">Trợ giúp và phản hồi sẽ có trong bản sau</string>
@@ -298,4 +297,29 @@
     <string name="permission_autostart_title">Tự khởi động</string>
     <string name="permission_autostart_sub">Xiaomi: cho phép để khóa ứng dụng tự bật lại sau khi khởi động lại máy</string>
     <string name="voice_volume_key_hint">Mẹo: bấm nút tăng hoặc giảm âm lượng để nói</string>
+    <!-- F1: lock by voice (phase 1, device admin) -->
+    <string name="voice_lock_sub_enrolled">Câu lệnh “%1$s” • Ô nhanh hoặc giữ biểu tượng app</string>
+    <string name="voice_lock_sub_not_enrolled">Chưa đặt câu lệnh khóa • Chạm để đăng ký</string>
+    <string name="voice_lock_enroll_title">Đăng ký câu lệnh khóa</string>
+    <string name="voice_lock_enroll_subtitle">Nói câu bạn muốn dùng để khóa máy (ví dụ “Khóa máy”, “Lock”) 3 lần liên tiếp. Câu này phải khác câu mở khóa.</string>
+    <string name="voice_lock_enroll_status_idle">Nhấn micro rồi nói câu lệnh khóa (lần %1$d)</string>
+    <string name="voice_lock_enroll_completed">Đã lưu câu lệnh khóa: “%1$s” (%2$s)</string>
+    <string name="voice_lock_enroll_error_same_as_unlock">Câu lệnh khóa nghe giống câu mở khóa. Hãy chọn một câu khác.</string>
+    <string name="voice_lock_command_title">Khóa bằng giọng nói</string>
+    <string name="voice_lock_auth_not_enrolled">Bạn chưa đặt câu lệnh khóa</string>
+    <string name="voice_lock_auth_action_enroll">Đăng ký câu lệnh khóa</string>
+    <string name="voice_lock_apps_locked">Đã khóa các ứng dụng. Cấp quyền Quản trị thiết bị để khóa cả màn hình.</string>
+    <string name="voice_lock_shortcut_long">Nói câu lệnh để khóa máy</string>
+    <string name="voice_lock_tile_subtitle_ready">Chạm rồi nói câu lệnh</string>
+    <string name="voice_lock_tile_subtitle_off">Chưa bật</string>
+    <string name="permission_device_admin_title">Quản trị thiết bị</string>
+    <string name="permission_device_admin_sub">Để khóa màn hình bằng giọng nói hoặc nút Khóa ngay</string>
+    <string name="permission_device_admin_explanation">VoiceLock chỉ dùng quyền này để khóa màn hình khi bạn nói câu lệnh khóa hoặc bấm Khóa ngay. Ứng dụng không xóa dữ liệu hay đổi mật khẩu. Hãy tắt quyền này trước khi gỡ VoiceLock.</string>
+    <!-- Quick lock: floating button + home-screen widget -->
+    <string name="floating_lock_title">Nút khóa giọng nói nổi</string>
+    <string name="floating_lock_sub">Chạm nhanh 3 lần để nói câu lệnh khóa • Kéo để di chuyển</string>
+    <string name="floating_lock_needs_overlay">Cần quyền Hiển thị trên ứng dụng khác để bật nút khóa giọng nói nổi</string>
+    <string name="floating_lock_description">Nút khóa giọng nói VoiceLock, chạm nhanh 3 lần để nói câu lệnh khóa</string>
+    <string name="floating_lock_notification_text">Chạm nhanh 3 lần vào nút nổi để nói câu lệnh khóa</string>
+    <string name="widget_lock_description">Chạm rồi nói câu lệnh để khóa máy</string>
 </resources>

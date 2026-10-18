@@ -9,6 +9,7 @@ import com.example.voicelock.data.model.voice.EnrollmentError
 import com.example.voicelock.data.model.voice.EnrollmentErrorInfo
 import com.example.voicelock.data.model.voice.EnrollmentPhase
 import com.example.voicelock.data.model.voice.EnrollmentProgress
+import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.setPreventDoubleClickScaleView
 import com.example.voicelock.util.showPermissionDeniedMessage
@@ -59,6 +60,9 @@ fun EnrollmentFragment.onMicPermissionResult(isGranted: Boolean) {
 }
 
 fun EnrollmentFragment.updateProgress(progress: EnrollmentProgress) = with(binding) {
+    val isLockCommand = progress.mode == VoiceVerificationMode.LOCK
+    tvEnrollTitle.setText(if (isLockCommand) R.string.voice_lock_enroll_title else R.string.voice_enroll_title)
+    tvEnrollSubtitle.setText(if (isLockCommand) R.string.voice_lock_enroll_subtitle else R.string.voice_enroll_subtitle)
     progressSamples.max = progress.requiredCount
     progressSamples.setProgressCompat(progress.recordedCount, true)
     tvSampleCount.text = getString(R.string.voice_enroll_sample_count, progress.recordedCount, progress.requiredCount)
@@ -80,7 +84,11 @@ fun EnrollmentFragment.updateProgress(progress: EnrollmentProgress) = with(bindi
 
 private fun EnrollmentFragment.getStatusText(progress: EnrollmentProgress): String =
     when (progress.phase) {
-        EnrollmentPhase.IDLE -> getString(R.string.voice_enroll_status_idle, progress.recordedCount + 1)
+        EnrollmentPhase.IDLE ->
+            getString(
+                if (progress.mode == VoiceVerificationMode.LOCK) R.string.voice_lock_enroll_status_idle else R.string.voice_enroll_status_idle,
+                progress.recordedCount + 1,
+            )
         EnrollmentPhase.RECORDING -> getString(R.string.voice_enroll_status_recording)
         EnrollmentPhase.RECOGNIZING -> getString(R.string.voice_enroll_status_recognizing)
         EnrollmentPhase.DOWNLOADING_LANGUAGE ->
@@ -88,7 +96,7 @@ private fun EnrollmentFragment.getStatusText(progress: EnrollmentProgress): Stri
         EnrollmentPhase.PROCESSING -> getString(R.string.voice_enroll_status_processing)
         EnrollmentPhase.COMPLETED ->
             getString(
-                R.string.voice_enroll_status_completed_phrase,
+                if (progress.mode == VoiceVerificationMode.LOCK) R.string.voice_lock_enroll_completed else R.string.voice_enroll_status_completed_phrase,
                 progress.recognizedPhrase,
                 getLanguageDisplayName(progress.languageTag),
             )
@@ -118,6 +126,7 @@ fun EnrollmentFragment.updateError(errorInfo: EnrollmentErrorInfo) {
             EnrollmentError.RECORDING_FAILED -> getString(R.string.voice_enroll_error_recording)
             EnrollmentError.PROCESSING_FAILED -> getString(R.string.voice_enroll_error_processing)
             EnrollmentError.MODEL_MISSING -> getString(R.string.voice_enroll_error_model_missing)
+            EnrollmentError.SAME_AS_UNLOCK -> getString(R.string.voice_lock_enroll_error_same_as_unlock)
         }
     binding.tvEnrollError.visibility = if (message == null) View.GONE else View.VISIBLE
     binding.tvEnrollError.text = message.orEmpty()

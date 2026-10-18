@@ -9,7 +9,7 @@ import com.example.voicelock.util.Result
 import kotlinx.coroutines.flow.Flow
 
 interface VoiceProfileRepository {
-    fun isVoiceEnrolled(): Flow<Result<Boolean>>
+    fun isVoiceEnrolled(mode: VoiceVerificationMode = VoiceVerificationMode.UNLOCK): Flow<Result<Boolean>>
 
     fun getVoiceSettings(): Flow<Result<VoiceSettingsDtoModel>>
 
@@ -19,11 +19,12 @@ interface VoiceProfileRepository {
 
     fun warmUpModel(): Flow<Result<Unit>>
 
-    fun getKeywordProfile(): Flow<Result<VoiceKeywordProfile?>>
+    fun getKeywordProfile(mode: VoiceVerificationMode = VoiceVerificationMode.UNLOCK): Flow<Result<VoiceKeywordProfile?>>
 
     fun enrollOwnerVoice(
         recordings: List<FloatArray>,
         keywordProfile: VoiceKeywordProfile,
+        mode: VoiceVerificationMode = VoiceVerificationMode.UNLOCK,
     ): Flow<Result<VoiceEnrollmentResult>>
 
     fun verifyOwnerVoice(

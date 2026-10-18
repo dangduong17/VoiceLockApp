@@ -47,6 +47,8 @@ class GetHomeStatusUseCase(
                         isBackupPinEnabled = pinInfo.isPinSet,
                         isVoiceUnlockEnabled = voiceSettings.isVoiceUnlockActive(),
                         isVoiceLockEnabled = voiceSettings.isVoiceLockActive(),
+                        isVoiceLockCommandEnrolled = voiceSettings.isLockCommandEnrolled,
+                        voiceLockPhrase = voiceSettings.lockCommandPhrase,
                         biometricSettings = biometricSettings,
                         faceSettings = faceSettings,
                         isPinSet = pinInfo.isPinSet,

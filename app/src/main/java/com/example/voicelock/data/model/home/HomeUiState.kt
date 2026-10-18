@@ -11,6 +11,9 @@ data class HomeUiState(
     val isBackupPinEnabled: Boolean = true,
     val isVoiceUnlockEnabled: Boolean = false,
     val isVoiceLockEnabled: Boolean = false,
+    /** F1: the lock command has its own 3 samples. */
+    val isVoiceLockCommandEnrolled: Boolean = false,
+    val voiceLockPhrase: String = "",
     val isPinSet: Boolean = false,
     val pinLength: Int = 6,
     val isPatternSet: Boolean = false,
@@ -27,6 +30,8 @@ data class HomeVoiceInfo(
     val isBackupPinEnabled: Boolean,
     val isVoiceUnlockEnabled: Boolean,
     val isVoiceLockEnabled: Boolean,
+    val isVoiceLockCommandEnrolled: Boolean,
+    val voiceLockPhrase: String,
 )
 
 fun HomeUiState.getVoiceInfo(): HomeVoiceInfo =
@@ -36,6 +41,8 @@ fun HomeUiState.getVoiceInfo(): HomeVoiceInfo =
         isBackupPinEnabled = isBackupPinEnabled,
         isVoiceUnlockEnabled = isVoiceUnlockEnabled,
         isVoiceLockEnabled = isVoiceLockEnabled,
+        isVoiceLockCommandEnrolled = isVoiceLockCommandEnrolled,
+        voiceLockPhrase = voiceLockPhrase,
     )
 
 /** PIN / pattern rows. */

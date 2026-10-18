@@ -36,4 +36,9 @@ sealed interface VoiceEnrollmentResult {
     data class InconsistentSamples(
         val consistency: Float,
     ) : VoiceEnrollmentResult
+
+    /** F1: the lock command sounds like the unlock passphrase, so unlocking could lock the phone. */
+    data class SameAsUnlockPhrase(
+        val similarity: Float,
+    ) : VoiceEnrollmentResult
 }

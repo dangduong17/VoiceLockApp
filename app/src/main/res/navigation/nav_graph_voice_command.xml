@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F1: voice lock command (VoiceCommandActivity). -->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_voice_command"
+    app:startDestination="@id/twoStageAuthFragment">
+
+    <fragment
+        android:id="@+id/twoStageAuthFragment"
+        android:name="com.example.voicelock.feature.voice.auth.TwoStageAuthFragment"
+        android:label="TwoStageAuthFragment"
+        tools:layout="@layout/fragment_two_stage_auth">
+        <action
+            android:id="@+id/action_twoStageAuthFragment_to_enrollmentFragment"
+            app:destination="@id/enrollmentFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/enrollmentFragment"
+        android:name="com.example.voicelock.feature.voice.enrollment.EnrollmentFragment"
+        android:label="EnrollmentFragment"
+        tools:layout="@layout/fragment_enrollment" />
+
+</navigation>

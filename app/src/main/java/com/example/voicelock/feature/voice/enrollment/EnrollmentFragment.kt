@@ -6,7 +6,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.example.voicelock.base.BaseFragment
 import com.example.voicelock.data.model.voice.getErrorInfo
 import com.example.voicelock.data.model.voice.getProgress
+import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.databinding.FragmentEnrollmentBinding
+import com.example.voicelock.util.BundleKey
 import com.example.voicelock.util.collectFlowOnView
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -26,6 +28,11 @@ class EnrollmentFragment : BaseFragment<FragmentEnrollmentBinding, EnrollmentVie
         initView()
         settingEvent()
         onSystemBack { backEvent() }
+        val mode =
+            arguments?.getString(BundleKey.KEY_VOICE_MODE)
+                ?.let { runCatching { VoiceVerificationMode.valueOf(it) }.getOrNull() }
+                ?: VoiceVerificationMode.UNLOCK
+        viewModel.initData(mode)
     }
 
     override fun subscribeObserver(view: View) {

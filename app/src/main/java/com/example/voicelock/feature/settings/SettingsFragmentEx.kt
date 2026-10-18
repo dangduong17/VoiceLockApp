@@ -17,7 +17,10 @@ import com.example.voicelock.feature.biometric.getBiometricSubText
 import com.example.voicelock.feature.biometric.showBiometricUnavailable
 import com.example.voicelock.feature.biometric.startBiometricEnrollment
 import com.example.voicelock.feature.biometric.testBiometric
+import com.example.voicelock.service.FloatingLockService
 import com.example.voicelock.util.BundleKey
+import com.example.voicelock.util.hasOverlayPermission
+import com.example.voicelock.util.offerVoiceLockTile
 import com.example.voicelock.util.MessageType
 import com.example.voicelock.util.setPreventDoubleClick
 import com.example.voicelock.util.showMessage
@@ -37,6 +40,10 @@ fun SettingsFragment.settingEvent() {
 
     binding.switchVoiceLock.setOnCheckedChangeListener { _, isChecked ->
         viewModel.toggleVoiceLock(isChecked)
+    }
+
+    binding.rowVoiceLock.setPreventDoubleClick {
+        viewModel.onVoiceLockRowClicked()
     }
 
     binding.rowVoiceUnlock.setPreventDoubleClick {
@@ -94,6 +101,14 @@ fun SettingsFragment.settingEvent() {
     binding.btnAppLock.setPreventDoubleClick {
         viewModel.onAppLockClicked()
     }
+
+    binding.switchFloatingLock.setOnCheckedChangeListener { _, isChecked ->
+        viewModel.toggleFloatingLock(isEnabled = isChecked, canDrawOverlays = requireContext().hasOverlayPermission())
+    }
+}
+
+fun SettingsFragment.updateFloatingLock(isEnabled: Boolean) {
+    if (binding.switchFloatingLock.isChecked != isEnabled) binding.switchFloatingLock.isChecked = isEnabled
 }
 
 fun SettingsFragment.updateVoice(info: SettingsVoiceInfo) {
@@ -104,6 +119,13 @@ fun SettingsFragment.updateVoice(info: SettingsVoiceInfo) {
     if (binding.switchVoiceLock.isChecked != info.isVoiceLockEnabled) {
         binding.switchVoiceLock.isChecked = info.isVoiceLockEnabled
     }
+
+    binding.tvVoiceLockSub.text =
+        if (info.isVoiceLockCommandEnrolled) {
+            getString(R.string.voice_lock_sub_enrolled, info.voiceLockPhrase)
+        } else {
+            getString(R.string.voice_lock_sub_not_enrolled)
+        }
 
     binding.tvVoiceUnlockSub.text =
         if (info.isVoiceEnrolled) {
@@ -175,8 +197,11 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.NavigateToVoiceEnrollment -> {
             restoreVoiceSwitches()
-            navigator.navigateTo(R.id.action_settingsFragment_to_enrollmentFragment)
+            val bundle = Bundle().apply { putString(BundleKey.KEY_VOICE_MODE, event.mode.name) }
+            navigator.navigateTo(R.id.action_settingsFragment_to_enrollmentFragment, bundle)
         }
+
+        is SettingsUiEvent.OfferVoiceLockTile -> offerVoiceLockTile()
 
         is SettingsUiEvent.NavigateToVoiceTest -> {
             navigator.navigateTo(R.id.action_settingsFragment_to_twoStageAuthFragment)
@@ -249,6 +274,14 @@ fun SettingsFragment.handleUiEvent(event: SettingsUiEvent) {
 
         is SettingsUiEvent.NavigateToAbout -> {
             showMessage(message = getString(R.string.coming_soon_about), anchorView = binding.layoutBottomNav)
+        }
+
+        is SettingsUiEvent.SyncFloatingLock ->
+            if (event.isEnabled) FloatingLockService.start(requireContext()) else FloatingLockService.stop(requireContext())
+
+        is SettingsUiEvent.ShowFloatingLockNeedsOverlay -> {
+            binding.switchFloatingLock.isChecked = false
+            showMessage(message = getString(R.string.floating_lock_needs_overlay), anchorView = binding.layoutBottomNav)
         }
 
         is SettingsUiEvent.NavigateToAppLock -> {

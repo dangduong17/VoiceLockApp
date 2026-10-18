@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_lock_description"
+    android:initialLayout="@layout/widget_lock"
+    android:minWidth="@dimen/_40dp"
+    android:minHeight="@dimen/_40dp"
+    android:previewLayout="@layout/widget_lock"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen" />

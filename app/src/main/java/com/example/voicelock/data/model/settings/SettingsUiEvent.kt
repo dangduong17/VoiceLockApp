@@ -4,6 +4,7 @@ import com.example.voicelock.data.model.biometric.BiometricAvailability
 import com.example.voicelock.data.model.biometric.BiometricType
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 
 sealed class SettingsUiEvent {
@@ -18,7 +19,14 @@ sealed class SettingsUiEvent {
     data object NavigateToHelpFeedback : SettingsUiEvent()
     data object NavigateToAbout : SettingsUiEvent()
     data object NavigateToAppLock : SettingsUiEvent()
-    data object NavigateToVoiceEnrollment : SettingsUiEvent()
+    /** Start / stop the floating lock button service to match the saved switch. */
+    data class SyncFloatingLock(val isEnabled: Boolean) : SettingsUiEvent()
+    /** The floating button needs "Display over other apps" first. */
+    data object ShowFloatingLockNeedsOverlay : SettingsUiEvent()
+    /** [mode] UNLOCK: the voice passphrase; LOCK: the F1 lock command. */
+    data class NavigateToVoiceEnrollment(val mode: VoiceVerificationMode) : SettingsUiEvent()
+    /** F1: voice lock was just turned on; Android 13+ can offer to add the Quick Settings tile. */
+    data object OfferVoiceLockTile : SettingsUiEvent()
     data object NavigateToVoiceTest : SettingsUiEvent()
     data object NavigateToFaceEnrollment : SettingsUiEvent()
     data object NavigateToFaceTest : SettingsUiEvent()

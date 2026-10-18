@@ -32,6 +32,9 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding, SettingsViewModel
             updateFingerprint(it)
         }
         viewModel.uiState.map { it.faceSettings }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) { updateFace(it) }
+        viewModel.uiState.map { it.isFloatingLockEnabled }.distinctUntilChanged().collectFlowOnView(viewLifecycleOwner) {
+            updateFloatingLock(it)
+        }
         viewModel.uiEvent.collectFlowOnView(viewLifecycleOwner) { handleUiEvent(it) }
     }
 }

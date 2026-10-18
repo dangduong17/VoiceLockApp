@@ -11,6 +11,7 @@ import com.example.voicelock.domain.usecase.biometric.GetBiometricSettingsUseCas
 import com.example.voicelock.domain.usecase.face.GetFaceSettingsUseCase
 import com.example.voicelock.domain.usecase.patternlock.GetPatternInfoUseCase
 import com.example.voicelock.domain.usecase.pinlock.GetPinInfoUseCase
+import com.example.voicelock.domain.usecase.quicklock.GetFloatingLockEnabledUseCase
 import com.example.voicelock.domain.usecase.securityquestion.GetSecurityQuestionUseCase
 import com.example.voicelock.domain.usecase.voice.GetVoiceSettingsUseCase
 import com.example.voicelock.util.Result
@@ -29,6 +30,7 @@ class GetSettingsUseCase(
     private val getBiometricSettingsUseCase: GetBiometricSettingsUseCase,
     private val getFaceSettingsUseCase: GetFaceSettingsUseCase,
     private val getSecurityQuestionUseCase: GetSecurityQuestionUseCase,
+    private val getFloatingLockEnabledUseCase: GetFloatingLockEnabledUseCase,
 ) {
     operator fun invoke(): Flow<Result<SettingsUiState>> =
         flow<Result<SettingsUiState>> {
@@ -45,6 +47,8 @@ class GetSettingsUseCase(
                         isVoiceEnrolled = voiceSettings.isEnrolled,
                         isVoiceUnlockEnabled = voiceSettings.isVoiceUnlockActive(),
                         isVoiceLockEnabled = voiceSettings.isVoiceLockActive(),
+                        isVoiceLockCommandEnrolled = voiceSettings.isLockCommandEnrolled,
+                        voiceLockPhrase = voiceSettings.lockCommandPhrase,
                         voiceSamplesCount = voiceSettings.sampleCount,
                         biometricSettings = biometricSettings,
                         faceSettings = faceSettings,
@@ -52,6 +56,7 @@ class GetSettingsUseCase(
                         pinLength = pinInfo.pinLength,
                         isPatternSet = isPatternSet,
                         isSecurityQuestionSet = isSecurityQuestionSet,
+                        isFloatingLockEnabled = getFloatingLockEnabledUseCase().getDataOrDefault(false),
                     ),
                 ),
             )

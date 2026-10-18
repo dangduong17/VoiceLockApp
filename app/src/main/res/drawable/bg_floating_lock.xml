@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Floating lock button (FloatingLockService). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/primary_blue" />
+    <stroke
+        android:width="@dimen/_2dp"
+        android:color="@color/white" />
+</shape>

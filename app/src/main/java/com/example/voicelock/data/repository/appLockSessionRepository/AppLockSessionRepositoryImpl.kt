@@ -33,4 +33,11 @@ class AppLockSessionRepositoryImpl : AppLockSessionRepository {
             emit(Result.Success(isStillValid))
         }.flowOn(Dispatchers.Default)
             .catchAsResult()
+
+    override fun clearAll(): Flow<Result<Unit>> =
+        flow<Result<Unit>> {
+            unlockedAt.clear()
+            emit(Result.Success(Unit))
+        }.flowOn(Dispatchers.Default)
+            .catchAsResult()
 }

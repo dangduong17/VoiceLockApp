@@ -225,6 +225,72 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Row 4: device admin (F1: lock the screen by voice / "Khóa ngay") -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_1dp"
+            android:layout_marginVertical="@dimen/_12dp"
+            android:background="@color/divider_line" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rowDeviceAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/ivDeviceAdminCircle"
+                app:tint="@color/primary_blue"
+                android:layout_width="@dimen/_40dp"
+                android:layout_height="@dimen/_40dp"
+                android:background="@drawable/bg_circle_icon"
+                android:importantForAccessibility="no"
+                android:padding="@dimen/_8dp"
+                android:src="@drawable/ic_lock"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvDeviceAdminTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12dp"
+                android:text="@string/permission_device_admin_title"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/_14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/btnDeviceAdmin"
+                app:layout_constraintStart_toEndOf="@id/ivDeviceAdminCircle"
+                app:layout_constraintTop_toTopOf="@id/ivDeviceAdminCircle" />
+
+            <TextView
+                android:id="@+id/tvDeviceAdminSub"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12dp"
+                android:layout_marginTop="@dimen/_2dp"
+                android:text="@string/permission_device_admin_sub"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/_12sp"
+                app:layout_constraintEnd_toStartOf="@id/btnDeviceAdmin"
+                app:layout_constraintStart_toEndOf="@id/ivDeviceAdminCircle"
+                app:layout_constraintTop_toBottomOf="@id/tvDeviceAdminTitle" />
+
+            <TextView
+                android:id="@+id/btnDeviceAdmin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/_4dp"
+                android:text="@string/app_lock_open_settings"
+                android:textColor="@color/primary_blue"
+                android:textSize="@dimen/_13sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <!-- Row 4: Xiaomi auto-start (needed to rebuild the app lock after a reboot) -->
         <View
             android:id="@+id/dividerAutoStart"
@@ -242,6 +308,7 @@
 
             <ImageView
                 android:id="@+id/ivAutoStartCircle"
+                app:tint="@color/primary_blue"
                 android:layout_width="@dimen/_40dp"
                 android:layout_height="@dimen/_40dp"
                 android:background="@drawable/bg_circle_icon"

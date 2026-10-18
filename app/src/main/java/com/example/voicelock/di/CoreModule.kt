@@ -18,7 +18,7 @@ val coreModule = module {
     single<DataStore<Preferences>> { androidContext().appLockDataStore }
     single { VoiceBiometricsManager(context = androidContext(), securePrefs = get()) }
     single { FaceRecognitionEngine(context = androidContext()) }
-    single { AppLockMonitorLauncher(context = androidContext(), getLockedPackagesUseCase = get()) }
+    single { AppLockMonitorLauncher(context = androidContext(), getLockedPackagesUseCase = get(), getFloatingLockEnabledUseCase = get()) }
     factory { AudioRecorderHelper() }
     factory { KeywordAudioRecognizer(androidContext()) }
 }

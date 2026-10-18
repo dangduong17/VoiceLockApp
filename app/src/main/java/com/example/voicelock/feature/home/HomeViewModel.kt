@@ -11,9 +11,13 @@ import com.example.voicelock.data.model.home.HomeUiEvent
 import com.example.voicelock.data.model.home.HomeUiState
 import com.example.voicelock.data.model.patternlock.PatternLockMode
 import com.example.voicelock.data.model.pinlock.PinLockMode
+import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.securityquestion.SecurityQuestionMode
 import com.example.voicelock.domain.usecase.biometric.SetBiometricEnabledUseCase
 import com.example.voicelock.domain.usecase.home.GetHomeStatusUseCase
+import com.example.voicelock.domain.usecase.lock.LockDeviceUseCase
+import com.example.voicelock.data.model.lock.DeviceLockResult
+import com.example.voicelock.util.getDataOrDefault
 import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
 import com.example.voicelock.util.handleApiCall
@@ -23,6 +27,7 @@ class HomeViewModel(
     private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
     private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
     private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
+    private val lockDeviceUseCase: LockDeviceUseCase,
 ) : BaseViewModel<HomeUiState, HomeUiEvent>(HomeUiState()) {
 
     fun initData() {
@@ -39,9 +44,11 @@ class HomeViewModel(
         )
     }
 
+    /** F1 "Khóa ngay": locks the phone (device admin) or at least every locked app, no voice needed. */
     fun onLockNowClicked() {
         launchIO {
-            setEvent(HomeUiEvent.LockNow)
+            val result = lockDeviceUseCase().getDataOrDefault(DeviceLockResult.APPS_LOCKED)
+            setEvent(HomeUiEvent.LockNowDone(result))
         }
     }
 
@@ -53,7 +60,7 @@ class HomeViewModel(
         val state = getCurrentState()
         if (isEnabled == state.isVoiceUnlockEnabled) return
         if (!state.isVoiceEnrolled) {
-            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment) }
+            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)) }
             return
         }
         setState { copy(isVoiceUnlockEnabled = isEnabled) }
@@ -63,16 +70,25 @@ class HomeViewModel(
     fun toggleVoiceLock(isEnabled: Boolean) {
         val state = getCurrentState()
         if (isEnabled == state.isVoiceLockEnabled) return
-        if (!state.isVoiceEnrolled) {
-            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment) }
+        if (!state.isVoiceLockCommandEnrolled) {
+            // F1: the lock command is its own recording, separate from the unlock passphrase.
+            launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
             return
         }
         setState { copy(isVoiceLockEnabled = isEnabled) }
-        handleApiCall(apiCall = { setVoiceLockEnabledUseCase(isEnabled) })
+        handleApiCall(
+            apiCall = { setVoiceLockEnabledUseCase(isEnabled) },
+            onSuccess = { if (isEnabled) launchIO { setEvent(HomeUiEvent.OfferVoiceLockTile) } },
+        )
+    }
+
+    /** F1: tapping the voice lock row records (or re-records) the lock command. */
+    fun onVoiceLockRowClicked() {
+        launchIO { setEvent(HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.LOCK)) }
     }
 
     fun onVoiceUnlockRowClicked() {
-        val event = if (getCurrentState().isVoiceEnrolled) HomeUiEvent.NavigateToVoiceTest else HomeUiEvent.NavigateToVoiceEnrollment
+        val event = if (getCurrentState().isVoiceEnrolled) HomeUiEvent.NavigateToVoiceTest else HomeUiEvent.NavigateToVoiceEnrollment(VoiceVerificationMode.UNLOCK)
         launchIO { setEvent(event) }
     }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.voicelock.domain.usecase.applock.GetLockedPackagesUseCase
+import com.example.voicelock.domain.usecase.quicklock.GetFloatingLockEnabledUseCase
 import com.example.voicelock.util.getDataOrDefault
 import com.example.voicelock.util.hasOverlayPermission
 import com.example.voicelock.util.hasUsageAccess
@@ -21,6 +22,7 @@ import timber.log.Timber
 class AppLockMonitorLauncher(
     private val context: Context,
     private val getLockedPackagesUseCase: GetLockedPackagesUseCase,
+    private val getFloatingLockEnabledUseCase: GetFloatingLockEnabledUseCase,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -35,6 +37,10 @@ class AppLockMonitorLauncher(
         val isReady = lockedPackages.isNotEmpty() && context.hasUsageAccess() && context.hasOverlayPermission()
         Timber.tag(TAG).d("Sync app lock monitor: locked=%d ready=%s", lockedPackages.size, isReady)
         if (isReady) start()
+        // The floating lock button comes back the same way (it needs the overlay permission only).
+        if (getFloatingLockEnabledUseCase().getDataOrDefault(false) && context.hasOverlayPermission()) {
+            FloatingLockService.start(context)
+        }
     }
 
     private fun start() {

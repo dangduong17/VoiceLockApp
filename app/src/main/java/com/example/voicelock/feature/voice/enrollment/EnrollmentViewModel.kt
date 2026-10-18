@@ -10,6 +10,7 @@ import com.example.voicelock.data.model.voice.SpeechRecognitionSupport
 import com.example.voicelock.data.model.voice.VoiceEnrollmentResult
 import com.example.voicelock.data.model.voice.VoiceKeywordProfile
 import com.example.voicelock.data.model.voice.VoiceModelMissingException
+import com.example.voicelock.data.model.voice.VoiceVerificationMode
 import com.example.voicelock.data.model.voice.canRecord
 import com.example.voicelock.data.model.voice.getDetectedLanguage
 import com.example.voicelock.data.model.voice.getTexts
@@ -21,6 +22,7 @@ import com.example.voicelock.domain.usecase.voice.GetSpeechRecognitionSupportUse
 import com.example.voicelock.domain.usecase.voice.MatchVoiceKeywordUseCase
 import com.example.voicelock.domain.usecase.voice.RecognizeSpeechUseCase
 import com.example.voicelock.domain.usecase.voice.RecordVoiceSampleUseCase
+import com.example.voicelock.domain.usecase.voice.SetVoiceLockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.SetVoiceUnlockEnabledUseCase
 import com.example.voicelock.domain.usecase.voice.WarmUpVoiceModelUseCase
 import com.example.voicelock.util.Result
@@ -55,6 +57,7 @@ class EnrollmentViewModel(
     private val enrollOwnerVoiceUseCase: EnrollOwnerVoiceUseCase,
     private val warmUpVoiceModelUseCase: WarmUpVoiceModelUseCase,
     private val setVoiceUnlockEnabledUseCase: SetVoiceUnlockEnabledUseCase,
+    private val setVoiceLockEnabledUseCase: SetVoiceLockEnabledUseCase,
 ) : BaseViewModel<EnrollmentUiState, Nothing>(EnrollmentUiState()) {
 
     private val recordings = mutableListOf<FloatArray>()
@@ -70,6 +73,11 @@ class EnrollmentViewModel(
     init {
         // Load the CAM++ model while the user reads the instructions; failures surface at enrollment.
         launchIO { warmUpVoiceModelUseCase().first() }
+    }
+
+    /** [mode] LOCK records the F1 lock command instead of the unlock passphrase. */
+    fun initData(mode: VoiceVerificationMode) {
+        if (recordings.isEmpty()) setState { copy(mode = mode) }
     }
 
     /** The caller must hold RECORD_AUDIO (the screen checks it before calling). */
@@ -223,12 +231,16 @@ class EnrollmentViewModel(
         val (languageTag, transcripts) = transcriptsByLanguage!!.entries.first().let { it.key to it.value }
         val keywordProfile = VoiceKeywordProfile(languageTag = languageTag, transcripts = transcripts.distinct())
 
-        enrollOwnerVoiceUseCase(recordings = samples, keywordProfile = keywordProfile).first()
+        val mode = getCurrentState().mode
+        enrollOwnerVoiceUseCase(recordings = samples, keywordProfile = keywordProfile, mode = mode).first()
             .onSuccess { result ->
                 when (result) {
                     is VoiceEnrollmentResult.Success -> {
-                        // Enrolling is how the user opts in, so voice unlock becomes active right away.
-                        setVoiceUnlockEnabledUseCase(true).first()
+                        // Enrolling is how the user opts in, so the feature becomes active right away.
+                        when (mode) {
+                            VoiceVerificationMode.UNLOCK -> setVoiceUnlockEnabledUseCase(true).first()
+                            VoiceVerificationMode.LOCK -> setVoiceLockEnabledUseCase(true).first()
+                        }
                         setState {
                             copy(
                                 phase = EnrollmentPhase.COMPLETED,
@@ -239,6 +251,7 @@ class EnrollmentViewModel(
                     }
                     is VoiceEnrollmentResult.NoSpeechDetected -> resetSamples(EnrollmentError.NO_SPEECH)
                     is VoiceEnrollmentResult.InconsistentSamples -> resetSamples(EnrollmentError.INCONSISTENT_SAMPLES)
+                    is VoiceEnrollmentResult.SameAsUnlockPhrase -> resetSamples(EnrollmentError.SAME_AS_UNLOCK)
                 }
             }.onError { throwable ->
                 Timber.tag(TAG).e(throwable, "Voice enrollment failed")
