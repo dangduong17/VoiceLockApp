@@ -3,6 +3,8 @@ package com.example.voicelock.data.local.voice
 import android.content.Context
 import android.content.Intent
 import android.media.AudioFormat
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -41,6 +43,9 @@ import kotlin.coroutines.resume
  * The recognizer is built for a live microphone, so the clip is trimmed, padded with silence
  * (lead-in + trailing silence lets the endpointer close the utterance) and streamed in chunks;
  * [biasingStrings] (the owner's enrolled phrase) steer on-device engines toward it.
+ *
+ * With internet the online engine goes first (much more accurate, notably for Vietnamese); the
+ * on-device engine is the fallback, so recognition still works offline.
  */
 class KeywordAudioRecognizer(
     private val context: Context,
@@ -48,21 +53,65 @@ class KeywordAudioRecognizer(
     /** Pre-recorded audio can be recognized at all (API 33+); per-language support is separate. */
     fun isSupportedOnDevice(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
+    /**
+     * [useOnline] null (default) = online first when the device has internet, falling back to the
+     * on-device engine when the online pass gives no text; true / false = that engine only.
+     * Language detection requests stay on-device: the online engine ignores them (verified on device).
+     */
     suspend fun recognize(
         samples: FloatArray,
         languageTag: String = Locale.getDefault().toLanguageTag(),
         biasingStrings: List<String> = emptyList(),
         detectLanguageAmong: List<String> = emptyList(),
-        useOnline: Boolean = false,
+        useOnline: Boolean? = null,
     ): SpeechRecognitionOutcome {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return SpeechRecognitionOutcome.Unsupported
         val audio = withContext(Dispatchers.Default) { prepareAudio(samples) }
+        val isOnlineFirst = useOnline == null && detectLanguageAmong.isEmpty() && hasInternet()
+        if (isOnlineFirst) {
+            val online =
+                recognizeOnce(
+                    audio = audio,
+                    languageTag = languageTag,
+                    biasingStrings = biasingStrings,
+                    detectLanguageAmong = detectLanguageAmong,
+                    useOnline = true,
+                    timeoutMs = ONLINE_RECOGNITION_TIMEOUT_MS,
+                )
+            if (online is SpeechRecognitionOutcome.Candidates) return online
+        }
+        return recognizeOnce(
+            audio = audio,
+            languageTag = languageTag,
+            biasingStrings = biasingStrings,
+            detectLanguageAmong = detectLanguageAmong,
+            useOnline = useOnline ?: false,
+            timeoutMs = RECOGNITION_TIMEOUT_MS,
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun recognizeOnce(
+        audio: FloatArray,
+        languageTag: String,
+        biasingStrings: List<String>,
+        detectLanguageAmong: List<String>,
+        useOnline: Boolean,
+        timeoutMs: Long,
+    ): SpeechRecognitionOutcome {
         val outcome =
-            withTimeoutOrNull(RECOGNITION_TIMEOUT_MS) {
+            withTimeoutOrNull(timeoutMs) {
                 withContext(Dispatchers.Main) { recognizeOnMain(audio, languageTag, biasingStrings, detectLanguageAmong, useOnline) }
-            } ?: SpeechRecognitionOutcome.Unsupported.also { Timber.tag(TAG).w("SpeechRecognizer did not answer for injected audio") }
+            } ?: SpeechRecognitionOutcome.Unsupported.also { Timber.tag(TAG).w("SpeechRecognizer (online=%s) did not answer for injected audio", useOnline) }
         Timber.tag(TAG).d("Keyword recognition language=%s online=%s outcome=%s", languageTag, useOnline, outcome)
         return outcome
+    }
+
+    private fun hasInternet(): Boolean {
+        val connectivityManager = context.getSystemService(ConnectivityManager::class.java) ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
     /**
@@ -362,6 +411,9 @@ class KeywordAudioRecognizer(
         private const val TAG = "KeywordAudioRecognizer"
 
         const val RECOGNITION_TIMEOUT_MS = 6_000L
+
+        // Shorter, so a slow network costs little before the on-device pass takes over.
+        const val ONLINE_RECOGNITION_TIMEOUT_MS = 4_000L
         const val SUPPORT_QUERY_TIMEOUT_MS = 3_000L
         const val DOWNLOAD_TIMEOUT_MS = 60_000L
         const val DOWNLOAD_POLL_MS = 2_000L
